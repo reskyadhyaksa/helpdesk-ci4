@@ -21,12 +21,12 @@ $values = ['Kepercayaan', 'Kewirausahaan', 'Inovatif', 'Kegembiraan'];
 <?= $this->section('content') ?>
 <div class="container px-4 py-5">
 
-    <div class="columns is-7">
+    <div class="columns is-desktop is-3 is-7-desktop">
         <!-- Kiri: banner dan aksi cepat -->
         <div class="column">
             <section class="box hero-card">
-                <span class="tag is-link is-light is-medium is-size-7 mb-4">Sistem Layanan Mandiri Karyawan PT Mandiri Tunas Finance</span>
-                <h1 class="title is-3">Selamat Datang di portal <span class="has-text-primary">HC Helpdesk</span></h1>
+                <span class="tag tag-wrap is-primary is-medium is-size-7 mb-4">Sistem Layanan Mandiri Karyawan PT Mandiri Tunas Finance</span>
+                <h1 class="title is-3 is-size-4-mobile">Selamat Datang di portal <span class="has-text-primary">HC Helpdesk</span></h1>
                 <p class="mb-5" style="max-width: 30rem">
                     Satu portal terpadu untuk bantuan layanan kepegawaian, pengajuan tiket kendala, panduan SOP, dan resolusi akun HC Eazy.
                 </p>
@@ -40,22 +40,24 @@ $values = ['Kepercayaan', 'Kewirausahaan', 'Inovatif', 'Kegembiraan'];
             <div class="columns is-4">
                 <?php foreach ($quickActions as $action): ?>
                     <div class="column is-4">
-                        <div class="box p-4 is-flex is-align-items-flex-start h-100" style="gap: 0.9rem">
-                            <span class="icon-box <?= $action['bg'] ?>">
-                                <img src="<?= base_url('images/' . $action['icon']) ?>" alt="" width="24" height="24">
-                            </span>
-                            <div class="is-flex-grow-1">
-                                <p class="has-text-weight-bold has-text-grey-dark"><?= esc($action['title']) ?></p>
-                                <p class="is-size-7 has-text-grey mb-3"><?= esc($action['desc']) ?></p>
-
-                                <?php if (isset($action['modal'])): ?>
-                                    <button type="button" class="button is-success is-outlined is-rounded is-small is-fullwidth px-1" data-modal-open="<?= esc($action['modal'], 'attr') ?>">
-                                        <?= esc($action['label']) ?>
-                                    </button>
-                                <?php else: ?>
-                                    <a class="button is-primary is-small is-fullwidth" href="<?= esc($action['href']) ?>"><?= esc($action['label']) ?></a>
-                                <?php endif ?>
+                        <div class="box p-4 h-100 is-flex is-flex-direction-column">
+                            <div class="is-flex is-align-items-center mb-4" style="gap: 0.9rem">
+                                <span class="icon-box <?= $action['bg'] ?>">
+                                    <img src="<?= base_url('images/' . $action['icon']) ?>" alt="" width="24" height="24">
+                                </span>
+                                <div>
+                                    <p class="has-text-weight-bold has-text-grey-dark"><?= esc($action['title']) ?></p>
+                                    <p class="is-size-7 has-text-grey"><?= esc($action['desc']) ?></p>
+                                </div>
                             </div>
+
+                            <?php if (isset($action['modal'])): ?>
+                                <button type="button" class="button is-success is-outlined is-fullwidth is-size-7 px-2 mt-auto" data-modal-open="<?= esc($action['modal'], 'attr') ?>">
+                                    <?= esc($action['label']) ?>
+                                </button>
+                            <?php else: ?>
+                                <a class="button is-primary is-fullwidth mt-auto" href="<?= esc($action['href']) ?>"><?= esc($action['label']) ?></a>
+                            <?php endif ?>
                         </div>
                     </div>
                 <?php endforeach ?>
@@ -64,7 +66,7 @@ $values = ['Kepercayaan', 'Kewirausahaan', 'Inovatif', 'Kegembiraan'];
 
         <!-- Kanan: lacak tiket -->
         <div class="column track-column" id="lacak-tiket">
-            <section class="box p-5">
+            <section class="box p-5 h-100 is-flex is-flex-direction-column">
                 <div class="is-flex is-align-items-center mb-4" style="gap: 0.9rem">
                     <span class="icon-box has-background-grey-lighter">
                         <img src="<?= base_url('images/global-search.svg') ?>" alt="" width="24" height="24">
@@ -93,25 +95,27 @@ $values = ['Kepercayaan', 'Kewirausahaan', 'Inovatif', 'Kegembiraan'];
                     </div>
                 </div>
 
-                <button type="button" class="button is-primary is-fullwidth mt-5">Lacak Progres Penanganan</button>
+                <div class="mt-auto pt-4">
+                    <button type="button" class="button is-primary is-fullwidth">Lacak Progres Penanganan</button>
 
-                <p class="is-size-7 has-text-centered has-text-grey mt-4">
-                    Ingin melihat detail tiket?
-                    <a class="has-text-link has-text-weight-semibold" href="<?= url_to('login') ?>">Masuk ke Akun →</a>
-                </p>
+                    <p class="is-size-7 has-text-centered has-text-grey mt-4">
+                        Ingin melihat detail tiket?
+                        <a class="has-text-link has-text-weight-semibold" href="<?= url_to('login') ?>">Masuk ke Akun →</a>
+                    </p>
+                </div>
             </section>
         </div>
     </div>
 
     <!-- Layanan populer -->
     <section class="mt-6">
-        <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-5">
+        <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-5" style="gap: 1rem">
             <div>
                 <span class="tag is-link is-light is-medium is-size-7 is-uppercase has-text-weight-bold mb-3">Kategori Layanan Populer</span>
                 <h2 class="title is-4 mb-1">Layanan &amp; Bantuan Kepegawaian</h2>
                 <p class="is-size-7">Pilih kategori layanan cepat untuk memproses tiket bantuan Anda.</p>
             </div>
-            <div class="buttons">
+            <div class="buttons is-hidden-mobile">
                 <button type="button" class="button is-rounded" aria-label="Sebelumnya" data-scroll-target="servicesRow" data-scroll-dir="-1">←</button>
                 <button type="button" class="button is-rounded" aria-label="Berikutnya" data-scroll-target="servicesRow" data-scroll-dir="1">→</button>
             </div>
@@ -125,7 +129,7 @@ $values = ['Kepercayaan', 'Kewirausahaan', 'Inovatif', 'Kegembiraan'];
                     <p class="is-size-7 is-flex-grow-1 mb-5"><?= esc($service['desc']) ?></p>
                     <div class="is-flex is-justify-content-space-between is-size-7 pt-4" style="border-top: 1px solid #eef0f4">
                         <a class="has-text-weight-bold has-text-grey-dark" href="#">Ajukan Tiketing →</a>
-                        <span class="has-text-grey-light">SLA <?= esc($service['sla']) ?></span>
+                        <span class="has-text-grey">SLA <?= esc($service['sla']) ?></span>
                     </div>
                 </article>
             <?php endforeach ?>
@@ -137,7 +141,7 @@ $values = ['Kepercayaan', 'Kewirausahaan', 'Inovatif', 'Kegembiraan'];
     <section class="columns is-multiline is-mobile has-text-centered py-5">
         <?php foreach ($values as $value): ?>
             <div class="column is-6-mobile is-3-desktop">
-                <img class="mb-3" src="<?= base_url('images/' . strtolower($value) . '.png') ?>" alt="<?= esc($value) ?>" style="height: 3.2rem">
+                <img class="mb-3" src="<?= base_url('images/' . strtolower($value) . '.png') ?>" alt="<?= esc($value) ?>" style="height: 4rem">
                 <p class="has-text-weight-bold has-text-grey-dark is-uppercase"><?= esc($value) ?></p>
             </div>
         <?php endforeach ?>
