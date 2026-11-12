@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="light">
 <head>
     <?= $this->include('partials/head') ?>
 </head>
@@ -11,6 +11,8 @@
         <?= $this->renderSection('content') ?>
     </main>
 
-    <script src="<?= base_url('js/navbar.js') ?>"></script>
+    <?= $this->include('partials/footer') ?>
+
+    <script src="<?= base_url('js/app.js') ?>"></script>
 </body>
 </html>
