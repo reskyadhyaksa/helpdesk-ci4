@@ -30,7 +30,12 @@ body {
 }
 
 .button {
+    min-height: 2.75rem;
     font-weight: 700;
+}
+
+.navbar-item {
+    font-weight: 600;
 }
 
 .box {
@@ -46,6 +51,24 @@ body {
 
 html {
     scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    .scroll-row {
+        scroll-behavior: auto;
+    }
+}
+
+/* Layar sentuh: target sentuh minimal 44px */
+@media (pointer: coarse) {
+    .button,
+    .navbar-item {
+        min-height: 44px;
+    }
 }
 
 /* Navbar */
@@ -66,6 +89,24 @@ html {
     background-color: #e2e8f0;
     color: #334155;
     font-weight: 700;
+}
+
+/* Menu navbar di layar kecil: ikon sejajar teks, penanda aktif di sisi kiri */
+@media (max-width: 1023px) {
+    .navbar-menu .navbar-item {
+        display: flex;
+        align-items: center;
+    }
+
+    .navbar-item.is-tab {
+        border-bottom: 0;
+        border-left: 3px solid transparent;
+    }
+
+    .navbar-item.is-tab.is-active {
+        border-bottom-width: 0;
+        border-left-color: hsl(224deg 76% 48%);
+    }
 }
 
 .navbar-item-button {
@@ -92,34 +133,47 @@ html {
 }
 
 .icon-box {
-    width: 3.2rem;
-    height: 3.2rem;
-    border-radius: 0.9rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 1rem;
 }
 
 /* Banner beranda: sorotan navy kabur di pojok kanan atas */
 .hero-card {
     position: relative;
     overflow: hidden;
-    padding: 2.5rem 2.6rem;
+    padding: 1.75rem 1.25rem;
+}
+
+@media (min-width: 769px) {
+    .hero-card {
+        padding: 2.5rem 2.6rem;
+    }
 }
 
 .hero-card::before {
     content: '';
     position: absolute;
-    top: -70%;
-    right: -120px;
-    width: 340px;
-    height: 280px;
+    top: -60%;
+    right: -140px;
+    width: 420px;
+    height: 340px;
     border-radius: 50%;
     background: radial-gradient(circle, #0f2b5b 0%, #1e3a8a 45%, rgb(30 58 138 / 0%) 75%);
-    opacity: 0.55;
+    opacity: 0.7;
     filter: blur(30px);
     pointer-events: none;
 }
 
 .hero-card > * {
     position: relative;
+}
+
+/* Label tag panjang boleh turun baris */
+.tag-wrap {
+    height: auto;
+    padding: 0.4rem 0.75rem;
+    white-space: normal;
 }
 
 .btn-cta {
