@@ -27,7 +27,7 @@ if ($user === null) {
                 <span class="brand-logo mr-3"><img src="<?= base_url('images/helpdesk.svg') ?>" alt="" width="20" height="20"></span>
                 <span>
                     <strong class="is-block is-size-5">HC Helpdesk</strong>
-                    <small class="is-block is-size-7 has-text-grey">Portal Bantuan Divisi Human Capital</small>
+                    <small class="is-block is-size-7 has-text-grey is-hidden-mobile">Portal Bantuan Divisi Human Capital</small>
                 </span>
             </a>
 
@@ -43,7 +43,7 @@ if ($user === null) {
             <div class="navbar-start is-flex-grow-1 is-justify-content-center">
                 <?php foreach ($menu as $item): ?>
                     <a class="navbar-item is-tab <?= $item['active'] ? 'is-active' : '' ?>" href="<?= esc($item['href']) ?>">
-                        <img class="mr-2" src="<?= base_url('images/' . $item['icon']) ?>" alt="" width="18" height="18">
+                        <img class="mr-2" src="<?= base_url('images/' . $item['icon']) ?>" alt="" width="20" height="20">
                         <?= esc($item['label']) ?>
                     </a>
                 <?php endforeach ?>
