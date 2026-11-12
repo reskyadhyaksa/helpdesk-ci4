@@ -1,0 +1,176 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+
+/* Tema: skala font, warna, dan radius Bulma disesuaikan dengan desain portal */
+:root {
+    --bulma-family-primary: 'Montserrat', sans-serif;
+    --bulma-body-size: 0.875em;
+    --bulma-navbar-height: 5.4rem;
+    --bulma-radius: 0.5rem;
+    --bulma-radius-large: 0.875rem;
+
+    --bulma-text: #475569;
+    --bulma-text-strong: #0f172a;
+
+    --bulma-primary-h: 222deg;
+    --bulma-primary-s: 75%;
+    --bulma-primary-l: 22%;
+    --bulma-primary-invert-l: 100%;
+    --bulma-link-h: 224deg;
+    --bulma-link-s: 76%;
+    --bulma-link-l: 48%;
+}
+
+body {
+    background-color: #f8fafc;
+}
+
+/* Teks kecil: 12px pada root 14px (bawaan Bulma 10.5px terlalu kecil) */
+.is-size-7 {
+    font-size: 0.85rem !important;
+}
+
+.button {
+    font-weight: 700;
+}
+
+.box {
+    border: 1px solid #e8ecf2;
+    box-shadow: 0 1px 3px rgb(15 23 42 / 6%);
+}
+
+.input {
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+    box-shadow: none;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* Navbar */
+.app-navbar {
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid #e5e9f0;
+}
+
+.avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: 1px solid #cbd5e1;
+    background-color: #e2e8f0;
+    color: #334155;
+    font-weight: 700;
+}
+
+.navbar-item-button {
+    width: 100%;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    text-align: left;
+}
+
+.brand-logo,
+.icon-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.brand-logo {
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: 0.8rem;
+    background-color: hsl(222deg 75% 22%);
+}
+
+.icon-box {
+    width: 3.2rem;
+    height: 3.2rem;
+    border-radius: 0.9rem;
+}
+
+/* Banner beranda: sorotan navy kabur di pojok kanan atas */
+.hero-card {
+    position: relative;
+    overflow: hidden;
+    padding: 2.5rem 2.6rem;
+}
+
+.hero-card::before {
+    content: '';
+    position: absolute;
+    top: -70%;
+    right: -120px;
+    width: 340px;
+    height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #0f2b5b 0%, #1e3a8a 45%, rgb(30 58 138 / 0%) 75%);
+    opacity: 0.55;
+    filter: blur(30px);
+    pointer-events: none;
+}
+
+.hero-card > * {
+    position: relative;
+}
+
+.btn-cta {
+    gap: 0.7rem;
+    box-shadow: 0 8px 16px rgb(37 99 235 / 30%);
+}
+
+.cta-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 0.5rem;
+    background-color: rgb(255 255 255 / 20%);
+}
+
+/* Kolom lacak tiket: lebar tetap di desktop */
+@media (min-width: 1024px) {
+    .track-column {
+        flex: none;
+        width: 380px;
+    }
+}
+
+/* Baris kartu yang bisa digeser */
+.scroll-row {
+    display: flex;
+    gap: 1.2rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+}
+
+.scroll-row > * {
+    flex: 0 0 calc((100% - 3.6rem) / 4);
+    scroll-snap-align: start;
+}
+
+@media (max-width: 1023px) {
+    .scroll-row > * {
+        flex-basis: calc((100% - 1.2rem) / 2);
+    }
+}
+
+@media (max-width: 768px) {
+    .scroll-row > * {
+        flex-basis: 85%;
+    }
+}
+
+.h-100 {
+    height: 100%;
+}
