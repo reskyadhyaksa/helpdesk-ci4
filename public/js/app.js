@@ -60,6 +60,19 @@ document.addEventListener('change', function (event) {
 
 document.addEventListener('commit', submitAutosubmitForm);
 
+// Pilihan "baris per halaman" di footer tabel (components/data_table): filter lain tetap, kembali ke halaman 1
+document.addEventListener('change', function (event) {
+    if (event.target.name !== 'per_page') {
+        return;
+    }
+
+    var url = new URL(window.location.href);
+
+    url.searchParams.set('per_page', event.target.value);
+    url.searchParams.delete('page');
+    window.location.href = url.toString();
+});
+
 // Kembali lewat tombol Back (halaman dari cache browser): tombol tidak boleh tertahan loading
 window.addEventListener('pageshow', function (event) {
     if (event.persisted) {

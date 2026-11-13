@@ -19,24 +19,24 @@ $firstShown = (int) $links[0]['title'];
 $lastShown  = (int) end($links)['title'];
 $pageCount  = $pager->getPageCount();
 ?>
-<nav class="pagination is-small is-rounded app-pagination" role="navigation" aria-label="Navigasi halaman">
+<nav class="pagination app-pagination" role="navigation" aria-label="Navigasi halaman">
     <?php if ($pager->hasPreviousPage()): ?>
-        <a class="pagination-previous" href="<?= $pager->getPreviousPage() ?>">
-            <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>&nbsp;Sebelumnya
+        <a class="pagination-previous" href="<?= $pager->getPreviousPage() ?>" aria-label="Halaman sebelumnya">
+            <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
         </a>
     <?php else: ?>
-        <span class="pagination-previous is-disabled" aria-disabled="true">
-            <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>&nbsp;Sebelumnya
+        <span class="pagination-previous is-disabled" aria-disabled="true" aria-label="Halaman sebelumnya">
+            <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
         </span>
     <?php endif ?>
 
     <?php if ($pager->hasNextPage()): ?>
-        <a class="pagination-next" href="<?= $pager->getNextPage() ?>">
-            Berikutnya&nbsp;<i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+        <a class="pagination-next" href="<?= $pager->getNextPage() ?>" aria-label="Halaman berikutnya">
+            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
         </a>
     <?php else: ?>
-        <span class="pagination-next is-disabled" aria-disabled="true">
-            Berikutnya&nbsp;<i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+        <span class="pagination-next is-disabled" aria-disabled="true" aria-label="Halaman berikutnya">
+            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
         </span>
     <?php endif ?>
 

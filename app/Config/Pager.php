@@ -3,6 +3,7 @@
 namespace Config;
 
 use CodeIgniter\Config\BaseConfig;
+use CodeIgniter\HTTP\IncomingRequest;
 
 class Pager extends BaseConfig
 {
@@ -32,7 +33,31 @@ class Pager extends BaseConfig
      * Items Per Page
      * --------------------------------------------------------------------------
      *
-     * The default number of results shown in a single page.
+     * Jumlah baris per halaman untuk semua tabel admin (paginate() tanpa argumen). Default 10; pengguna bisa
+     * memilih salah satu PER_PAGE_OPTIONS lewat ?per_page=… (dropdown di footer components/data_table).
      */
-    public int $perPage = 20;
+    public const DEFAULT_PER_PAGE = 10;
+
+    /** @var list<int> */
+    public const PER_PAGE_OPTIONS = [10, 25, 50, 100];
+
+    public int $perPage = self::DEFAULT_PER_PAGE;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        // Satu tempat membaca pilihan pengguna, jadi semua model yang memanggil paginate() ikut tanpa perubahan
+        $request = service('request');
+
+        if (! $request instanceof IncomingRequest) {
+            return;
+        }
+
+        $requested = (int) $request->getGet('per_page');
+
+        if (in_array($requested, self::PER_PAGE_OPTIONS, true)) {
+            $this->perPage = $requested;
+        }
+    }
 }

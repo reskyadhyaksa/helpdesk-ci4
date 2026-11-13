@@ -1,6 +1,7 @@
 <?php
 
 use CodeIgniter\Pager\Pager;
+use Config\Pager as PagerConfig;
 
 /**
  * Tabel data admin: kartu, kepala kolom, keadaan kosong, total, dan pager.
@@ -69,8 +70,30 @@ $isEmpty = trim($slot) === '';
     </div>
 
     <?php if ($pager !== null && ! $isEmpty): ?>
+        <?php
+        $total = $pager->getTotal();
+        $from  = ($pager->getCurrentPage() - 1) * $pager->getPerPage() + 1;
+        $to    = min($from + $pager->getPerPage() - 1, $total);
+        ?>
         <div class="admin-table-footer">
-            <p class="is-size-7 has-text-grey-dark">Total <?= number_format($pager->getTotal(), 0, ',', '.') ?> <?= esc($totalLabel) ?></p>
+            <div class="admin-table-footer-start">
+                <?php // Pilihan baris per halaman: js/app.js menulis ?per_page=… ke URL dan kembali ke halaman 1 ?>
+                <div class="admin-table-size">
+                    <?= component('select', [
+                        'name'      => 'per_page',
+                        'label'     => 'Baris per halaman',
+                        'hideLabel' => true,
+                        'options'   => array_combine(PagerConfig::PER_PAGE_OPTIONS, PagerConfig::PER_PAGE_OPTIONS),
+                        'selected'  => (string) $pager->getPerPage(),
+                        'size'      => 'is-small',
+                        'fullwidth' => true,
+                    ]) ?>
+                </div>
+                <p class="admin-table-info">
+                    Menampilkan <strong><?= number_format($from, 0, ',', '.') ?>–<?= number_format($to, 0, ',', '.') ?></strong>
+                    dari <strong><?= number_format($total, 0, ',', '.') ?></strong> <?= esc($totalLabel) ?>
+                </p>
+            </div>
             <?= $pager->links('default', 'bulma') ?>
         </div>
     <?php endif ?>
