@@ -65,6 +65,18 @@ class Validation extends BaseConfig
         'is_active'          => ['label' => 'Status aktif', 'rules' => 'required|in_list[0,1]'],
     ];
 
+    public array $holiday = [
+        'holiday_date'  => ['label' => 'Tanggal', 'rules' => 'required|valid_date[Y-m-d]'],
+        'name'          => ['label' => 'Nama hari libur', 'rules' => 'required|max_length[150]'],
+        'description'   => ['label' => 'Deskripsi', 'rules' => 'permit_empty|max_length[255]'],
+        'is_mass_leave' => ['label' => 'Cuti bersama', 'rules' => 'required|in_list[0,1]'],
+    ];
+
+    // Tidak ada hari dicentang = field tidak terkirim, jadi boleh kosong (service menolak jika semua hari off)
+    public array $offDays = [
+        'off_days.*' => ['label' => 'Hari off', 'rules' => 'permit_empty|in_list[1,2,3,4,5,6,7]'],
+    ];
+
     public array $userRole = [
         'role_id' => ['label' => 'Role', 'rules' => 'required|exact_length[36]'],
     ];

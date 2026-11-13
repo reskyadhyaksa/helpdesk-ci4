@@ -35,7 +35,7 @@ $menuGroups = [
         'label' => lang('Admin.groups.data'),
         'items' => [
             ['page' => 'users', 'icon' => 'fa-users', 'route' => 'admin.users.index', 'path' => 'admin/users*', 'permission' => PermissionModel::ADMIN_USERS_VIEW],
-            ['page' => 'holidays', 'icon' => 'fa-calendar-days', 'route' => 'admin.holidays.index', 'path' => 'admin/holidays*'],
+            ['page' => 'holidays', 'icon' => 'fa-calendar-days', 'route' => 'admin.holidays.index', 'path' => 'admin/holidays*', 'permission' => PermissionModel::ADMIN_HOLIDAYS_VIEW],
         ],
     ],
     [

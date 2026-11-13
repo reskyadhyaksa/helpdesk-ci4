@@ -36,7 +36,6 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'au
     $routes->get('faqs', 'FaqController::index', ['as' => 'admin.faqs.index']);
     $routes->get('forms', 'FormController::index', ['as' => 'admin.forms.index']);
     $routes->get('reports', 'ReportController::index', ['as' => 'admin.reports.index']);
-    $routes->get('holidays', 'HolidayController::index', ['as' => 'admin.holidays.index']);
 
     // CRUD: tiap aksi dijaga permission-nya sendiri (view, create, update, delete)
 
@@ -59,4 +58,14 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'au
     $routes->get('sla-policies/(:uuid)/edit', 'SlaPolicyController::edit/$1', ['as' => 'admin.sla-policies.edit', 'filter' => 'auth:admin.sla-policies.update']);
     $routes->post('sla-policies/(:uuid)', 'SlaPolicyController::update/$1', ['as' => 'admin.sla-policies.update', 'filter' => 'auth:admin.sla-policies.update']);
     $routes->post('sla-policies/(:uuid)/delete', 'SlaPolicyController::delete/$1', ['as' => 'admin.sla-policies.delete', 'filter' => 'auth:admin.sla-policies.delete']);
+
+    // Holiday: hari libur (CRUD + sync dari API eksternal) dan hari off mingguan
+    $routes->get('holidays', 'HolidayController::index', ['as' => 'admin.holidays.index', 'filter' => 'auth:admin.holidays.view']);
+    $routes->get('holidays/new', 'HolidayController::new', ['as' => 'admin.holidays.new', 'filter' => 'auth:admin.holidays.create']);
+    $routes->post('holidays', 'HolidayController::create', ['as' => 'admin.holidays.create', 'filter' => 'auth:admin.holidays.create']);
+    $routes->post('holidays/sync', 'HolidayController::sync', ['as' => 'admin.holidays.sync', 'filter' => 'auth:admin.holidays.sync']);
+    $routes->post('holidays/off-days', 'HolidayController::updateOffDays', ['as' => 'admin.holidays.off-days', 'filter' => 'auth:admin.off-days.update']);
+    $routes->get('holidays/(:uuid)/edit', 'HolidayController::edit/$1', ['as' => 'admin.holidays.edit', 'filter' => 'auth:admin.holidays.update']);
+    $routes->post('holidays/(:uuid)', 'HolidayController::update/$1', ['as' => 'admin.holidays.update', 'filter' => 'auth:admin.holidays.update']);
+    $routes->post('holidays/(:uuid)/delete', 'HolidayController::delete/$1', ['as' => 'admin.holidays.delete', 'filter' => 'auth:admin.holidays.delete']);
 });

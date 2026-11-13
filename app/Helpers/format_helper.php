@@ -12,6 +12,20 @@ if (! function_exists('initials')) {
     }
 }
 
+if (! function_exists('format_date')) {
+    /**
+     * Tanggal database → "Kamis, 1 Januari 2026" (nama hari dan bulan Indonesia). Kosong → "—".
+     */
+    function format_date(?string $value): string
+    {
+        if ($value === null || $value === '') {
+            return '—';
+        }
+
+        return Time::parse($value)->toLocalizedString('EEEE, d MMMM yyyy');
+    }
+}
+
 if (! function_exists('format_datetime')) {
     /**
      * Tanggal-waktu database → "13 Nov 2026, 14:30" (nama bulan Indonesia). Kosong → "—".

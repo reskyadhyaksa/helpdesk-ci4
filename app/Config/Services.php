@@ -2,13 +2,16 @@
 
 namespace Config;
 
+use App\Models\HolidayModel;
 use App\Models\PermissionModel;
 use App\Models\RoleModel;
 use App\Models\RolePermissionModel;
 use App\Models\SlaPolicyModel;
 use App\Models\UserModel;
+use App\Models\WeeklyOffDayModel;
 use App\Services\Auth\KeycloakAuthService;
 use App\Services\AuthService;
+use App\Services\HolidayService;
 use App\Services\RoleService;
 use App\Services\SlaPolicyService;
 use App\Services\UserService;
@@ -37,6 +40,15 @@ class Services extends BaseService
         }
 
         return new SlaPolicyService(model(SlaPolicyModel::class));
+    }
+
+    public static function holidays(bool $getShared = true): HolidayService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('holidays');
+        }
+
+        return new HolidayService(model(HolidayModel::class), model(WeeklyOffDayModel::class), new KeycloakAuthService());
     }
 
     public static function users(bool $getShared = true): UserService

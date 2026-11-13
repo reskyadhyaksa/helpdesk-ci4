@@ -82,13 +82,28 @@ class KeycloakAuthService
      */
     public function getHelpdeskUserData(string $employeeNo): ?array
     {
-        $url = rtrim($this->config->helpdeskApiBaseUrl, '/') . '/api/helpdesk/user';
+        return $this->getHelpdesk('/api/helpdesk/user', ['employeeNo' => $employeeNo]);
+    }
+
+    /**
+     * Daftar hari libur satu tahun dari API Spring Boot (Basic Auth).
+     *
+     * @return list<array{name: string, description: ?string, date: int|string, massLeaveFlag: ?bool}>|null
+     */
+    public function getHelpdeskHolidays(int $year): ?array
+    {
+        return $this->getHelpdesk('/api/helpdesk/holiday', ['year' => $year]);
+    }
+
+    private function getHelpdesk(string $path, array $query): ?array
+    {
+        $url = rtrim($this->config->helpdeskApiBaseUrl, '/') . $path;
 
         try {
             $response = $this->client->get($url, [
                 'auth'    => [$this->config->helpdeskApiUser, $this->config->helpdeskApiPass, 'basic'],
                 'headers' => ['Accept' => 'application/json'],
-                'query'   => ['employeeNo' => $employeeNo],
+                'query'   => $query,
             ]);
         } catch (Throwable $e) {
             log_message('error', 'Spring Boot connection exception: ' . $e->getMessage());
