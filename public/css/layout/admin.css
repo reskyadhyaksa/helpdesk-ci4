@@ -17,6 +17,12 @@
   color: var(--bulma-text-strong);
 }
 
+/* Teks header 10% lebih kecil dan tidak boleh turun baris */
+.admin-brand-text {
+  zoom: 0.9;
+  white-space: nowrap;
+}
+
 .admin-brand .tag {
   height: 1.6em;
   font-size: 0.7rem;
@@ -27,10 +33,19 @@
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
-  padding: 1.75rem 1.25rem 1.25rem;
+  padding: 1.6625rem 1.1875rem 1.1875rem;
   border-right: 1px solid #e5e9f0;
   background-color: #fff;
-  background-image: radial-gradient(circle at 0 0, hsl(222deg 75% 22% / 0.07), transparent 45%);
+  background-image: radial-gradient(
+    circle at 0 0,
+    hsl(222deg 75% 22% / 0.07),
+    transparent 45%
+  );
+}
+
+/* Isi sidebar (logo, menu, kartu user) 10% lebih kecil; lebar container dan paddingnya tetap */
+.admin-sidebar > * {
+  zoom: 0.9;
 }
 
 .admin-sidebar-head {
@@ -52,7 +67,9 @@
   background-color: #fff;
   color: #64748b;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .admin-sidebar-toggle:hover,
@@ -98,7 +115,10 @@
   background-color: transparent;
   color: #334155;
   font-weight: 600;
-  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .admin-menu-icon {
@@ -110,7 +130,9 @@
   height: 2rem;
   border-radius: 0.6rem;
   color: #64748b;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .admin-menu .menu-list a:hover {
@@ -188,7 +210,9 @@
   height: 2.25rem;
   border-radius: 50%;
   color: #64748b;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .admin-user-action:hover,
@@ -236,9 +260,11 @@
     position: sticky;
     top: 0;
     flex-shrink: 0;
-    width: 22.2rem;
+    width: 18.5rem;
     height: 100vh;
-    transition: width 0.2s ease, padding 0.2s ease;
+    transition:
+      width 0.2s ease,
+      padding 0.2s ease;
   }
 
   /* Sidebar diperkecil: hanya ikon, teks disembunyikan secara visual tapi tetap dibaca screen reader */
