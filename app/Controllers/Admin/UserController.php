@@ -4,6 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Exceptions\BusinessException;
+use App\Models\UserModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\RedirectResponse;
 
@@ -12,14 +13,33 @@ class UserController extends BaseController
     public function index(): string
     {
         $keyword = trim((string) $this->request->getGet('q'));
-        $result  = service('users')->paginate($keyword);
+
+        // Filter profil dari query string, multi-pilih (jabatan[]=A&jabatan[]=B); nama parameter = nama kolom.
+        // Filter tanpa nilai diabaikan.
+        $filters = [];
+
+        foreach (UserModel::FILTER_COLUMNS as $column) {
+            $values = array_values(array_filter(
+                array_map('trim', array_map('strval', (array) $this->request->getGet($column))),
+                static fn (string $value): bool => $value !== '',
+            ));
+
+            if ($values !== []) {
+                $filters[$column] = $values;
+            }
+        }
+
+        $users  = service('users');
+        $result = $users->paginate($keyword, $filters);
 
         return view('admin/users/index', [
-            'title'   => lang('Admin.pages.users.title'),
-            'users'   => $result['users'],
-            'pager'   => $result['pager'],
-            'roles'   => service('roles')->all(),
-            'keyword' => $keyword,
+            'title'         => lang('Admin.pages.users.title'),
+            'users'         => $result['users'],
+            'pager'         => $result['pager'],
+            'roles'         => service('roles')->all(),
+            'keyword'       => $keyword,
+            'filters'       => $filters,
+            'filterOptions' => $users->filterOptions(),
         ]);
     }
 

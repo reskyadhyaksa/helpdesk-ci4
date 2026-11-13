@@ -9,10 +9,19 @@ use CodeIgniter\Pager\Pager;
  * @var Pager        $pager
  * @var list<array>  $roles
  * @var string       $keyword
+ * @var array<string, list<string>> $filters        filter profil aktif (kolom => daftar nilai)
+ * @var array<string, list<string>> $filterOptions  pilihan dropdown per kolom
  */
 $canUpdate   = auth_can(PermissionModel::ADMIN_USERS_UPDATE);
 $myId        = auth_user()['id'];
 $roleOptions = array_column($roles, 'name', 'id');
+
+// Teks dropdown filter: opsi kosong = tanpa filter. Kolom sesuai UserModel::FILTER_COLUMNS.
+$filterLabels = [
+    'job_title'      => 'Semua jabatan',
+    'position_level' => 'Semua level',
+    'organization'   => 'Semua organisasi',
+];
 
 $columns = ['Pengguna', 'NIK', 'Jabatan', 'Role', 'Login Terakhir', 'Status'];
 
@@ -29,22 +38,29 @@ if ($canUpdate) {
         'subtitle' => lang('Admin.pages.users.subtitle'),
     ]) ?>
 
-    <form class="admin-toolbar" action="<?= url_to('admin.users.index') ?>" method="get" role="search">
-        <div class="field has-addons mb-0">
-            <div class="control has-icons-left is-expanded">
-                <label class="is-sr-only" for="q"><?= esc(lang('Admin.users.searchPlaceholder')) ?></label>
-                <input class="input" id="q" name="q" type="search" maxlength="100"
-                    value="<?= esc($keyword, 'attr') ?>" placeholder="<?= esc(lang('Admin.users.searchPlaceholder'), 'attr') ?>">
-                <span class="icon is-left"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
+    <?php component_start('filter_bar', [
+        'action'      => url_to('admin.users.index'),
+        'keyword'     => $keyword,
+        'placeholder' => lang('Admin.users.searchPlaceholder'),
+        'isFiltered'  => $keyword !== '' || $filters !== [],
+    ]) ?>
+        <?php foreach ($filterLabels as $column => $allLabel): ?>
+            <div class="admin-toolbar-select">
+                <?= component('select', [
+                    'name'        => $column,
+                    'label'       => $allLabel,
+                    'hideLabel'   => true,
+                    'options'     => array_combine($filterOptions[$column], $filterOptions[$column]),
+                    'selected'    => $filters[$column] ?? [],
+                    'placeholder' => $allLabel,
+                    'fullwidth'   => true,
+                    'searchable'  => true,
+                    'multiple'    => true,
+                    'emptyLabel'  => 'Tanpa filter',
+                ]) ?>
             </div>
-            <div class="control">
-                <button type="submit" class="button is-primary">Cari</button>
-            </div>
-        </div>
-        <?php if ($keyword !== ''): ?>
-            <a class="button is-light" href="<?= url_to('admin.users.index') ?>">Reset</a>
-        <?php endif ?>
-    </form>
+        <?php endforeach ?>
+    <?= component_end() ?>
 
     <?php if (! $canUpdate): ?>
         <?= component('readonly_notice', ['message' => 'Anda tidak punya izin mengubah role pengguna.']) ?>
@@ -74,7 +90,13 @@ if ($canUpdate) {
                     </div>
                 </td>
                 <td><?= esc($user->employee_no) ?></td>
-                <td><?= esc($user->job_title ?? '—') ?></td>
+                <td>
+                    <?= esc($user->job_title ?? '—') ?>
+                    <?php $jobMeta = implode(' · ', array_filter([$user->position_level, $user->organization])) ?>
+                    <?php if ($jobMeta !== ''): ?>
+                        <small><?= esc($jobMeta) ?></small>
+                    <?php endif ?>
+                </td>
                 <td>
                     <span class="tag is-link is-light is-rounded">
                         <i class="fa-solid fa-user-shield mr-1" aria-hidden="true"></i><?= esc($user->role_name) ?>
