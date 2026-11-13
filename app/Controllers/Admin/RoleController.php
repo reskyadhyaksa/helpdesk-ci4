@@ -11,9 +11,12 @@ class RoleController extends BaseController
 {
     public function index(): string
     {
+        $result = service('roles')->paginate();
+
         return view('admin/roles/index', [
             'title' => lang('Admin.pages.roles.title'),
-            'roles' => service('roles')->all(),
+            'roles' => $result['roles'],
+            'pager' => $result['pager'],
         ]);
     }
 

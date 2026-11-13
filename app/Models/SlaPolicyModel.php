@@ -35,12 +35,14 @@ class SlaPolicyModel extends Model
     ];
 
     /**
-     * @return list<SlaPolicy> kebijakan aktif lebih dulu, lalu dari target respons tercepat
+     * Kebijakan aktif lebih dulu, lalu dari target respons tercepat. Dipaginasi; pager ada di $this->pager.
+     *
+     * @return list<SlaPolicy>
      */
-    public function allForAdmin(): array
+    public function paginateForAdmin(): array
     {
         return $this->orderBy('is_active', 'DESC')
             ->orderBy('response_minutes', 'ASC')
-            ->findAll();
+            ->paginate();
     }
 }

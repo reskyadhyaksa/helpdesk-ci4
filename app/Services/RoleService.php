@@ -8,6 +8,7 @@ use App\Models\RoleModel;
 use App\Models\RolePermissionModel;
 use App\Models\UserModel;
 use CodeIgniter\Database\BaseConnection;
+use CodeIgniter\Pager\Pager;
 use Throwable;
 
 /**
@@ -38,6 +39,16 @@ class RoleService
     public function all(): array
     {
         return $this->roles->allWithCounts();
+    }
+
+    /**
+     * @return array{roles: list<array>, pager: Pager}
+     */
+    public function paginate(): array
+    {
+        $roles = $this->roles->paginateWithCounts();
+
+        return ['roles' => $roles, 'pager' => $this->roles->pager];
     }
 
     public function find(string $id): ?array

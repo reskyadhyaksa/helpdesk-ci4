@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Entities\SlaPolicy;
 use App\Exceptions\BusinessException;
 use App\Models\SlaPolicyModel;
+use CodeIgniter\Pager\Pager;
 
 class SlaPolicyService
 {
@@ -13,11 +14,13 @@ class SlaPolicyService
     }
 
     /**
-     * @return list<SlaPolicy>
+     * @return array{policies: list<SlaPolicy>, pager: Pager}
      */
-    public function all(): array
+    public function paginate(): array
     {
-        return $this->policies->allForAdmin();
+        $policies = $this->policies->paginateForAdmin();
+
+        return ['policies' => $policies, 'pager' => $this->policies->pager];
     }
 
     public function find(string $id): ?SlaPolicy

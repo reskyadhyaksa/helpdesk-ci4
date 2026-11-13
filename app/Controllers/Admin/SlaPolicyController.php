@@ -12,9 +12,12 @@ class SlaPolicyController extends BaseController
 {
     public function index(): string
     {
+        $result = service('slaPolicies')->paginate();
+
         return view('admin/sla_policies/index', [
             'title'    => lang('Admin.pages.slaPolicies.title'),
-            'policies' => service('slaPolicies')->all(),
+            'policies' => $result['policies'],
+            'pager'    => $result['pager'],
         ]);
     }
 

@@ -34,6 +34,8 @@ if ($hasActions) {
     <?php component_start('data_table', [
         'columns'   => $columns,
         'emptyIcon' => 'fa-user-shield',
+        'pager'     => $pager,
+        'totalLabel' => 'role',
     ]) ?>
         <?php foreach ($roles as $role): ?>
             <?php

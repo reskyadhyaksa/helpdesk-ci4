@@ -35,6 +35,8 @@ if ($hasActions) {
         'emptyIcon'    => 'fa-clock',
         'emptyTitle'   => lang('Admin.sla.emptyTitle'),
         'emptyMessage' => lang('Admin.sla.emptyMessage'),
+        'pager'        => $pager,
+        'totalLabel'   => 'kebijakan',
     ]) ?>
         <?php foreach ($policies as $policy): ?>
             <tr>

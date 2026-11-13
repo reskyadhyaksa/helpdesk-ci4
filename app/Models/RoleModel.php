@@ -44,14 +44,28 @@ class RoleModel extends Model
     }
 
     /**
-     * @return list<array> role beserta jumlah pengguna dan permission-nya, urut nama
+     * @return list<array> semua role beserta jumlah pengguna dan permission-nya, urut nama
      */
     public function allWithCounts(): array
+    {
+        return $this->withCounts()->findAll();
+    }
+
+    /**
+     * Sama seperti allWithCounts(), tapi dipaginasi; pager ada di $this->pager.
+     *
+     * @return list<array>
+     */
+    public function paginateWithCounts(): array
+    {
+        return $this->withCounts()->paginate();
+    }
+
+    private function withCounts(): static
     {
         return $this->select('roles.*')
             ->select('(SELECT COUNT(*) FROM users WHERE users.role_id = roles.id) AS users_count', false)
             ->select('(SELECT COUNT(*) FROM role_permissions rp WHERE rp.role_id = roles.id) AS permissions_count', false)
-            ->orderBy('roles.name', 'ASC')
-            ->findAll();
+            ->orderBy('roles.name', 'ASC');
     }
 }
