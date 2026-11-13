@@ -19,7 +19,16 @@
   box-shadow: 0 1px 3px rgb(15 23 42 / 6%);
 }
 
+/* Sama dengan .button (2.75rem) agar input dan tombol selalu sejajar, mis. di .field.has-addons */
+/* Placeholder cukup gelap untuk dibaca di atas latar #f8fafc (kontras 4.5:1+) */
+.input::placeholder,
+.textarea::placeholder {
+  color: #64748b;
+  opacity: 1;
+}
+
 .input {
+  min-height: 2.75rem;
   background-color: #f8fafc;
   border-color: #e2e8f0;
   box-shadow: none;
@@ -42,6 +51,7 @@ html {
 /* Layar sentuh: target sentuh minimal 44px */
 @media (pointer: coarse) {
   .button,
+  .input,
   .navbar-item {
     min-height: 44px;
   }
@@ -91,6 +101,14 @@ html {
 .page-container {
   padding-left: 1rem;
   padding-right: 1rem;
+}
+
+/* Tablet: gutter lebih longgar dari ponsel */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .page-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
 }
 
 @media (min-width: 1024px) {
