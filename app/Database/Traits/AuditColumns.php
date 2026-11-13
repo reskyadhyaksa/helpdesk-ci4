@@ -13,8 +13,9 @@ trait AuditColumns
         return [
             'created_at' => ['type' => 'DATETIME', 'null' => true],
             'updated_at' => ['type' => 'DATETIME', 'null' => true],
-            'created_by' => ['type' => 'UUID', 'null' => true],
-            'updated_by' => ['type' => 'UUID', 'null' => true],
+            // NIK (users.employee_no) pembuat/pengubah; tanpa foreign key, sama panjang dengan users.employee_no
+            'created_by' => ['type' => 'VARCHAR', 'constraint' => 50, 'null' => true],
+            'updated_by' => ['type' => 'VARCHAR', 'constraint' => 50, 'null' => true],
         ];
     }
 }
