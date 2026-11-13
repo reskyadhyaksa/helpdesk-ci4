@@ -1,0 +1,64 @@
+/*
+ * Admin > Roles Category: form role. Kartu form dan kartu opsi ada di components/form-card.css.
+ * Di sini: lebar field nama dan kartu modul (header: ikon, nama, penjelasan + grid opsi permission).
+ */
+
+.role-name-field {
+  max-width: 28rem;
+  margin-bottom: 1.75rem;
+}
+
+.perm-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.perm-section {
+  border: 1px solid #e5e9f0;
+  border-radius: 0.9rem;
+  background-color: #fff;
+}
+
+.perm-section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1.15rem;
+  border-bottom: 1px solid #eef0f4;
+  border-radius: 0.9rem 0.9rem 0 0;
+  background-color: #f8fafc;
+}
+
+.perm-section-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.65rem;
+  background-color: hsl(222deg 75% 22% / 0.08);
+  color: var(--bulma-primary);
+}
+
+.perm-section-title {
+  color: var(--bulma-text-strong);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.perm-section-desc {
+  margin-top: 0.1rem;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.perm-options {
+  display: grid;
+  /* auto-fit: modul dengan sedikit opsi tetap mengisi penuh lebar baris */
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.75rem;
+  padding: 1rem 1.15rem 1.15rem;
+}

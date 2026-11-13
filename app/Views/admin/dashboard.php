@@ -1,10 +1,17 @@
-<?= $this->extend('layouts/main') ?>
+<?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('content') ?>
 <section class="section">
-    <div class="container">
-        <h1 class="title">Dashboard Admin</h1>
-        <p class="subtitle">Selamat datang, <?= esc(auth_user()['name']) ?>.</p>
+    <?= component('page_header', [
+        'title'    => lang('Admin.pages.dashboard.title'),
+        'subtitle' => lang('Admin.pages.dashboard.subtitle'),
+    ]) ?>
+
+    <div class="box">
+        <?= component('empty_state', [
+            'icon'    => 'fa-table-cells-large',
+            'title'   => 'Selamat datang, ' . auth_user()['name'] . '.',
+        ]) ?>
     </div>
 </section>
 <?= $this->endSection() ?>

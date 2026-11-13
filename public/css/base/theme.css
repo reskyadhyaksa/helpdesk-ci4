@@ -1,0 +1,34 @@
+/* Tema: font, token warna, dan skala dasar Bulma. Dimuat paling awal. */
+
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
+
+/* Tema: skala font, warna, dan radius Bulma disesuaikan dengan desain portal */
+:root {
+  --bulma-family-primary: "Montserrat", sans-serif;
+  --bulma-body-size: 0.875em;
+  --bulma-navbar-height: 5.4rem;
+  --bulma-radius: 0.5rem;
+  --bulma-radius-large: 0.875rem;
+
+  --bulma-text: #475569;
+  --bulma-text-strong: #0f172a;
+
+  --bulma-primary-h: 222deg;
+  --bulma-primary-s: 75%;
+  --bulma-primary-l: 22%;
+  --bulma-primary-invert-l: 100%;
+  /* Warna secondary (kuning #e8c323). Bulma tidak punya "secondary", jadi dipakai lewat token ini. */
+  --app-secondary: hsl(49deg 81% 52%);
+  --app-secondary-soft: hsl(49deg 81% 52% / 0.18);
+  --app-secondary-ink: hsl(222deg 75% 22%);
+  /* Danger bawaan Bulma (l 70%) hanya ±2.6:1 di latar putih; versi gelap ini untuk teks */
+  --app-danger-ink: hsl(348deg 75% 40%);
+
+  --bulma-link-h: 224deg;
+  --bulma-link-s: 76%;
+  --bulma-link-l: 48%;
+}
+
+body {
+  background-color: #f8fafc;
+}

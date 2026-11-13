@@ -1,0 +1,190 @@
+/* Dropdown kustom: components/select + js/components/select.js. */
+
+/*
+ * Dropdown kustom (components/select + js/components/select.js).
+ * Tombol tampil seperti input Bulma; menu melayang dengan bayangan lembut,
+ * pilihan aktif ditandai latar navy tipis dan ikon centang.
+ */
+/*
+ * <select> asli tetap di DOM untuk form, tapi disembunyikan. Atribut hidden saja tidak cukup
+ * karena Bulma memberi .select select { display: block } yang mengalahkannya.
+ */
+.select.is-enhanced select,
+.select-menu[hidden] {
+  display: none;
+}
+
+/* Selector sengaja sepanjang aturan Bulma agar panah bawaan Bulma benar-benar tersembunyi */
+.select.is-enhanced:not(.is-multiple) {
+  height: auto;
+}
+
+.select.is-enhanced:not(.is-multiple):not(.is-loading)::after {
+  display: none;
+}
+
+.select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.65rem;
+  background-color: #f8fafc;
+  color: var(--bulma-text-strong);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.select-trigger:hover {
+  border-color: #cbd5e1;
+  background-color: #fff;
+}
+
+.select-trigger:focus-visible,
+.select.is-open .select-trigger {
+  border-color: var(--bulma-primary);
+  background-color: #fff;
+  outline: none;
+  box-shadow: 0 0 0 3px hsl(222deg 75% 22% / 0.15);
+}
+
+.select-trigger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.select-trigger.is-placeholder .select-trigger-text {
+  color: #94a3b8;
+}
+
+.select-trigger-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select-trigger-icon {
+  flex-shrink: 0;
+  color: #64748b;
+  font-size: 0.75em;
+  transition: transform 0.2s ease;
+}
+
+.select.is-open .select-trigger-icon {
+  transform: rotate(180deg);
+}
+
+.select.is-danger .select-trigger {
+  border-color: var(--bulma-danger);
+}
+
+.select.is-fullwidth.is-enhanced {
+  width: 100%;
+}
+
+.select.is-small .select-trigger {
+  min-height: 2rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 0.5rem;
+  font-size: 0.85em;
+}
+
+.select.is-medium .select-trigger {
+  min-height: 3rem;
+  font-size: 1.1em;
+}
+
+.select-menu {
+  position: fixed;
+  z-index: 50;
+  max-height: 16rem;
+  max-width: min(24rem, calc(100vw - 2rem));
+  margin: 0;
+  padding: 0.35rem;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid #e5e9f0;
+  border-radius: 0.75rem;
+  background-color: #fff;
+  box-shadow: 0 16px 36px -12px rgb(15 23 42 / 0.25);
+  animation: select-menu-in 0.12s ease-out;
+}
+
+.select-menu.is-up {
+  animation-name: select-menu-in-up;
+}
+
+@keyframes select-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes select-menu-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  color: var(--bulma-text-strong);
+  cursor: pointer;
+  user-select: none;
+}
+
+.select-option.is-placeholder {
+  color: #94a3b8;
+}
+
+.select-option.is-active {
+  background-color: #f1f5f9;
+}
+
+.select-option[aria-selected="true"] {
+  background-color: hsl(222deg 75% 22% / 0.07);
+  color: var(--bulma-primary);
+  font-weight: 600;
+}
+
+.select-option[aria-selected="true"].is-active {
+  background-color: hsl(222deg 75% 22% / 0.12);
+}
+
+.select-option-check {
+  visibility: hidden;
+  font-size: 0.8em;
+}
+
+.select-option[aria-selected="true"] .select-option-check {
+  visibility: visible;
+}
+
+@media (pointer: coarse) {
+  .select-option {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .select-trigger,
+  .select-trigger-icon,
+  .select-menu {
+    transition: none;
+    animation: none;
+  }
+}

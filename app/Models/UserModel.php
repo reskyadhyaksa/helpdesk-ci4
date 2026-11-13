@@ -32,6 +32,33 @@ class UserModel extends Model
         'job_title'      => 'permit_empty|max_length[100]',
     ];
 
+    /**
+     * Daftar pengguna untuk admin, dengan nama role. Hasil dipaginasi; pager ada di $this->pager.
+     *
+     * @return list<User>
+     */
+    public function paginateForAdmin(?string $keyword, int $perPage): array
+    {
+        $this->select('users.*, roles.name AS role_name')
+            ->join('roles', 'roles.id = users.role_id')
+            ->orderBy('users.name', 'ASC');
+
+        if ($keyword !== null && $keyword !== '') {
+            $this->groupStart()
+                ->like('users.name', $keyword)
+                ->orLike('users.employee_no', $keyword)
+                ->orLike('users.email', $keyword)
+                ->groupEnd();
+        }
+
+        return $this->paginate($perPage);
+    }
+
+    public function countByRole(string $roleId): int
+    {
+        return $this->where('role_id', $roleId)->countAllResults();
+    }
+
     public function findByEmployeeNo(string $employeeNo): ?User
     {
         return $this->select('users.*, roles.slug AS role_slug, roles.name AS role_name')

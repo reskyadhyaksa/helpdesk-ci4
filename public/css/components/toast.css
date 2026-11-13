@@ -1,0 +1,181 @@
+/*
+ * Toast flash message (partials/flash + js/components/toast.js).
+ * Kartu berwarna lembut sesuai jenis, ikon bulat berwarna penuh,
+ * dan garis progres yang menunjukkan sisa waktu. Tanpa gradasi.
+ */
+
+.toast-region {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: min(30rem, calc(100vw - 2rem));
+  pointer-events: none;
+}
+
+/* Warna per jenis: aksen, latar lembut, bingkai, dan judul */
+.toast {
+  --toast-color: #16a34a;
+  --toast-bg: #f0fdf4;
+  --toast-border: #bbf7d0;
+  --toast-title: #14532d;
+
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 1rem 1rem 1.15rem;
+  overflow: hidden;
+  border: 1px solid var(--toast-border);
+  border-radius: 1rem;
+  background-color: var(--toast-bg);
+  box-shadow:
+    0 18px 40px -16px rgb(15 23 42 / 0.28),
+    0 2px 6px -2px rgb(15 23 42 / 0.08);
+  pointer-events: auto;
+  animation: toast-in 0.25s cubic-bezier(0.21, 1.02, 0.73, 1);
+}
+
+.toast.is-danger {
+  --toast-color: #dc2626;
+  --toast-bg: #fef2f2;
+  --toast-border: #fecaca;
+  --toast-title: #7f1d1d;
+}
+
+.toast-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background-color: var(--toast-color);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--toast-color) 15%, transparent);
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+.toast-body {
+  flex: 1;
+  min-width: 0;
+  padding-top: 0.15rem;
+}
+
+.toast-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.toast-title {
+  color: var(--toast-title);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.toast-time {
+  color: color-mix(in srgb, var(--toast-title) 55%, transparent);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.toast-message {
+  margin-top: 0.2rem;
+  color: #334155;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+ul.toast-message {
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+
+.toast-close {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin: -0.25rem -0.25rem 0 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: color-mix(in srgb, var(--toast-title) 55%, transparent);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.toast-close:hover,
+.toast-close:focus-visible {
+  background-color: color-mix(in srgb, var(--toast-color) 12%, transparent);
+  color: var(--toast-title);
+}
+
+/* Garis sisa waktu di bawah kartu; berhenti saat toast ditahan (hover/fokus) */
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--toast-color);
+  opacity: 0.6;
+  transform-origin: left;
+  animation: toast-progress var(--toast-duration, 5000ms) linear forwards;
+}
+
+.toast.is-paused .toast-progress {
+  animation-play-state: paused;
+}
+
+.toast.is-leaving {
+  animation: toast-out 0.2s ease-in forwards;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(1.5rem) scale(0.97);
+  }
+}
+
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateX(1.5rem);
+  }
+}
+
+@keyframes toast-progress {
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* Layar kecil: toast selebar layar */
+@media (max-width: 768px) {
+  .toast-region {
+    left: 1rem;
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .toast.is-leaving,
+  .toast-close {
+    animation: none;
+    transition: none;
+  }
+
+  .toast-progress {
+    display: none;
+  }
+}

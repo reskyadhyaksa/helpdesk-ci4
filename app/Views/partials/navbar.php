@@ -1,6 +1,6 @@
 <?php
 $user     = auth_user();
-$initials = $user === null ? '' : strtoupper(mb_substr($user['name'], 0, 2));
+$initials = $user === null ? '' : initials($user['name']);
 
 // Halaman yang belum dibuat memakai '#'. Ganti dengan url_to('nama.route') saat halamannya ada.
 if ($user === null) {
@@ -8,10 +8,6 @@ if ($user === null) {
         ['label' => 'Beranda', 'icon' => 'home.svg', 'href' => url_to('home'), 'active' => url_is('/')],
         ['label' => 'FAQ & Help Center', 'icon' => 'shield-question.svg', 'href' => '#', 'active' => false],
         ['label' => 'Ticket Status', 'icon' => 'doc-search.svg', 'href' => url_to('home') . '#lacak-tiket', 'active' => false],
-    ];
-} elseif ($user['is_admin']) {
-    $menu = [
-        ['label' => 'Dashboard', 'icon' => 'home.svg', 'href' => url_to('admin.dashboard'), 'active' => url_is('admin')],
     ];
 } else {
     $menu = [
@@ -122,14 +118,12 @@ if ($user === null) {
                         </a>
                     </div>
 
-                    <?php if (! $user['is_admin']): ?>
-                        <div class="navbar-item is-hidden-touch">
-                            <a class="button is-primary is-rounded" href="#">
-                                <span class="icon is-small"><i class="fa-solid fa-plus" aria-hidden="true"></i></span>
-                                <span>Buat Tiket</span>
-                            </a>
-                        </div>
-                    <?php endif ?>
+                    <div class="navbar-item is-hidden-touch">
+                        <a class="button is-primary is-rounded" href="#">
+                            <span class="icon is-small"><i class="fa-solid fa-plus" aria-hidden="true"></i></span>
+                            <span>Buat Tiket</span>
+                        </a>
+                    </div>
                 <?php endif ?>
             </div>
         </div>

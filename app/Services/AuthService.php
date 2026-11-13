@@ -125,6 +125,7 @@ class AuthService
             'name'        => $user->name,
             'role'        => $user->role_slug,
             'role_name'   => $user->role_name,
+            'job_title'   => $user->job_title,
             'permissions' => $permissions,
             'is_admin'    => in_array(PermissionModel::ADMIN_ACCESS, $permissions, true),
             'employee'    => $employee,

@@ -1,0 +1,343 @@
+/* Layout admin: sidebar (lebar/diperkecil), bar atas di layar sentuh, dan kartu user. */
+
+/* Layout admin: sidebar kiri, konten kanan. Di layar sentuh sidebar jadi panel geser dari kiri. */
+.admin-shell {
+  min-height: 100vh;
+}
+
+.admin-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  color: var(--bulma-text-strong);
+}
+
+.admin-brand .tag {
+  height: 1.6em;
+  font-size: 0.7rem;
+}
+
+/* Sidebar: putih dengan pendar navy tipis di pojok atas, menu bisa digulir, kartu user tetap di bawah */
+.admin-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding: 1.75rem 1.25rem 1.25rem;
+  border-right: 1px solid #e5e9f0;
+  background-color: #fff;
+  background-image: radial-gradient(circle at 0 0, hsl(222deg 75% 22% / 0.07), transparent 45%);
+}
+
+.admin-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.admin-sidebar-toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid #e5e9f0;
+  border-radius: 0.65rem;
+  background-color: #fff;
+  color: #64748b;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.admin-sidebar-toggle:hover,
+.admin-sidebar-toggle:focus-visible {
+  background-color: #f1f5f9;
+  color: var(--bulma-primary);
+}
+
+.admin-sidebar-head .brand-logo {
+  width: 3rem;
+  height: 3rem;
+  box-shadow: 0 10px 20px -10px hsl(222deg 75% 22% / 0.7);
+}
+
+.admin-menu {
+  flex: 1;
+  min-height: 0;
+  margin-inline: -0.25rem;
+  padding-inline: 0.25rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.admin-menu .menu-label {
+  margin: 1.5rem 0 0.5rem;
+  padding-left: 0.9rem;
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.admin-menu .menu-list li + li {
+  margin-top: 0.2rem;
+}
+
+.admin-menu .menu-list a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.8rem;
+  background-color: transparent;
+  color: #334155;
+  font-weight: 600;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-menu-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.6rem;
+  color: #64748b;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.admin-menu .menu-list a:hover {
+  background-color: #f1f5f9;
+  color: var(--bulma-primary);
+}
+
+.admin-menu .menu-list a:hover .admin-menu-icon {
+  background-color: #fff;
+  color: var(--bulma-primary);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.08);
+}
+
+.admin-menu .menu-list a:focus-visible {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: 2px;
+}
+
+/* Aktif: kartu navy terangkat, ikon kuning dalam chip transparan */
+.admin-menu .menu-list a.is-active,
+.admin-menu .menu-list a.is-active:hover {
+  background-color: var(--bulma-primary);
+  color: #fff;
+  box-shadow: 0 8px 18px -12px hsl(222deg 75% 22% / 0.35);
+}
+
+.admin-menu .menu-list a.is-active .admin-menu-icon {
+  background-color: rgb(255 255 255 / 0.12);
+  color: var(--app-secondary);
+  box-shadow: none;
+}
+
+.admin-sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border-radius: 1rem;
+  background-color: #f1f5f9;
+}
+
+.admin-user .avatar {
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 0;
+  background-color: var(--bulma-primary);
+  color: #fff;
+  box-shadow: 0 0 0 3px #fff;
+}
+
+.admin-user-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-user-text strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-user-action {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  color: #64748b;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.admin-user-action:hover,
+.admin-user-action:focus-visible {
+  background-color: #fff;
+  color: var(--bulma-primary);
+}
+
+.admin-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background: none;
+  color: hsl(348deg 70% 45%);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.admin-logout:hover,
+.admin-logout:focus-visible {
+  background-color: hsl(348deg 86% 61% / 0.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-menu .menu-list a,
+  .admin-menu-icon,
+  .admin-user-action,
+  .admin-logout {
+    transition: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .admin-shell {
+    display: flex;
+  }
+
+  .admin-sidebar {
+    position: sticky;
+    top: 0;
+    flex-shrink: 0;
+    width: 22.2rem;
+    height: 100vh;
+    transition: width 0.2s ease, padding 0.2s ease;
+  }
+
+  /* Sidebar diperkecil: hanya ikon, teks disembunyikan secara visual tapi tetap dibaca screen reader */
+  .is-sidebar-collapsed .admin-sidebar {
+    width: 5.5rem;
+    padding-inline: 0.75rem;
+  }
+
+  .is-sidebar-collapsed .admin-collapsible-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .is-sidebar-collapsed .admin-brand-text,
+  .is-sidebar-collapsed .admin-user-text {
+    display: none;
+  }
+
+  .is-sidebar-collapsed .admin-sidebar-toggle {
+    display: none;
+  }
+
+  .is-sidebar-collapsed .admin-sidebar-head,
+  .is-sidebar-collapsed .admin-user {
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* Logo jadi pembuka sidebar: beri tanda bisa diklik */
+  .is-sidebar-collapsed .admin-brand .brand-logo {
+    transition: transform 0.15s ease;
+  }
+
+  .is-sidebar-collapsed .admin-brand:hover .brand-logo,
+  .is-sidebar-collapsed .admin-brand:focus-visible .brand-logo {
+    transform: scale(1.06);
+  }
+
+  .is-sidebar-collapsed .admin-menu .menu-label {
+    height: 1px;
+    margin: 1rem 0.5rem;
+    padding: 0;
+    overflow: hidden;
+    background-color: #e5e9f0;
+    color: transparent;
+    font-size: 0;
+  }
+
+  .is-sidebar-collapsed .admin-menu .menu-list a,
+  .is-sidebar-collapsed .admin-logout {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .is-sidebar-collapsed .admin-user {
+    padding: 0.5rem 0;
+    background-color: transparent;
+  }
+}
+
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+  .admin-sidebar,
+  .admin-sidebar-toggle,
+  .admin-brand .brand-logo {
+    transition: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .admin-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 4rem;
+    padding: 0 0.5rem 0 1rem;
+    border-bottom: 1px solid #e5e9f0;
+    background-color: #fff;
+  }
+
+  .admin-sidebar {
+    display: none;
+    position: fixed;
+    top: 4rem;
+    bottom: 0;
+    left: 0;
+    z-index: 29;
+    width: min(24rem, 88vw);
+    padding-top: 1rem;
+    box-shadow: 0 16px 40px -12px rgb(15 23 42 / 0.3);
+  }
+
+  .admin-sidebar.is-active {
+    display: flex;
+  }
+}

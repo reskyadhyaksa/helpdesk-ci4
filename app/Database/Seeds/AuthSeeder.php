@@ -8,6 +8,8 @@ use CodeIgniter\Database\Seeder;
 
 /**
  * Data awal RBAC (role, permission, pemetaannya). Aman dijalankan ulang.
+ * Menyamakan tabel permissions dengan PermissionModel::GROUPS: yang baru ditambah,
+ * yang sudah tidak ada di kode dihapus (pemetaannya ikut terhapus lewat cascade).
  */
 class AuthSeeder extends Seeder
 {
@@ -16,20 +18,11 @@ class AuthSeeder extends Seeder
         RoleModel::SLUG_ADMIN => 'Admin',
     ];
 
-    private const ROLE_PERMISSIONS = [
-        RoleModel::SLUG_USER  => [
-            PermissionModel::USER_DASHBOARD_VIEW,
-        ],
-        RoleModel::SLUG_ADMIN => [
-            PermissionModel::ADMIN_ACCESS,
-            PermissionModel::ADMIN_DASHBOARD_VIEW,
-        ],
-    ];
-
     public function run(): void
     {
         $roles       = model(RoleModel::class);
         $permissions = model(PermissionModel::class);
+        $definedSlugs = PermissionModel::definedSlugs();
         $now         = date('Y-m-d H:i:s');
 
         foreach (self::ROLE_NAMES as $slug => $name) {
@@ -38,14 +31,21 @@ class AuthSeeder extends Seeder
             }
         }
 
-        $permissionSlugs = array_unique(array_merge(...array_values(self::ROLE_PERMISSIONS)));
-        foreach ($permissionSlugs as $slug) {
+        $permissions->whereNotIn('slug', $definedSlugs)->delete();
+
+        foreach ($definedSlugs as $slug) {
             if ($permissions->where('slug', $slug)->first() === null) {
                 $permissions->insert(['slug' => $slug]);
             }
         }
 
-        foreach (self::ROLE_PERMISSIONS as $roleSlug => $slugs) {
+        // Admin mendapat semua permission (termasuk area user /u); user hanya portal.
+        $rolePermissions = [
+            RoleModel::SLUG_USER  => [PermissionModel::USER_DASHBOARD_VIEW],
+            RoleModel::SLUG_ADMIN => $definedSlugs,
+        ];
+
+        foreach ($rolePermissions as $roleSlug => $slugs) {
             $roleId = $roles->where('slug', $roleSlug)->first()['id'];
 
             foreach ($slugs as $slug) {

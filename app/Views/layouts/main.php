@@ -14,5 +14,8 @@
     <?= $this->include('partials/footer') ?>
 
     <script src="<?= base_url('js/app.js') ?>"></script>
+    <script src="<?= base_url('js/components/select.js') ?>"></script>
+    <script src="<?= base_url('js/components/toast.js') ?>"></script>
+    <?= $this->renderSection('scripts') ?>
 </body>
 </html>

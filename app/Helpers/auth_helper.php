@@ -9,3 +9,13 @@ if (! function_exists('auth_user')) {
         return service('auth')->user();
     }
 }
+
+if (! function_exists('auth_can')) {
+    /**
+     * Apakah user yang login memiliki permission ini. Dipakai view untuk menampilkan tombol aksi.
+     */
+    function auth_can(string $permission): bool
+    {
+        return service('auth')->can($permission);
+    }
+}

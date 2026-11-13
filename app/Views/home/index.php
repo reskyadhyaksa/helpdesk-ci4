@@ -33,11 +33,19 @@ $values = ['Kepercayaan', 'Kewirausahaan', 'Inovatif', 'Kegembiraan'];
                     Satu portal terpadu untuk bantuan layanan kepegawaian, pengajuan tiket kendala, panduan SOP, dan
                     resolusi akun HC Eazy.
                 </p>
-                <a class="button is-link is-medium btn-cta" href="#">
-                    <span class="cta-icon">+</span>
-                    Buat Tiket Bantuan
-                    <span>→</span>
-                </a>
+                <?php if (auth_user()): ?>
+                    <!-- TODO: arahkan ke route buat tiket setelah modul tiket user dibuat -->
+                    <a class="button is-primary is-medium btn-cta" href="#">
+                        <span class="cta-icon"><i class="fa-solid fa-plus" aria-hidden="true"></i></span>
+                        <span>Buat Tiket Sekarang</span>
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                <?php else: ?>
+                    <a class="button is-primary is-medium btn-cta" href="<?= url_to('login') ?>">
+                        <span class="cta-icon"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i></span>
+                        <span>Masuk untuk Ajukan Tiket</span>
+                    </a>
+                <?php endif ?>
             </section>
 
             <div class="columns is-4">
@@ -87,11 +95,12 @@ $values = ['Kepercayaan', 'Kewirausahaan', 'Inovatif', 'Kegembiraan'];
                     melacak status SLA.
                 </p>
 
-                <div class="field">
+                <div class="field mb-5">
                     <label class="label is-size-7" for="ticketNumber">Nomor Tiket <span
                             class="has-text-danger">*</span></label>
                     <div class="control">
-                        <input class="input" id="ticketNumber" type="text" placeholder="CTH: #HC-2025-0042" aria-describedby="ticketNumberHelp">
+                        <input class="input" id="ticketNumber" type="text" placeholder="CTH: #HC-2025-0042"
+                            aria-describedby="ticketNumberHelp">
                     </div>
                     <p class="help" id="ticketNumberHelp">Nomor tiket dikirim ke email Anda setelah tiket dibuat.</p>
                 </div>
@@ -100,9 +109,11 @@ $values = ['Kepercayaan', 'Kewirausahaan', 'Inovatif', 'Kegembiraan'];
                     <label class="label is-size-7" for="reporterEmail">Email Pelapor <span
                             class="has-text-weight-normal has-text-grey">(Opsional)</span></label>
                     <div class="control">
-                        <input class="input" id="reporterEmail" type="email" placeholder="nama@perusahaan.co.id" aria-describedby="reporterEmailHelp">
+                        <input class="input" id="reporterEmail" type="email" placeholder="nama@perusahaan.co.id"
+                            aria-describedby="reporterEmailHelp">
                     </div>
-                    <p class="help" id="reporterEmailHelp">Isi untuk memastikan tiket yang dilacak adalah milik Anda.</p>
+                    <p class="help" id="reporterEmailHelp">Isi untuk memastikan tiket yang dilacak adalah milik Anda.
+                    </p>
                 </div>
 
                 <div class="mt-auto pt-4">
@@ -166,32 +177,27 @@ $values = ['Kepercayaan', 'Kewirausahaan', 'Inovatif', 'Kegembiraan'];
 
 </div>
 
-<!-- Modal hotline -->
-<div class="modal" id="hotlineModal">
-    <div class="modal-background" data-modal-close></div>
-    <div class="modal-card">
-        <header class="modal-card-head">
-            <p class="modal-card-title">Hotline Darurat Human Capital</p>
-            <button type="button" class="delete" aria-label="Tutup" data-modal-close></button>
-        </header>
-        <section class="modal-card-body">
-            <p class="mb-4">Untuk kendala mendesak atau darurat operasional kepegawaian, hubungi kontak resmi PIC
-                Ticketing berikut:</p>
-            <dl>
-                <dt class="has-text-weight-bold">PIC Layanan Helpdesk</dt>
-                <dd class="mb-3">Divisi Human Capital MTF</dd>
-                <dt class="has-text-weight-bold">WhatsApp Hotline</dt>
-                <dd class="mb-3"><a class="has-text-success" href="https://wa.me/6281119500000" target="_blank"
-                        rel="noopener">+62 811-1950-0000</a></dd>
-                <dt class="has-text-weight-bold">Email Support</dt>
-                <dd class="mb-3">hc.helpdesk@mtf.co.id</dd>
-                <dt class="has-text-weight-bold">Jam Operasional</dt>
-                <dd>Senin - Jumat, 08.30 - 17.30 WIB</dd>
-            </dl>
-        </section>
-        <footer class="modal-card-foot is-justify-content-flex-end">
-            <button type="button" class="button is-primary" data-modal-close>Tutup</button>
-        </footer>
-    </div>
-</div>
+<?php component_start('modal', [
+    'id' => 'hotlineModal',
+    'title' => 'Hotline Darurat Human Capital',
+    'subtitle' => 'Untuk kendala mendesak atau darurat operasional kepegawaian.',
+]) ?>
+<dl>
+    <dt class="has-text-weight-bold">PIC Layanan Helpdesk</dt>
+    <dd class="mb-3">Divisi Human Capital MTF</dd>
+    <dt class="has-text-weight-bold">WhatsApp Hotline</dt>
+    <dd class="mb-3"><a class="has-text-success" href="https://wa.me/6281119500000" target="_blank" rel="noopener">+62
+            811-1950-0000</a></dd>
+    <dt class="has-text-weight-bold">Email Support</dt>
+    <dd class="mb-3">hc.helpdesk@mtf.co.id</dd>
+    <dt class="has-text-weight-bold">Jam Operasional</dt>
+    <dd>Senin - Jumat, 08.30 - 17.30 WIB</dd>
+</dl>
+<?php component_slot('footer') ?>
+<button type="button" class="button is-primary" data-modal-close>Tutup</button>
+<?= component_end() ?>
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script src="<?= base_url('js/pages/home.js') ?>"></script>
 <?= $this->endSection() ?>

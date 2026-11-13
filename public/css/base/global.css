@@ -1,0 +1,105 @@
+/* Gaya global: penyesuaian elemen Bulma, aksesibilitas, dan helper kecil yang dipakai banyak halaman. */
+
+/* Teks kecil: 12px pada root 14px (bawaan Bulma 10.5px terlalu kecil) */
+.is-size-7 {
+  font-size: 0.85rem !important;
+}
+
+.button {
+  min-height: 2.75rem;
+  font-weight: 700;
+}
+
+.navbar-item {
+  font-weight: 600;
+}
+
+.box {
+  border: 1px solid #e8ecf2;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 6%);
+}
+
+.input {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  box-shadow: none;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .scroll-row {
+    scroll-behavior: auto;
+  }
+}
+
+/* Layar sentuh: target sentuh minimal 44px */
+@media (pointer: coarse) {
+  .button,
+  .navbar-item {
+    min-height: 44px;
+  }
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid #cbd5e1;
+  background-color: #e2e8f0;
+  color: #334155;
+  font-weight: 700;
+}
+
+/* Tombol ikon bulat */
+.icon-button {
+  width: 2.75rem;
+  padding: 0;
+}
+
+.brand-logo,
+.icon-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.brand-logo {
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 0.8rem;
+  background-color: hsl(222deg 75% 22%);
+}
+
+.icon-box {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1rem;
+}
+
+/* Isi halaman sejajar dengan navbar di desktop; di mobile diberi gutter */
+.page-container {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .page-container {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.h-100 {
+  height: 100%;
+}

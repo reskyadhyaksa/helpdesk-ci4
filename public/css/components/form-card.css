@@ -1,0 +1,131 @@
+/*
+ * Form admin di dalam satu kartu (dipakai form role dan form SLA):
+ *   <form class="box p-0">
+ *     <div class="form-card-body">…</div>
+ *     <div class="form-card-footer">Batal · Simpan</div>
+ *   </form>
+ * Pelengkap: .form-section-label (judul kelompok field), .form-panel (panel abu di samping),
+ * .option-card (checkbox berbentuk kartu: judul + penjelasan, seluruh kartu bisa diklik).
+ */
+
+.form-card-body {
+  padding: 1.5rem;
+}
+
+.form-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #eef0f4;
+}
+
+.form-card-footer .button {
+  margin: 0;
+}
+
+.form-section-label {
+  margin-bottom: 1rem;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.form-panel {
+  height: 100%;
+  padding: 1.25rem;
+  border: 1px solid #eef0f4;
+  border-radius: 0.9rem;
+  background-color: #f8fafc;
+}
+
+.form-panel + .form-panel,
+.form-panel-divider {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e5e9f0;
+}
+
+/* Checkbox berbentuk kartu */
+.option-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  min-height: 2.75rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #e5e9f0;
+  border-radius: 0.7rem;
+  background-color: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.option-card:hover {
+  border-color: #cbd5e1;
+}
+
+.option-card:has(input:checked) {
+  border-color: hsl(222deg 75% 22% / 0.3);
+  background-color: hsl(222deg 75% 22% / 0.04);
+}
+
+.option-card:has(input:focus-visible) {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: 2px;
+}
+
+.option-card input[type="checkbox"] {
+  flex-shrink: 0;
+  width: 1.05rem;
+  height: 1.05rem;
+  margin-top: 0.15rem;
+  accent-color: var(--bulma-primary);
+  cursor: pointer;
+}
+
+.option-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.option-card-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--bulma-text-strong);
+  font-weight: 600;
+}
+
+.option-card-desc {
+  color: #64748b;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.option-card-badge {
+  height: 1.5em;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* Terkunci: tetap aktif, tampil redup, tidak bisa diubah */
+.option-card.is-locked,
+.option-card.is-locked input {
+  cursor: not-allowed;
+}
+
+.option-card.is-locked {
+  border-style: dashed;
+  background-color: #f8fafc;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option-card {
+    transition: none;
+  }
+}

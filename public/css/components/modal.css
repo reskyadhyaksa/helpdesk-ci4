@@ -1,0 +1,100 @@
+/* Modal (components/modal): kartu membulat; header, isi, dan footer dipisah satu garis tipis. */
+
+.app-modal .modal-background {
+  background-color: rgb(15 23 42 / 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.app-modal .modal-card {
+  width: min(36rem, calc(100vw - 2rem));
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background-color: #fff;
+  box-shadow: 0 24px 60px -16px rgb(15 23 42 / 0.4);
+  animation: modal-in 0.18s ease-out;
+}
+
+.app-modal.is-small .modal-card {
+  width: min(28rem, calc(100vw - 2rem));
+}
+
+.app-modal.is-large .modal-card {
+  width: min(48rem, calc(100vw - 2rem));
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+.app-modal .modal-card-head {
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #eef0f4;
+  background-color: #fbfcfd; /* abu sangat tipis: cukup membedakan area judul tanpa terasa gelap */
+  box-shadow: none;
+}
+
+.app-modal-title {
+  color: var(--bulma-text-strong);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.app-modal-subtitle {
+  margin-top: 0.25rem;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.app-modal-close {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: -0.35rem -0.5rem 0 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: #64748b;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.app-modal-close:hover,
+.app-modal-close:focus-visible {
+  background-color: #f1f5f9;
+  color: var(--bulma-text-strong);
+}
+
+.app-modal .modal-card-body {
+  padding: 1.5rem;
+}
+
+.app-modal .modal-card-foot {
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #eef0f4;
+  background-color: #fff;
+}
+
+.app-modal .modal-card-foot .button {
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-modal .modal-card,
+  .app-modal-close {
+    animation: none;
+    transition: none;
+  }
+}
