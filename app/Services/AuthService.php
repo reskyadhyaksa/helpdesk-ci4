@@ -38,19 +38,18 @@ class AuthService
 
         $claims     = $this->keycloak->parseTokenPayload($tokens['access_token'] ?? '') ?? [];
         $employeeNo = (string) ($claims[config(Integration::class)->keycloakEmployeeClaim] ?? '');
-        $employee   = $employeeNo === '' ? null : $this->keycloak->getHelpdeskUserData($employeeNo);
 
-        if ($employee === null) {
+        if ($employeeNo === '') {
             throw new BusinessException(lang('Auth.employeeNotFound'));
         }
 
-        $user = $this->syncUser($employeeNo, $employee, $claims);
+        $user = $this->refreshedUser($employeeNo, $claims);
 
         if (! $user->is_active) {
             throw new BusinessException(lang('Auth.accountInactive'));
         }
 
-        $this->startSession($user, $employee);
+        $this->startSession($user);
     }
 
     public function logout(): void
@@ -84,21 +83,46 @@ class AuthService
     }
 
     /**
-     * Profil diperbarui dari API Spring Boot setiap login. Karyawan baru dibuat otomatis
-     * dengan role user. Menjadi admin = mengganti role_id di tabel users.
+     * Profil diambil dari API Spring Boot paling banyak sekali sehari per karyawan: login pertama hari itu
+     * (atau karyawan baru) memanggil API, login berikutnya hanya mencatat waktu login.
+     *
+     * @throws BusinessException API tidak mengenali karyawan
      */
-    private function syncUser(string $employeeNo, array $employee, array $claims): User
+    private function refreshedUser(string $employeeNo, array $claims): User
     {
+        $user = $this->users->findByEmployeeNo($employeeNo);
+
+        if ($user !== null && $user->isSyncedToday()) {
+            $this->users->update($user->id, ['last_login_time' => date('Y-m-d H:i:s')]);
+
+            return $user;
+        }
+
+        $employee = $this->keycloak->getHelpdeskUserData($employeeNo);
+
+        if ($employee === null) {
+            throw new BusinessException(lang('Auth.employeeNotFound'));
+        }
+
+        return $this->syncUser($user, $employeeNo, $employee, $claims);
+    }
+
+    /**
+     * Karyawan baru dibuat otomatis dengan role user. Menjadi admin = mengganti role_id di tabel users.
+     */
+    private function syncUser(?User $user, string $employeeNo, array $employee, array $claims): User
+    {
+        $now     = date('Y-m-d H:i:s');
         $profile = [
             'name'            => $employee['name'] ?? $employee['fullName'] ?? $claims['name'] ?? $employeeNo,
             'email'           => $employee['officeMail'] ?? $claims['email'] ?? null,
             'position'        => $employee['position'] ?? null,
             'position_level'  => $employee['positionLevel'] ?? $employee['position_level'] ?? null,
             'job_title'       => $employee['jobTitle'] ?? $employee['job_title'] ?? null,
-            'last_login_time' => date('Y-m-d H:i:s'),
+            'organization'    => $employee['organization'] ?? null,
+            'last_login_time' => $now,
+            'last_synced_at'  => $now,
         ];
-
-        $user = $this->users->findByEmployeeNo($employeeNo);
 
         if ($user === null) {
             $this->users->insert($profile + [
@@ -113,7 +137,7 @@ class AuthService
         return $this->users->findByEmployeeNo($employeeNo);
     }
 
-    private function startSession(User $user, array $employee): void
+    private function startSession(User $user): void
     {
         $permissions = $this->permissions->slugsForRole($user->role_id);
 
@@ -128,7 +152,6 @@ class AuthService
             'job_title'   => $user->job_title,
             'permissions' => $permissions,
             'is_admin'    => in_array(PermissionModel::ADMIN_ACCESS, $permissions, true),
-            'employee'    => $employee,
         ]);
     }
 }

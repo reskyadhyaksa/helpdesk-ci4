@@ -14,8 +14,6 @@ use CodeIgniter\Pager\Pager;
  */
 class UserService
 {
-    private const PER_PAGE = 15;
-
     public function __construct(
         private readonly UserModel $users,
         private readonly RoleModel $roles,
@@ -23,13 +21,23 @@ class UserService
     }
 
     /**
+     * @param array<string, list<string>> $filters kolom profil (UserModel::FILTER_COLUMNS) => daftar nilai
+     *
      * @return array{users: list<User>, pager: Pager}
      */
-    public function paginate(?string $keyword): array
+    public function paginate(?string $keyword, array $filters = []): array
     {
-        $users = $this->users->paginateForAdmin($keyword, self::PER_PAGE);
+        $users = $this->users->paginateForAdmin($keyword, $filters);
 
         return ['users' => $users, 'pager' => $this->users->pager];
+    }
+
+    /**
+     * @return array<string, list<string>> pilihan dropdown filter per kolom profil
+     */
+    public function filterOptions(): array
+    {
+        return $this->users->filterOptions();
     }
 
     public function find(string $id): ?User
