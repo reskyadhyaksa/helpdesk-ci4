@@ -19,7 +19,7 @@ $values = ['Kepercayaan', 'Kewirausahaan', 'Inovatif', 'Kegembiraan'];
 ?>
 
 <?= $this->section('content') ?>
-<div class="container page-container py-5">
+<div class="container page-container home-page py-5">
 
     <div class="columns is-desktop is-3 is-7-desktop">
         <!-- Kiri: banner dan aksi cepat -->
@@ -48,30 +48,29 @@ $values = ['Kepercayaan', 'Kewirausahaan', 'Inovatif', 'Kegembiraan'];
                 <?php endif ?>
             </section>
 
-            <div class="columns is-4">
+            <?php // Grid (bukan .columns Bulma) agar iPad portrait 768px sudah 3 kolom; lihat .quick-actions di home.css ?>
+            <div class="quick-actions">
                 <?php foreach ($quickActions as $action): ?>
-                    <div class="column is-4">
-                        <div class="box p-4 h-100 is-flex is-flex-direction-column">
-                            <div class="is-flex is-align-items-center mb-4" style="gap: 0.9rem">
-                                <span class="icon-box <?= $action['bg'] ?>">
-                                    <img src="<?= base_url('images/' . $action['icon']) ?>" alt="" width="24" height="24">
-                                </span>
-                                <div>
-                                    <p class="has-text-weight-bold has-text-grey-dark"><?= esc($action['title']) ?></p>
-                                    <p class="is-size-7 has-text-grey"><?= esc($action['desc']) ?></p>
-                                </div>
+                    <div class="box p-4 h-100 is-flex is-flex-direction-column">
+                        <div class="is-flex is-align-items-center mb-4" style="gap: 0.9rem">
+                            <span class="icon-box <?= $action['bg'] ?>">
+                                <img src="<?= base_url('images/' . $action['icon']) ?>" alt="" width="24" height="24">
+                            </span>
+                            <div>
+                                <p class="has-text-weight-bold has-text-grey-dark"><?= esc($action['title']) ?></p>
+                                <p class="is-size-7 has-text-grey"><?= esc($action['desc']) ?></p>
                             </div>
-
-                            <?php if (isset($action['modal'])): ?>
-                                <button type="button" class="button is-success is-outlined is-fullwidth is-size-7 px-2 mt-auto"
-                                    data-modal-open="<?= esc($action['modal'], 'attr') ?>">
-                                    <?= esc($action['label']) ?>
-                                </button>
-                            <?php else: ?>
-                                <a class="button is-primary is-fullwidth mt-auto"
-                                    href="<?= esc($action['href']) ?>"><?= esc($action['label']) ?></a>
-                            <?php endif ?>
                         </div>
+
+                        <?php if (isset($action['modal'])): ?>
+                            <button type="button" class="button is-success is-outlined is-fullwidth is-size-7 px-2 mt-auto"
+                                data-modal-open="<?= esc($action['modal'], 'attr') ?>">
+                                <?= esc($action['label']) ?>
+                            </button>
+                        <?php else: ?>
+                            <a class="button is-primary is-fullwidth mt-auto"
+                                href="<?= esc($action['href']) ?>"><?= esc($action['label']) ?></a>
+                        <?php endif ?>
                     </div>
                 <?php endforeach ?>
             </div>
@@ -79,47 +78,51 @@ $values = ['Kepercayaan', 'Kewirausahaan', 'Inovatif', 'Kegembiraan'];
 
         <!-- Kanan: lacak tiket -->
         <div class="column track-column" id="lacak-tiket">
-            <section class="box p-5 h-100 is-flex is-flex-direction-column">
-                <div class="is-flex is-align-items-center mb-4" style="gap: 0.9rem">
-                    <span class="icon-box has-background-grey-lighter">
-                        <img src="<?= base_url('images/global-search.svg') ?>" alt="" width="24" height="24">
-                    </span>
-                    <div>
-                        <h2 class="title is-5 mb-1">Lacak Status Tiket</h2>
-                        <p class="is-size-7 has-text-grey">Cek progres penanganan tiket secara instan</p>
+            <section class="box p-5 h-100 track-card">
+                <div class="track-intro">
+                    <div class="is-flex is-align-items-center mb-4" style="gap: 0.9rem">
+                        <span class="icon-box has-background-grey-lighter">
+                            <img src="<?= base_url('images/global-search.svg') ?>" alt="" width="24" height="24">
+                        </span>
+                        <div>
+                            <h2 class="title is-5 mb-1">Lacak Status Tiket</h2>
+                            <p class="is-size-7 has-text-grey">Cek progres penanganan tiket secara instan</p>
+                        </div>
                     </div>
-                </div>
 
-                <p class="is-size-7 mb-4">
-                    Sudah pernah mengajukan keluhan atau tiket bantuan sebelumnya? Masukkan nomor referensi untuk
-                    melacak status SLA.
-                </p>
-
-                <div class="field mb-5">
-                    <label class="label is-size-7" for="ticketNumber">Nomor Tiket <span
-                            class="has-text-danger">*</span></label>
-                    <div class="control">
-                        <input class="input" id="ticketNumber" type="text" placeholder="CTH: #HC-2025-0042"
-                            aria-describedby="ticketNumberHelp">
-                    </div>
-                    <p class="help" id="ticketNumberHelp">Nomor tiket dikirim ke email Anda setelah tiket dibuat.</p>
-                </div>
-
-                <div class="field">
-                    <label class="label is-size-7" for="reporterEmail">Email Pelapor <span
-                            class="has-text-weight-normal has-text-grey">(Opsional)</span></label>
-                    <div class="control">
-                        <input class="input" id="reporterEmail" type="email" placeholder="nama@perusahaan.co.id"
-                            aria-describedby="reporterEmailHelp">
-                    </div>
-                    <p class="help" id="reporterEmailHelp">Isi untuk memastikan tiket yang dilacak adalah milik Anda.
+                    <p class="is-size-7 mb-4">
+                        Sudah pernah mengajukan keluhan atau tiket bantuan sebelumnya? Masukkan nomor referensi untuk
+                        melacak status SLA.
                     </p>
                 </div>
 
-                <div class="mt-auto pt-4">
+                <div class="track-fields">
+                    <div class="field mb-5">
+                        <label class="label is-size-7" for="ticketNumber">Nomor Tiket <span
+                                class="has-text-danger">*</span></label>
+                        <div class="control">
+                            <input class="input" id="ticketNumber" type="text" placeholder="CTH: #HC-2025-0042"
+                                aria-describedby="ticketNumberHelp">
+                        </div>
+                        <p class="help" id="ticketNumberHelp">Nomor tiket dikirim ke email Anda setelah tiket dibuat.</p>
+                    </div>
+
+                    <div class="field">
+                        <label class="label is-size-7" for="reporterEmail">Email Pelapor <span
+                                class="has-text-weight-normal has-text-grey">(Opsional)</span></label>
+                        <div class="control">
+                            <input class="input" id="reporterEmail" type="email" placeholder="nama@perusahaan.co.id"
+                                aria-describedby="reporterEmailHelp">
+                        </div>
+                        <p class="help" id="reporterEmailHelp">Isi untuk memastikan tiket yang dilacak adalah milik Anda.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="track-actions mt-auto pt-4">
                     <button type="button" class="button is-primary is-fullwidth">Lacak Progres Penanganan</button>
 
-                    <p class="is-size-7 has-text-centered has-text-grey mt-4">
+                    <p class="is-size-7 has-text-centered has-text-grey track-note">
                         Ingin melihat detail tiket?
                         <a class="has-text-link has-text-weight-semibold" href="<?= url_to('login') ?>">Masuk ke Akun
                             →</a>

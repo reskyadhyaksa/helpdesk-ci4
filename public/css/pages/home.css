@@ -1,5 +1,14 @@
 /* Beranda portal: banner, kartu aksi cepat, kolom lacak tiket, baris layanan yang bisa digeser. */
 
+/*
+ * Seluruh isi beranda (teks, kartu, jarak, ikon) tampil sedikit lebih kecil. Navbar ikut, tapi hanya di
+ * beranda (:has), supaya halaman lain yang memakai layout yang sama tidak berubah. Footer tidak ikut.
+ */
+.home-page,
+body:has(.home-page) .navbar {
+  zoom: 0.9;
+}
+
 /* Banner beranda: sorotan navy kabur di pojok kanan atas */
 .hero-card {
   position: relative;
@@ -7,7 +16,7 @@
   padding: 1.75rem 1.25rem;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 640px) {
   .hero-card {
     padding: 2.5rem 2.6rem;
   }
@@ -61,8 +70,79 @@
   background-color: rgb(255 255 255 / 20%);
 }
 
-/* Kolom lacak tiket: lebar tetap di desktop */
-@media (min-width: 1024px) {
+/*
+ * Aksi cepat: 1 kolom di ponsel, 3 kolom mulai 640px (termasuk iPad portrait 768px).
+ * Grid dipakai, bukan .columns Bulma, karena .columns baru horizontal di 769px sehingga iPad 768px ikut bertumpuk.
+ */
+.quick-actions {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.quick-actions > .box {
+  margin-bottom: 0;
+}
+
+@media (min-width: 640px) {
+  .quick-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Kartu lacak tiket */
+.track-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.track-note {
+  margin-top: 1rem;
+}
+
+/*
+ * iPad landscape (1024-1215px): kolom kiri hanya ~500px, terlalu sempit untuk 3 kartu aksi cepat berdampingan
+ * dengan kolom lacak tiket 440px. Susunannya sama dengan tablet portrait: banner, aksi cepat, lalu lacak tiket di bawah.
+ */
+@media (min-width: 1024px) and (max-width: 1215px) {
+  .home-page > .columns.is-desktop {
+    display: block;
+  }
+}
+
+/*
+ * Tablet (iPad portrait dan landscape, 640-1215px): kartu selebar layar dibagi dua kolom, keterangan di kiri dan
+ * isian di kanan, tombol selebar kartu di bawahnya. Di bawah 640px (ponsel) dan mulai 1216px (kolom samping 440px)
+ * tetap satu kolom.
+ */
+@media (min-width: 640px) and (max-width: 1215px) {
+  .track-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    column-gap: 2rem;
+    align-content: start;
+  }
+
+  .track-actions {
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .track-actions .button {
+    flex: 0 0 20rem;
+    width: auto;
+  }
+
+  .track-note {
+    margin-top: 0;
+  }
+}
+
+/* Kolom lacak tiket: lebar tetap di desktop lebar (kolom samping) */
+@media (min-width: 1216px) {
   .track-column {
     flex: none;
     width: 440px;
@@ -89,8 +169,26 @@
   }
 }
 
-@media (max-width: 768px) {
+/* Ponsel: satu kartu terlihat penuh, kartu berikutnya mengintip. iPad portrait (768px) tetap 2 kartu. */
+@media (max-width: 639px) {
   .scroll-row > * {
     flex-basis: 85%;
+  }
+}
+
+/*
+ * Layar sentuh (iPad): target sentuh 44px. Isi beranda dan navbar sedang diskala 0.9 (zoom), jadi minimum
+ * di CSS dibagi 0.9 agar ukuran yang terlihat tetap 44px.
+ */
+@media (pointer: coarse) {
+  .home-page .button,
+  .home-page .input,
+  body:has(.home-page) .navbar-item,
+  body:has(.home-page) .navbar-burger {
+    min-height: calc(44px / 0.9);
+  }
+
+  body:has(.home-page) .navbar-burger {
+    min-width: calc(44px / 0.9);
   }
 }
