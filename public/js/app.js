@@ -9,6 +9,18 @@ document.querySelectorAll('.navbar-burger').forEach(function (burger) {
     });
 });
 
+// Esc menutup menu burger dan mengembalikan fokus ke tombolnya
+document.addEventListener('keydown', function (event) {
+    var burger = document.querySelector('.navbar-burger.is-active');
+
+    if (event.key !== 'Escape' || ! burger) {
+        return;
+    }
+
+    burger.click();
+    burger.focus();
+});
+
 // Modal Bulma: <button data-modal-open="idModal"> membuka, [data-modal-close] atau Esc menutup
 document.addEventListener('click', function (event) {
     var opener = event.target.closest('[data-modal-open]');

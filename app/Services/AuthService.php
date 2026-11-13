@@ -44,7 +44,7 @@ class AuthService
             throw new BusinessException(lang('Auth.employeeNotFound'));
         }
 
-        $user = $this->findOrCreateUser($employeeNo, (string) ($claims['name'] ?? $employeeNo));
+        $user = $this->syncUser($employeeNo, $employee, $claims);
 
         if (! $user->is_active) {
             throw new BusinessException(lang('Auth.accountInactive'));
@@ -84,23 +84,31 @@ class AuthService
     }
 
     /**
-     * Karyawan yang valid di Keycloak dibuat otomatis dengan role user.
-     * Menjadi admin = mengganti role_id di tabel users.
+     * Profil diperbarui dari API Spring Boot setiap login. Karyawan baru dibuat otomatis
+     * dengan role user. Menjadi admin = mengganti role_id di tabel users.
      */
-    private function findOrCreateUser(string $employeeNo, string $name): User
+    private function syncUser(string $employeeNo, array $employee, array $claims): User
     {
+        $profile = [
+            'name'            => $employee['name'] ?? $employee['fullName'] ?? $claims['name'] ?? $employeeNo,
+            'email'           => $employee['officeMail'] ?? $claims['email'] ?? null,
+            'position'        => $employee['position'] ?? null,
+            'position_level'  => $employee['positionLevel'] ?? $employee['position_level'] ?? null,
+            'job_title'       => $employee['jobTitle'] ?? $employee['job_title'] ?? null,
+            'last_login_time' => date('Y-m-d H:i:s'),
+        ];
+
         $user = $this->users->findByEmployeeNo($employeeNo);
 
-        if ($user !== null) {
-            return $user;
+        if ($user === null) {
+            $this->users->insert($profile + [
+                'role_id'     => $this->roles->idBySlug(RoleModel::SLUG_USER),
+                'employee_no' => $employeeNo,
+                'is_active'   => 1,
+            ]);
+        } else {
+            $this->users->update($user->id, $profile);
         }
-
-        $this->users->insert([
-            'role_id'     => $this->roles->idBySlug(RoleModel::SLUG_USER),
-            'employee_no' => $employeeNo,
-            'name'        => $name,
-            'is_active'   => 1,
-        ]);
 
         return $this->users->findByEmployeeNo($employeeNo);
     }

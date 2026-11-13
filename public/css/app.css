@@ -1,230 +1,641 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
 
 /* Tema: skala font, warna, dan radius Bulma disesuaikan dengan desain portal */
 :root {
-    --bulma-family-primary: 'Montserrat', sans-serif;
-    --bulma-body-size: 0.875em;
-    --bulma-navbar-height: 5.4rem;
-    --bulma-radius: 0.5rem;
-    --bulma-radius-large: 0.875rem;
+  --bulma-family-primary: "Montserrat", sans-serif;
+  --bulma-body-size: 0.875em;
+  --bulma-navbar-height: 5.4rem;
+  --bulma-radius: 0.5rem;
+  --bulma-radius-large: 0.875rem;
 
-    --bulma-text: #475569;
-    --bulma-text-strong: #0f172a;
+  --bulma-text: #475569;
+  --bulma-text-strong: #0f172a;
 
-    --bulma-primary-h: 222deg;
-    --bulma-primary-s: 75%;
-    --bulma-primary-l: 22%;
-    --bulma-primary-invert-l: 100%;
-    --bulma-link-h: 224deg;
-    --bulma-link-s: 76%;
-    --bulma-link-l: 48%;
+  --bulma-primary-h: 222deg;
+  --bulma-primary-s: 75%;
+  --bulma-primary-l: 22%;
+  --bulma-primary-invert-l: 100%;
+  /* Warna secondary (kuning #e8c323). Bulma tidak punya "secondary", jadi dipakai lewat token ini. */
+  --app-secondary: hsl(49deg 81% 52%);
+  --app-secondary-soft: hsl(49deg 81% 52% / 0.18);
+  --app-secondary-ink: hsl(222deg 75% 22%);
+  /* Danger bawaan Bulma (l 70%) hanya ±2.6:1 di latar putih; versi gelap ini untuk teks */
+  --app-danger-ink: hsl(348deg 75% 40%);
+
+  --bulma-link-h: 224deg;
+  --bulma-link-s: 76%;
+  --bulma-link-l: 48%;
 }
 
 body {
-    background-color: #f8fafc;
+  background-color: #f8fafc;
 }
 
 /* Teks kecil: 12px pada root 14px (bawaan Bulma 10.5px terlalu kecil) */
 .is-size-7 {
-    font-size: 0.85rem !important;
+  font-size: 0.85rem !important;
 }
 
 .button {
-    min-height: 2.75rem;
-    font-weight: 700;
+  min-height: 2.75rem;
+  font-weight: 700;
 }
 
 .navbar-item {
-    font-weight: 600;
+  font-weight: 600;
 }
 
 .box {
-    border: 1px solid #e8ecf2;
-    box-shadow: 0 1px 3px rgb(15 23 42 / 6%);
+  border: 1px solid #e8ecf2;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 6%);
 }
 
 .input {
-    background-color: #f8fafc;
-    border-color: #e2e8f0;
-    box-shadow: none;
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  box-shadow: none;
 }
 
 html {
-    scroll-behavior: smooth;
+  scroll-behavior: smooth;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    html {
-        scroll-behavior: auto;
-    }
+  html {
+    scroll-behavior: auto;
+  }
 
-    .scroll-row {
-        scroll-behavior: auto;
-    }
+  .scroll-row {
+    scroll-behavior: auto;
+  }
 }
 
 /* Layar sentuh: target sentuh minimal 44px */
 @media (pointer: coarse) {
-    .button,
-    .navbar-item {
-        min-height: 44px;
-    }
+  .button,
+  .navbar-item {
+    min-height: 44px;
+  }
 }
 
 /* Navbar */
 .app-navbar {
-    position: sticky;
-    top: 0;
-    border-bottom: 1px solid #e5e9f0;
+  position: sticky;
+  top: 0;
+  border-bottom: 1px solid #e5e9f0;
 }
 
 .avatar {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 50%;
-    border: 1px solid #cbd5e1;
-    background-color: #e2e8f0;
-    color: #334155;
-    font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid #cbd5e1;
+  background-color: #e2e8f0;
+  color: #334155;
+  font-weight: 700;
 }
 
-/* Menu navbar di layar kecil: ikon sejajar teks, penanda aktif di sisi kiri */
+/* Logo brand tanpa latar saat dihover */
+.navbar-brand a.navbar-item:hover,
+.navbar-brand a.navbar-item:focus-visible {
+  background-color: transparent;
+}
+
+/* Lonceng di bar atas (layar sentuh); burger tetap paling kanan */
+.brand-action {
+  margin-left: auto;
+}
+
+.brand-action + .navbar-burger {
+  margin-inline-start: 0;
+}
+
+/* Trigger profil: pil abu sederhana saat hover */
+.profile-menu > .navbar-link {
+  align-self: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.75rem;
+  background-color: transparent;
+}
+
+.profile-menu:hover > .navbar-link,
+.profile-menu > .navbar-link:focus-visible {
+  background-color: var(--bulma-scheme-main-ter);
+}
+
+/* Nama panjang dipotong agar menu tidak terdesak; nama lengkap ada di title dan dropdown */
+.profile-name {
+  max-width: 11rem;
+}
+
+.profile-name strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9375rem;
+}
+
+/* Dropdown profil: kartu putih, header navy, item hover primary dengan chip ikon kuning */
+/* font-size: Bulma memakai .875rem (12.25px di root 14px), terlalu kecil untuk dibaca */
+.profile-dropdown {
+  width: 23rem;
+  font-size: 1rem;
+  padding: 0.5rem;
+  border: 1px solid #e5e9f0;
+  border-radius: 1rem;
+  background-color: #fff;
+  box-shadow: 0 16px 40px -12px rgb(15 23 42 / 0.25);
+}
+
+@media (min-width: 1024px) {
+  /* Muncul tepat di bawah pil profil, bukan di dasar navbar */
+  .profile-dropdown {
+    top: calc(100% - 0.6rem);
+  }
+
+  /* Bisa dibuka lewat keyboard (Tab) atau ketukan di tablet, tidak hanya hover */
+  .profile-menu:focus-within > .profile-dropdown {
+    display: block;
+  }
+
+  .profile-menu:hover > .profile-dropdown,
+  .profile-menu:focus-within > .profile-dropdown {
+    animation: dropdown-in 0.18s ease-out;
+  }
+}
+
+@keyframes dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+/* Header profil: polos, dipisah garis tipis dari daftar menu */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  padding: 0.75rem 0.75rem 1rem;
+  border-bottom: 1px solid #eef0f4;
+}
+
+.profile-header .avatar {
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.profile-header-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Nama lengkap boleh turun baris: di sini satu-satunya tempat nama tampil utuh */
+.profile-header-text strong {
+  overflow-wrap: anywhere;
+  color: var(--bulma-text-strong);
+}
+
+.profile-role {
+  flex-shrink: 0;
+  background-color: var(--app-secondary-soft);
+  color: hsl(45deg 90% 28%);
+  font-weight: 700;
+}
+
+.profile-dropdown .navbar-item {
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  white-space: normal;
+  border-radius: 0.65rem;
+  font-weight: 600;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+/* Spesifisitas dinaikkan agar menang dari .navbar-dropdown .navbar-item:not(...) milik Bulma.
+   Ditaruh sebelum blok hover agar teks tetap putih saat dihover. */
+.profile-dropdown .navbar-item.navbar-item-button {
+  color: var(--app-danger-ink);
+}
+
+.profile-dropdown a.navbar-item:hover,
+.profile-dropdown a.navbar-item:focus-visible,
+.profile-dropdown .navbar-item-button:hover,
+.profile-dropdown .navbar-item-button:focus-visible {
+  background-color: var(--bulma-primary);
+  color: #fff;
+}
+
+.profile-dropdown .navbar-divider {
+  margin: 0.4rem 0.25rem;
+}
+
+.menu-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.55rem;
+  background-color: #f1f5f9;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.profile-dropdown a.navbar-item:hover .menu-icon {
+  background-color: var(--app-secondary);
+  color: var(--app-secondary-ink);
+}
+
+.profile-dropdown .navbar-item-button .menu-icon {
+  background-color: hsl(348deg 86% 61% / 0.12);
+}
+
+.profile-dropdown .navbar-item-button:hover .menu-icon {
+  background-color: var(--bulma-danger);
+  color: #fff;
+}
+
+/* Desktop: jarak menu ke brand/profil, aksi (lonceng, buat tiket) dirapatkan */
+@media (min-width: 1024px) {
+  .app-navbar .navbar-start {
+    padding-inline: 1.5rem;
+  }
+
+  .navbar-end > .navbar-item:not(.has-dropdown) {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+}
+
+/* Desktop sempit (container 960px): menu dan jarak dipadatkan agar satu baris */
+@media (min-width: 1024px) and (max-width: 1215px) {
+  .app-navbar .navbar-start {
+    padding-inline: 0.5rem;
+  }
+
+  .app-navbar .navbar-item.is-tab {
+    padding-inline: 0.6rem;
+  }
+}
+
+.vertical-divider {
+  align-self: center;
+  width: 1px;
+  height: 1.75rem;
+  margin: 0 0.5rem;
+  background-color: #e5e9f0;
+}
+
+/* Tombol ikon bulat */
+.icon-button {
+  width: 2.75rem;
+  padding: 0;
+}
+
+/* Menu navbar desktop: garis bawah bergeser masuk, hover dan aktif berwarna primary */
+@media (min-width: 1024px) {
+  .navbar-item.is-tab,
+  .navbar-item.is-tab:hover,
+  .navbar-item.is-tab.is-active {
+    position: relative;
+    align-self: center;
+    min-height: 0;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    border-bottom-width: 0;
+    transition: color 0.2s ease;
+  }
+
+  .navbar-item.is-tab img {
+    transition: transform 0.2s ease;
+  }
+
+  .navbar-item.is-tab::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    border-radius: 2px;
+    background-color: var(--bulma-primary);
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
+  }
+
+  .navbar-item.is-tab:hover,
+  .navbar-item.is-tab:focus-visible {
+    color: var(--bulma-primary);
+  }
+
+  .navbar-item.is-tab:hover img {
+    transform: translateY(-1px);
+  }
+
+  .navbar-item.is-tab:hover::after {
+    transform: scaleX(0.4);
+  }
+
+  .navbar-item.is-tab.is-active {
+    color: var(--bulma-primary);
+  }
+
+  .navbar-item.is-tab.is-active::after {
+    transform: scaleX(1);
+    animation: tab-underline-in 0.35s ease-out;
+  }
+}
+
+/* Jalan setiap halaman dimuat, jadi pindah halaman terlihat bergerak */
+@keyframes tab-underline-in {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar-item.is-tab,
+  .navbar-item.is-tab img,
+  .navbar-item.is-tab::after,
+  .profile-dropdown,
+  .profile-dropdown .navbar-item {
+    transition: none;
+    animation: none;
+  }
+}
+
+/*
+ * Layar sentuh (<1024px): menu burger jadi panel kartu.
+ * Urutan: kartu profil, navigasi, garis, tombol Buat Tiket, Menu Admin, Keluar.
+ * Wadah dropdown dibuat display: contents agar isinya bisa diurutkan ulang tanpa
+ * mengubah markup desktop.
+ */
 @media (max-width: 1023px) {
-    .navbar-menu .navbar-item {
-        display: flex;
-        align-items: center;
-    }
+  :root {
+    --bulma-navbar-height: 4rem;
+  }
 
-    .navbar-item.is-tab {
-        border-bottom: 0;
-        border-left: 3px solid transparent;
-    }
+  /* Bar atas: lonceng berbingkai, burger berupa kotak membulat (navy saat terbuka) */
+  .navbar-brand .icon-button {
+    border: 1px solid #e5e9f0;
+    background-color: #fff;
+  }
 
-    .navbar-item.is-tab.is-active {
-        border-bottom-width: 0;
-        border-left-color: hsl(224deg 76% 48%);
-    }
+  .app-navbar .navbar-burger {
+    align-self: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-right: 0.5rem;
+    border-radius: 0.75rem;
+    background-color: #f1f5f9;
+    color: var(--bulma-primary);
+  }
+
+  .app-navbar .navbar-burger.is-active {
+    background-color: var(--bulma-primary);
+    color: #fff;
+  }
+
+  .navbar-menu.is-active {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    max-height: calc(100dvh - var(--bulma-navbar-height));
+    overflow-y: auto;
+    padding: 0.75rem 1rem 1.25rem;
+  }
+
+  .navbar-menu .navbar-end,
+  .navbar-menu .profile-menu,
+  .navbar-menu .profile-dropdown {
+    display: contents;
+  }
+
+  .navbar-menu .profile-dropdown .navbar-divider {
+    display: none;
+  }
+
+  /* Kartu profil di paling atas */
+  .navbar-menu .profile-header {
+    order: -1;
+    margin: 0;
+    padding: 1rem;
+    border: 0;
+    border-radius: 0.85rem;
+    background-color: #f8fafc;
+  }
+
+  /* Navigasi: kartu abu muda, ikon dalam chip putih, yang aktif biru muda */
+  .navbar-start {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding-bottom: 1rem;
+    margin-bottom: 0.4rem;
+    border-bottom: 1px solid #e5e9f0;
+  }
+
+  .navbar-menu .navbar-item.is-tab,
+  .navbar-menu .profile-dropdown .navbar-item {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.85rem;
+    background-color: #f8fafc;
+    color: var(--bulma-text-strong);
+    /* 16px di mobile (root 14px) agar mudah dibaca */
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  .navbar-menu .navbar-item.is-tab img,
+  .navbar-menu .profile-dropdown .menu-icon {
+    box-sizing: content-box;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    padding: 0.5rem;
+    border-radius: 0.6rem;
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.08);
+  }
+
+  .navbar-menu .navbar-item.is-tab.is-active {
+    border-color: hsl(214deg 90% 85%);
+    background-color: hsl(214deg 100% 96%);
+    color: var(--bulma-link);
+  }
+
+  /* Tombol aksi utama selebar panel */
+  .navbar-menu .profile-dropdown .profile-cta {
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.9rem 1rem;
+    background-color: var(--bulma-primary);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .navbar-menu .profile-dropdown .profile-cta .menu-icon {
+    padding: 0;
+    background-color: transparent;
+    box-shadow: none;
+    color: inherit;
+  }
+
+  .navbar-menu .profile-dropdown .navbar-item-button {
+    color: var(--app-danger-ink);
+  }
+
+  .navbar-end .buttons .button {
+    flex: 1;
+  }
 }
 
 .navbar-item-button {
-    width: 100%;
-    border: 0;
-    background: none;
-    cursor: pointer;
-    text-align: left;
+  width: 100%;
+  border: 0;
+  font: inherit;
+  background: none;
+  cursor: pointer;
+  text-align: left;
 }
 
 .brand-logo,
 .icon-box {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .brand-logo {
-    width: 2.8rem;
-    height: 2.8rem;
-    border-radius: 0.8rem;
-    background-color: hsl(222deg 75% 22%);
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 0.8rem;
+  background-color: hsl(222deg 75% 22%);
 }
 
 .icon-box {
-    width: 3.5rem;
-    height: 3.5rem;
-    border-radius: 1rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1rem;
 }
 
 /* Banner beranda: sorotan navy kabur di pojok kanan atas */
 .hero-card {
-    position: relative;
-    overflow: hidden;
-    padding: 1.75rem 1.25rem;
+  position: relative;
+  overflow: hidden;
+  padding: 1.75rem 1.25rem;
 }
 
 @media (min-width: 769px) {
-    .hero-card {
-        padding: 2.5rem 2.6rem;
-    }
+  .hero-card {
+    padding: 2.5rem 2.6rem;
+  }
 }
 
 .hero-card::before {
-    content: '';
-    position: absolute;
-    top: -60%;
-    right: -140px;
-    width: 420px;
-    height: 340px;
-    border-radius: 50%;
-    background: radial-gradient(circle, #0f2b5b 0%, #1e3a8a 45%, rgb(30 58 138 / 0%) 75%);
-    opacity: 0.7;
-    filter: blur(30px);
-    pointer-events: none;
+  content: "";
+  position: absolute;
+  top: -60%;
+  right: -140px;
+  width: 420px;
+  height: 340px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #0f2b5b 0%,
+    #1e3a8a 45%,
+    rgb(30 58 138 / 0%) 75%
+  );
+  opacity: 0.7;
+  filter: blur(30px);
+  pointer-events: none;
 }
 
 .hero-card > * {
-    position: relative;
+  position: relative;
 }
 
 /* Label tag panjang boleh turun baris */
 .tag-wrap {
-    height: auto;
-    padding: 0.4rem 0.75rem;
-    white-space: normal;
+  height: auto;
+  padding: 0.4rem 0.75rem;
+  white-space: normal;
 }
 
 .btn-cta {
-    gap: 0.7rem;
-    box-shadow: 0 8px 16px rgb(37 99 235 / 30%);
+  gap: 0.7rem;
+  box-shadow: 0 8px 16px rgb(37 99 235 / 30%);
 }
 
 .cta-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.7rem;
-    height: 1.7rem;
-    border-radius: 0.5rem;
-    background-color: rgb(255 255 255 / 20%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 0.5rem;
+  background-color: rgb(255 255 255 / 20%);
+}
+
+/* Isi halaman sejajar dengan navbar di desktop; di mobile diberi gutter */
+.page-container {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .page-container {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 
 /* Kolom lacak tiket: lebar tetap di desktop */
 @media (min-width: 1024px) {
-    .track-column {
-        flex: none;
-        width: 380px;
-    }
+  .track-column {
+    flex: none;
+    width: 440px;
+  }
 }
 
 /* Baris kartu yang bisa digeser */
 .scroll-row {
-    display: flex;
-    gap: 1.2rem;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
+  display: flex;
+  gap: 1.2rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
 }
 
 .scroll-row > * {
-    flex: 0 0 calc((100% - 3.6rem) / 4);
-    scroll-snap-align: start;
+  flex: 0 0 calc((100% - 3.6rem) / 4);
+  scroll-snap-align: start;
 }
 
 @media (max-width: 1023px) {
-    .scroll-row > * {
-        flex-basis: calc((100% - 1.2rem) / 2);
-    }
+  .scroll-row > * {
+    flex-basis: calc((100% - 1.2rem) / 2);
+  }
 }
 
 @media (max-width: 768px) {
-    .scroll-row > * {
-        flex-basis: 85%;
-    }
+  .scroll-row > * {
+    flex-basis: 85%;
+  }
 }
 
 .h-100 {
-    height: 100%;
+  height: 100%;
 }
