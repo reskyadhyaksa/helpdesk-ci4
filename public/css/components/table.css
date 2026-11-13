@@ -101,19 +101,97 @@
   color: #64748b;
 }
 
-/* Baris pencarian di atas tabel */
+/* Baris filter di atas tabel (components/filter_bar): filter + cari di kiri, tombol aksi di kanan */
 .admin-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
-  max-width: 32rem;
+  justify-content: space-between;
+  gap: 0.75rem;
   margin-bottom: 1rem;
 }
 
-.admin-toolbar .field {
+.admin-toolbar-filters {
+  display: flex;
   flex: 1;
-  min-width: 14rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+  min-width: 0;
+}
+
+/* Kiri: dropdown filter + Reset */
+.admin-toolbar-selects {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Kanan: kolom cari */
+.admin-toolbar-search {
+  flex: 0 1 21.6rem;
+  min-width: 12.6rem;
+  margin-left: auto;
+}
+
+.admin-toolbar-select {
+  min-width: 8.1rem;
+}
+
+/* Kontrol di filter bar: kontainer 10% lebih kecil (2.75rem → 2.475rem), teks 20% lebih kecil (1rem → 0.8rem) */
+.admin-toolbar .input,
+.admin-toolbar .select-trigger,
+.admin-toolbar .select select,
+.admin-toolbar .select-option,
+.admin-toolbar .select-search-input,
+.admin-toolbar .select-empty,
+.admin-toolbar .select-footer,
+.admin-toolbar .button {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.admin-toolbar .input,
+.admin-toolbar .select-trigger,
+.admin-toolbar .button {
+  min-height: 2.475rem;
+}
+
+/* Latar putih + garis lebih tegas agar kontrol terpisah dari latar halaman; ikon cari ikut gelap */
+.admin-toolbar .input,
+.admin-toolbar .select-trigger {
+  border-color: #cbd5e1;
+  background-color: #fff;
+}
+
+.admin-toolbar .control.has-icons-left .icon {
+  color: #64748b;
+}
+
+.admin-toolbar-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+@media (max-width: 768px) {
+  .admin-toolbar-select,
+  .admin-toolbar-selects,
+  .admin-toolbar-search {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+
+  .admin-toolbar-actions {
+    width: 100%;
+  }
+
+  .admin-toolbar-actions .button {
+    flex: 1;
+  }
 }
 
 /* Footer tabel: keterangan jumlah data di kiri, pager di kanan; di layar sempit bertumpuk dan rata tengah */
