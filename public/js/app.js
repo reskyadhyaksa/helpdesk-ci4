@@ -41,6 +41,25 @@ document.addEventListener('submit', function (event) {
     }
 });
 
+// Form filter (components/filter_bar): memilih dropdown langsung mengirim form.
+// Dropdown multi-pilih baru mengirim saat menunya ditutup (event "commit" dari js/components/select.js),
+// supaya mencentang beberapa pilihan tidak memuat ulang halaman di tiap centang.
+function submitAutosubmitForm(event) {
+    var form = event.target.closest('form[data-autosubmit]');
+
+    if (form) {
+        form.requestSubmit();
+    }
+}
+
+document.addEventListener('change', function (event) {
+    if (event.target.tagName === 'SELECT' && ! event.target.multiple) {
+        submitAutosubmitForm(event);
+    }
+});
+
+document.addEventListener('commit', submitAutosubmitForm);
+
 // Kembali lewat tombol Back (halaman dari cache browser): tombol tidak boleh tertahan loading
 window.addEventListener('pageshow', function (event) {
     if (event.persisted) {
