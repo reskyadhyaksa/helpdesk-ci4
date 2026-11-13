@@ -14,3 +14,7 @@
     ]) ?>
 </section>
 <?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script src="<?= base_url('js/pages/admin/sla-policy-form.js') ?>"></script>
+<?= $this->endSection() ?>

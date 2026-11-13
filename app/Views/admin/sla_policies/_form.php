@@ -13,10 +13,10 @@ use App\Entities\SlaPolicy;
 $errors = session('errors') ?? [];
 $isActive = old('is_active', $policy->is_active ? '1' : '0') === '1';
 
-// Target dalam menit. Entity mengubah nilai kosong jadi 0, jadi 0 ditampilkan kosong (nilai valid selalu > 0).
+// Target disimpan dalam menit. Entity mengubah nilai kosong jadi 0, jadi 0 ditampilkan kosong (nilai valid selalu > 0).
 $targets = [
-    'response_minutes' => ['label' => 'Respons pertama', 'placeholder' => '60', 'help' => 'Batas waktu tiket pertama kali ditanggapi.'],
-    'resolution_minutes' => ['label' => 'Penyelesaian', 'placeholder' => '480', 'help' => 'Batas waktu tiket selesai ditangani.'],
+    'response_minutes' => ['label' => 'Respons pertama', 'help' => 'Batas waktu tiket pertama kali ditanggapi.'],
+    'resolution_minutes' => ['label' => 'Penyelesaian', 'help' => 'Batas waktu tiket selesai ditangani.'],
 ];
 
 // Hari yang dilewati saat menghitung target (lihat Entity SlaPolicy)
@@ -101,30 +101,51 @@ $calendarFlags = [
                     <p class="form-section-label">Target Waktu</p>
 
                     <?php foreach ($targets as $field => $target): ?>
-                        <div class="field">
-                            <label class="label" for="<?= $field ?>"><?= esc($target['label']) ?> <span
+                        <?php
+                        // Tampilan jam + menit dipecah dari total menit; hidden $field tetap membawa total ke server
+                        $total   = (int) old($field, $policy->{$field});
+                        $hasError = isset($errors[$field]);
+                        $parts   = [
+                            'hours'   => ['unit' => 'jam', 'max' => 720, 'value' => intdiv($total, 60) ?: ''],
+                            'minutes' => ['unit' => 'menit', 'max' => 43200, 'value' => $total % 60 ?: ''],
+                        ];
+                        ?>
+                        <div class="field" data-duration>
+                            <label class="label" for="<?= $field ?>Hours"><?= esc($target['label']) ?> <span
                                     class="has-text-danger" aria-hidden="true">*</span></label>
-                            <div class="field has-addons mb-0">
-                                <div class="control is-expanded">
-                                    <input class="input <?= isset($errors[$field]) ? 'is-danger' : '' ?>" id="<?= $field ?>"
-                                        name="<?= $field ?>" type="number" min="1" max="43200" step="1" required
-                                        value="<?= esc(old($field, $policy->{$field} ?: ''), 'attr') ?>"
-                                        placeholder="<?= esc($target['placeholder'], 'attr') ?>"
-                                        aria-describedby="<?= $field ?>Help<?= isset($errors[$field]) ? ' ' . $field . 'Error' : '' ?>"
-                                        <?= isset($errors[$field]) ? 'aria-invalid="true"' : '' ?>>
-                                </div>
-                                <div class="control">
-                                    <span class="button is-static">menit</span>
-                                </div>
+                            <input type="hidden" name="<?= $field ?>" value="<?= $total ?: '' ?>" data-duration-total>
+                            <div class="columns is-mobile is-variable is-2 mb-0">
+                                <?php foreach ($parts as $part => $config): ?>
+                                    <div class="column is-half">
+                                        <div class="field has-addons mb-0">
+                                            <div class="control is-expanded">
+                                                <input class="input <?= $hasError ? 'is-danger' : '' ?>"
+                                                    id="<?= $field . ucfirst($part) ?>" type="number" min="0"
+                                                    max="<?= $config['max'] ?>" step="1" inputmode="numeric"
+                                                    data-duration-<?= $part ?> value="<?= $config['value'] ?>"
+                                                    placeholder="0"
+                                                    aria-label="<?= esc($target['label'] . ', ' . $config['unit'], 'attr') ?>"
+                                                    aria-describedby="<?= $field ?>Help<?= $hasError ? ' ' . $field . 'Error' : '' ?>"
+                                                    <?= $hasError ? 'aria-invalid="true"' : '' ?>>
+                                            </div>
+                                            <div class="control">
+                                                <span class="button is-static"><?= $config['unit'] ?></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach ?>
                             </div>
-                            <p class="help" id="<?= $field ?>Help"><?= esc($target['help']) ?></p>
-                            <?php if (isset($errors[$field])): ?>
+                            <p class="help" id="<?= $field ?>Help">
+                                <?= esc($target['help']) ?>
+                                Total: <strong data-duration-preview aria-live="polite"><?= $total ?> menit</strong>
+                            </p>
+                            <?php if ($hasError): ?>
                                 <p class="help is-danger" id="<?= $field ?>Error"><?= esc($errors[$field]) ?></p>
                             <?php endif ?>
                         </div>
                     <?php endforeach ?>
 
-                    <p class="help mt-0">Contoh: 60 menit = 1 jam, 480 menit = 8 jam.</p>
+                    <p class="help mt-0">Isi jam, menit, atau keduanya. Contoh: 1 jam 30 menit = 90 menit.</p>
 
                     <div class="form-panel-divider">
                         <p class="form-section-label">Status</p>
