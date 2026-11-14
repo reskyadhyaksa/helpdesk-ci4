@@ -194,11 +194,6 @@ class RequestCategoryService
     }
 
     /**
-     * @param array|null   $category berisi kategori yang sedang diubah, null saat membuat
-     * @param list<string> $savedJobTitles
-     */
-    private function ensureValid(array $data, ?array $category, array $savedJobTitles, bool $validateUsers): void
-    /**
      * Aturan job title dan role mengikuti form; pengecualian user hanya disentuh bila pelaku berhak mengelolanya.
      */
     private function saveAccess(string $categoryId, array $data, string $actorId, bool $canManageUserAccess): void
@@ -213,6 +208,11 @@ class RequestCategoryService
         }
     }
 
+    /**
+     * @param array|null   $category berisi kategori yang sedang diubah, null saat membuat
+     * @param list<string> $savedJobTitles
+     */
+    private function ensureValid(array $data, ?array $category, array $savedJobTitles, bool $validateUsers): void
     {
         $this->ensureValidParent($data['parent_id'], $category);
 
@@ -220,13 +220,6 @@ class RequestCategoryService
             throw new BusinessException(lang('Admin.requestCategory.nameTaken'));
         }
 
-        if ($data['parent_id'] !== null && $data['job_titles'] !== []) {
-            throw new BusinessException(lang('Admin.requestCategory.jobTitlesOnlyTopLevel'));
-        }
-
-        if ($data['parent_id'] !== null && $data['role_ids'] !== []) {
-            throw new BusinessException(lang('Admin.requestCategory.rolesOnlyTopLevel'));
-        }
         $this->ensureValidRules($data, $savedJobTitles);
 
         if ($validateUsers && $data['user_access'] !== [] && ! $this->allExist($this->users, array_keys($data['user_access']))) {
@@ -241,15 +234,17 @@ class RequestCategoryService
      */
     private function ensureValidRules(array $data, array $savedJobTitles): void
     {
+        if ($data['parent_id'] !== null && $data['job_titles'] !== []) {
+            throw new BusinessException(lang('Admin.requestCategory.jobTitlesOnlyTopLevel'));
+        }
+
+        if ($data['parent_id'] !== null && $data['role_ids'] !== []) {
+            throw new BusinessException(lang('Admin.requestCategory.rolesOnlyTopLevel'));
+        }
 
         if (array_diff($data['job_titles'], $this->jobTitleOptions($savedJobTitles)) !== []) {
             throw new BusinessException(lang('Admin.requestCategory.unknownJobTitle'));
         }
-    }
-
-    private function ensureValidParent(?string $parentId, ?array $category): void
-    {
-        if ($parentId === null) {
 
         if ($data['role_ids'] !== [] && ! $this->allExist($this->roles, $data['role_ids'])) {
             throw new BusinessException(lang('Admin.requestCategory.unknownRole'));
@@ -262,6 +257,11 @@ class RequestCategoryService
     private function allExist(RoleModel|UserModel $model, array $ids): bool
     {
         return count($model->find($ids)) === count($ids);
+    }
+
+    private function ensureValidParent(?string $parentId, ?array $category): void
+    {
+        if ($parentId === null) {
             return;
         }
 

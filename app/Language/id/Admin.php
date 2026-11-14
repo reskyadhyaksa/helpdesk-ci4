@@ -186,6 +186,7 @@ return [
         'confirmDelete' => 'Hapus hari libur ini? Tindakan ini tidak bisa dibatalkan.',
         'offDaysSaved'  => 'Hari off mingguan berhasil disimpan. Berlaku untuk perhitungan SLA berikutnya.',
         'allDaysOff'    => 'Minimal satu hari harus menjadi hari kerja.',
+        'workHoursInvalid' => 'Jam kerja hari {0} harus diisi dan jam selesai harus lebih akhir dari jam mulai.',
         'syncAction'   => 'Sync Holiday',
         'synced'       => '{0} hari libur berhasil disinkronkan.',
         'syncFailed'   => 'Gagal mengambil data hari libur dari aplikasi eksternal. Coba lagi beberapa saat.',
@@ -201,4 +202,3 @@ return [
     'collapseSidebar'    => 'Perkecil sidebar',
     'expandSidebar'      => 'Perluas sidebar',
 ];
-        'workHoursInvalid' => 'Jam kerja hari {0} harus diisi dan jam selesai harus lebih akhir dari jam mulai.',

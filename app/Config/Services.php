@@ -23,6 +23,8 @@ use App\Services\RequestCategoryService;
 use App\Services\RoleService;
 use App\Services\SlaCalculator;
 use App\Services\SlaPolicyService;
+use App\Services\TicketService;
+use App\Services\WhatsAppService;
 use App\Services\UserService;
 use CodeIgniter\Config\BaseService;
 
@@ -93,9 +95,7 @@ class Services extends BaseService
         return new RequestCategoryService(
             model(RequestCategoryModel::class),
             model(RequestCategoryAccessJobTitleModel::class),
-            model(UserModel::class),
-            db_connect(),
-        );
+            model(RequestCategoryAccessRoleModel::class),
             model(UserModel::class),
             model(RoleModel::class),
             static::categoryAccess(),
@@ -132,12 +132,7 @@ class Services extends BaseService
         return new WhatsAppService(static::curlrequest(['timeout' => 10, 'http_errors' => false]), config(Integration::class));
     }
 
-    }
-
-            model(RequestCategoryAccessRoleModel::class),
     public static function categoryAccess(bool $getShared = true): CategoryAccessService
-            model(RoleModel::class),
-            static::categoryAccess(),
     {
         if ($getShared) {
             return static::getSharedInstance('categoryAccess');
@@ -146,8 +141,8 @@ class Services extends BaseService
         return new CategoryAccessService(
             model(RequestCategoryModel::class),
             model(RequestCategoryAccessJobTitleModel::class),
+            model(RequestCategoryAccessRoleModel::class),
             model(RequestCategoryAccessUserModel::class),
         );
     }
 }
-            model(RequestCategoryAccessRoleModel::class),

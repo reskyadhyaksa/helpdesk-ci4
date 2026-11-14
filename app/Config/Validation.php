@@ -114,6 +114,8 @@ class Validation extends BaseConfig
     // Tidak ada hari dicentang = field tidak terkirim, jadi boleh kosong (service menolak jika semua hari off)
     public array $offDays = [
         'off_days.*' => ['label' => 'Hari off', 'rules' => 'permit_empty|in_list[1,2,3,4,5,6,7]'],
+        'work_start.*' => ['label' => 'Jam mulai', 'rules' => 'permit_empty|regex_match[/^([01]\d|2[0-3]):[0-5]\d$/]'],
+        'work_end.*' => ['label' => 'Jam selesai', 'rules' => 'permit_empty|regex_match[/^([01]\d|2[0-3]):[0-5]\d$/]'],
     ];
 
     public array $userRole = [
@@ -134,5 +136,3 @@ class Validation extends BaseConfig
         'permissions.*' => ['label' => 'Permission', 'rules' => 'permit_empty|max_length[100]'],
     ];
 }
-        'work_start.*' => ['label' => 'Jam mulai', 'rules' => 'permit_empty|regex_match[/^([01]\d|2[0-3]):[0-5]\d$/]'],
-        'work_end.*' => ['label' => 'Jam selesai', 'rules' => 'permit_empty|regex_match[/^([01]\d|2[0-3]):[0-5]\d$/]'],

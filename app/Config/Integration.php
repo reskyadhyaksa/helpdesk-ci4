@@ -19,4 +19,8 @@ class Integration extends BaseConfig
     public string $helpdeskApiBaseUrl = '';
     public string $helpdeskApiUser    = '';
     public string $helpdeskApiPass    = '';
+
+    // API WhatsApp HC Eazy (mis. https://hceazy-wa.mtf.co.id/send-message)
+    public string $whatsappApiUrl   = '';
+    public string $whatsappApiToken = '';
 }

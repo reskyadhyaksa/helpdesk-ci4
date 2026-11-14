@@ -105,14 +105,6 @@ class RequestCategoryModel extends Model
         return $this->countAllResults() > 0;
     }
 
-    private function orderedUnderParent(): static
-    {
-        return $this->join('request_categories parent', 'parent.id = request_categories.parent_id', 'left')
-            ->orderBy('COALESCE(parent.name, request_categories.name)', 'ASC', false)
-            ->orderBy('request_categories.parent_id IS NOT NULL', 'ASC', false)
-            ->orderBy('request_categories.name', 'ASC');
-    }
-}
     /**
      * Filter parent: kategori itu beserta subnya. Filter akses: aturan job title/role disimpan di kategori
      * utama dan diikuti sub, jadi yang dicocokkan adalah kategori utama dari baris tersebut.
@@ -139,3 +131,11 @@ class RequestCategoryModel extends Model
         }
     }
 
+    private function orderedUnderParent(): static
+    {
+        return $this->join('request_categories parent', 'parent.id = request_categories.parent_id', 'left')
+            ->orderBy('COALESCE(parent.name, request_categories.name)', 'ASC', false)
+            ->orderBy('request_categories.parent_id IS NOT NULL', 'ASC', false)
+            ->orderBy('request_categories.name', 'ASC');
+    }
+}

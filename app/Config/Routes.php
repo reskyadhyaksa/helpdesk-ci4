@@ -12,6 +12,11 @@ $routes->addPlaceholder('uuid', '[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9
 // Publik
 $routes->get('/', 'HomeController::index', ['as' => 'home']);
 
+// Tiket tanpa login (publik)
+$routes->get('tiket/baru', 'PublicTicketController::new', ['as' => 'public.tickets.new']);
+// Dibatasi 5 pengajuan per 10 menit per IP: tiap pengajuan memanggil API kepegawaian
+$routes->post('tiket', 'PublicTicketController::create', ['as' => 'public.tickets.create', 'filter' => 'throttle:5,600']);
+
 // Tamu saja
 $routes->group('', ['filter' => 'guest'], static function (RouteCollection $routes) {
     $routes->get('login', 'AuthController::showLogin', ['as' => 'login']);
@@ -23,29 +28,29 @@ $routes->post('logout', 'AuthController::logout', ['as' => 'logout', 'filter' =>
 // Area user: /u
 $routes->group('u', ['namespace' => 'App\Controllers\User', 'filter' => 'auth:user.dashboard.view'], static function (RouteCollection $routes) {
     $routes->get('/', 'DashboardController::index', ['as' => 'user.dashboard']);
-});
-
-// Area admin: /admin. Gerbang area = admin.access, tiap halaman menambah permission-nya sendiri.
-$routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'auth:admin.access'], static function (RouteCollection $routes) {
-    $routes->get('/', 'DashboardController::index', ['as' => 'admin.dashboard', 'filter' => 'auth:admin.dashboard.view']);
 
     // Tiket: daftar tiket yang terlihat oleh user, dan form buat tiket
     $routes->get('tickets', 'TicketController::index', ['as' => 'user.tickets.index', 'filter' => 'auth:user.tickets.view']);
     $routes->get('tickets/new', 'TicketController::new', ['as' => 'user.tickets.new', 'filter' => 'auth:user.tickets.create']);
     $routes->get('tickets/(:uuid)', 'TicketController::show/$1', ['as' => 'user.tickets.show', 'filter' => 'auth:user.tickets.view']);
     $routes->post('tickets', 'TicketController::create', ['as' => 'user.tickets.create', 'filter' => 'auth:user.tickets.create']);
+});
+
+// Area admin: /admin. Gerbang area = admin.access, tiap halaman menambah permission-nya sendiri.
+$routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'auth:admin.access'], static function (RouteCollection $routes) {
+    $routes->get('/', 'DashboardController::index', ['as' => 'admin.dashboard', 'filter' => 'auth:admin.dashboard.view']);
 
     // Halaman kerangka: cukup gerbang admin.access. Tambah permission per halaman saat fiturnya dibuat.
     $routes->get('tickets', 'TicketController::index', ['as' => 'admin.tickets.index']);
     $routes->get('tickets/mine', 'TicketController::mine', ['as' => 'admin.tickets.mine']);
+    $routes->get('tickets/(:uuid)', 'TicketController::show/$1', ['as' => 'admin.tickets.show']);
+    $routes->post('tickets/(:uuid)/status', 'TicketController::updateStatus/$1', ['as' => 'admin.tickets.status', 'filter' => 'auth:admin.tickets.update']);
+    $routes->post('tickets/(:uuid)/assign', 'TicketController::assign/$1', ['as' => 'admin.tickets.assign', 'filter' => 'auth:admin.tickets.assign']);
     $routes->get('faqs', 'FaqController::index', ['as' => 'admin.faqs.index']);
     $routes->get('forms', 'FormController::index', ['as' => 'admin.forms.index']);
     $routes->get('reports', 'ReportController::index', ['as' => 'admin.reports.index']);
 
     // CRUD: tiap aksi dijaga permission-nya sendiri (view, create, update, delete)
-    $routes->get('tickets/(:uuid)', 'TicketController::show/$1', ['as' => 'admin.tickets.show']);
-    $routes->post('tickets/(:uuid)/status', 'TicketController::updateStatus/$1', ['as' => 'admin.tickets.status', 'filter' => 'auth:admin.tickets.update']);
-    $routes->post('tickets/(:uuid)/assign', 'TicketController::assign/$1', ['as' => 'admin.tickets.assign', 'filter' => 'auth:admin.tickets.assign']);
 
     // Roles Category: role dan permission-nya
     $routes->get('roles', 'RoleController::index', ['as' => 'admin.roles.index', 'filter' => 'auth:admin.roles.view']);
