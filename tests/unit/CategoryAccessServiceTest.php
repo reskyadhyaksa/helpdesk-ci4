@@ -3,6 +3,7 @@
 use App\Entities\User;
 use App\Exceptions\BusinessException;
 use App\Models\RequestCategoryAccessJobTitleModel;
+use App\Models\RequestCategoryAccessRoleModel;
 use App\Models\RequestCategoryAccessUserModel;
 use App\Models\RequestCategoryModel;
 use App\Services\CategoryAccessService;
@@ -63,9 +64,31 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
         return $model;
     }
 
-    private function user(?string $jobTitle = 'Payroll Staff'): User
+    /**
+     * @param list<string> $ruleIds id kategori untuk role 'role-1'
+     */
+    private function roleModel(array $ruleIds): RequestCategoryAccessRoleModel
     {
-        return new User(['id' => 'user-1', 'job_title' => $jobTitle]);
+        $model = $this->createMock(RequestCategoryAccessRoleModel::class);
+        $model->method('categoryIdsForRole')->willReturnCallback(
+            static fn (string $roleId): array => $roleId === 'role-1' ? $ruleIds : [],
+        );
+
+        return $model;
+    }
+
+    private function make(
+        RequestCategoryModel $categories,
+        RequestCategoryAccessJobTitleModel $jobTitleAccess,
+        RequestCategoryAccessUserModel $userAccess,
+        ?RequestCategoryAccessRoleModel $roleAccess = null,
+    ): CategoryAccessService {
+        return new CategoryAccessService($categories, $jobTitleAccess, $roleAccess ?? $this->roleModel([]), $userAccess);
+    }
+
+    private function user(?string $jobTitle = 'Payroll Staff', ?string $roleId = 'role-1'): User
+    {
+        return new User(['id' => 'user-1', 'job_title' => $jobTitle, 'role_id' => $roleId]);
     }
 
     private function sorted(array $ids): array
@@ -77,14 +100,14 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
 
     public function testJobTitleRuleGrantsCategoryAndItsSubs(): void
     {
-        $service = new CategoryAccessService($this->categories(), $this->jobTitleModel(['A']), $this->userModel([]));
+        $service = $this->make($this->categories(), $this->jobTitleModel(['A']), $this->userModel([]));
 
         $this->assertSame(['A', 'A1'], $this->sorted($service->effectiveCategoryIds($this->user())));
     }
 
     public function testAllowAddsCategoryBeyondRule(): void
     {
-        $service = new CategoryAccessService(
+        $service = $this->make(
             $this->categories(),
             $this->jobTitleModel(['A']),
             $this->userModel(['B' => 'allow']),
@@ -95,7 +118,7 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
 
     public function testDenyRemovesRuleCategory(): void
     {
-        $service = new CategoryAccessService(
+        $service = $this->make(
             $this->categories(),
             $this->jobTitleModel(['A']),
             $this->userModel(['B' => 'allow', 'C' => 'allow', 'D' => 'allow', 'A' => 'deny']),
@@ -106,7 +129,7 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
 
     public function testDenyOnSubOnlyBlocksThatSub(): void
     {
-        $service = new CategoryAccessService(
+        $service = $this->make(
             $this->categories(),
             $this->jobTitleModel(['A']),
             $this->userModel(['A1' => 'deny']),
@@ -117,7 +140,7 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
 
     public function testAllowOnSubOnlyGrantsOnlyThatSub(): void
     {
-        $service = new CategoryAccessService(
+        $service = $this->make(
             $this->categories(),
             $this->jobTitleModel([]),
             $this->userModel(['A1' => 'allow']),
@@ -128,7 +151,7 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
 
     public function testDenyOnParentBeatsAllowOnSub(): void
     {
-        $service = new CategoryAccessService(
+        $service = $this->make(
             $this->categories(),
             $this->jobTitleModel([]),
             $this->userModel(['A' => 'deny', 'A1' => 'allow']),
@@ -146,7 +169,7 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
         $jobTitles = $this->createMock(RequestCategoryAccessJobTitleModel::class);
         $jobTitles->expects($this->never())->method('categoryIdsForJobTitle');
 
-        $service = new CategoryAccessService($this->categories(), $jobTitles, $this->userModel(['B' => 'allow']));
+        $service = $this->make($this->categories(), $jobTitles, $this->userModel(['B' => 'allow']));
 
         $this->assertSame(['B'], $service->effectiveCategoryIds($this->user(null)));
         $this->assertSame(['B'], $service->effectiveCategoryIds($this->user('   ')));
@@ -160,19 +183,19 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
             ->with('Payroll Staff')
             ->willReturn(['A']);
 
-        $service = new CategoryAccessService($this->categories(), $jobTitles, $this->userModel([]));
+        $service = $this->make($this->categories(), $jobTitles, $this->userModel([]));
 
         $this->assertSame(['A', 'A1'], $this->sorted($service->effectiveCategoryIds($this->user('  Payroll Staff '))));
 
         // Pencocokan persis: huruf kecil tidak cocok dengan aturan
-        $service = new CategoryAccessService($this->categories(), $this->jobTitleModel(['A']), $this->userModel([]));
+        $service = $this->make($this->categories(), $this->jobTitleModel(['A']), $this->userModel([]));
 
         $this->assertSame([], $service->effectiveCategoryIds($this->user('payroll staff')));
     }
 
     public function testInactiveCategoriesStayVisible(): void
     {
-        $service = new CategoryAccessService(
+        $service = $this->make(
             $this->categories(['B' => ['is_active' => 0]]),
             $this->jobTitleModel(['B']),
             $this->userModel([]),
@@ -183,21 +206,21 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
 
     public function testAllowOnParentGrantsItsSubCategories(): void
     {
-        $service = new CategoryAccessService($this->categories(), $this->jobTitleModel([]), $this->userModel(['A' => 'allow']));
+        $service = $this->make($this->categories(), $this->jobTitleModel([]), $this->userModel(['A' => 'allow']));
 
         $this->assertSame(['A', 'A1'], $this->sorted($service->effectiveCategoryIds($this->user())));
     }
 
     public function testJobTitleRuleReasonOutranksAllowReason(): void
     {
-        $service = new CategoryAccessService($this->categories(), $this->jobTitleModel(['A']), $this->userModel(['A' => 'allow']));
+        $service = $this->make($this->categories(), $this->jobTitleModel(['A']), $this->userModel(['A' => 'allow']));
 
         $this->assertSame('job_title', $service->explain($this->user())['A']['reason']);
     }
 
     public function testExplainReportsReasons(): void
     {
-        $service = new CategoryAccessService(
+        $service = $this->make(
             $this->categories(),
             $this->jobTitleModel(['A']),
             $this->userModel(['C' => 'allow', 'B' => 'deny']),
@@ -215,7 +238,7 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
 
     public function testUnknownEffectValueNeverGrantsAccess(): void
     {
-        $service = new CategoryAccessService(
+        $service = $this->make(
             $this->categories(),
             $this->jobTitleModel([]),
             $this->userModel(['B' => 'maybe', 'A1' => '']),
@@ -228,7 +251,7 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
         ?RequestCategoryAccessUserModel $userAccess = null,
         ?RequestCategoryModel $categories = null,
     ): CategoryAccessService {
-        return new CategoryAccessService(
+        return $this->make(
             $categories ?? $this->knownCategory(),
             $this->jobTitleModel([]),
             $userAccess ?? $this->createMock(RequestCategoryAccessUserModel::class),
@@ -322,5 +345,134 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
         $this->expectException(BusinessException::class);
 
         $this->exceptionService($this->untouchedUserAccess())->removeException($this->user(), 'B', 'user-1');
+    }
+
+    public function testRoleRuleGrantsCategoryAndItsSubs(): void
+    {
+        $service = $this->make($this->categories(), $this->jobTitleModel([]), $this->userModel([]), $this->roleModel(['A']));
+
+        $this->assertSame(['A', 'A1'], $this->sorted($service->effectiveCategoryIds($this->user())));
+    }
+
+    public function testRoleAndJobTitleRulesAreCombined(): void
+    {
+        $service = $this->make($this->categories(), $this->jobTitleModel(['A']), $this->userModel([]), $this->roleModel(['B']));
+
+        $this->assertSame(['A', 'A1', 'B'], $this->sorted($service->effectiveCategoryIds($this->user())));
+    }
+
+    public function testDenyBeatsRoleRule(): void
+    {
+        $service = $this->make($this->categories(), $this->jobTitleModel([]), $this->userModel(['A' => 'deny']), $this->roleModel(['A', 'B']));
+
+        $this->assertSame(['B'], $service->effectiveCategoryIds($this->user()));
+    }
+
+    public function testJobTitleReasonOutranksRoleReasonAndRoleOutranksAllow(): void
+    {
+        $service = $this->make(
+            $this->categories(),
+            $this->jobTitleModel(['A']),
+            $this->userModel(['B' => 'allow']),
+            $this->roleModel(['A', 'B']),
+        );
+
+        $explain = $service->explain($this->user());
+
+        $this->assertSame('job_title', $explain['A']['reason']);
+        $this->assertSame(['access' => true, 'reason' => 'role', 'detail' => 'role-1'], $explain['B']);
+        $this->assertSame('inherited', $explain['A1']['reason']);
+    }
+
+    public function testUserWithoutRoleGetsNoRoleAccess(): void
+    {
+        $roleAccess = $this->createMock(RequestCategoryAccessRoleModel::class);
+        $roleAccess->expects($this->never())->method('categoryIdsForRole');
+
+        $service = $this->make($this->categories(), $this->jobTitleModel([]), $this->userModel(['B' => 'allow']), $roleAccess);
+
+        $this->assertSame(['B'], $service->effectiveCategoryIds($this->user('Payroll Staff', null)));
+    }
+
+    /**
+     * @param array<string, string> $current [user id => effect] pengecualian yang tersimpan untuk kategori B
+     */
+    private function syncService(array $current, ?RequestCategoryAccessUserModel &$userAccess = null): CategoryAccessService
+    {
+        $rows = [];
+
+        foreach ($current as $userId => $effect) {
+            $rows[] = ['user_id' => $userId, 'effect' => $effect, 'name' => $userId, 'employee_no' => '1'];
+        }
+
+        $userAccess = $this->createMock(RequestCategoryAccessUserModel::class);
+        $userAccess->method('forCategory')->with('B')->willReturn($rows);
+        $userAccess->method('findOne')->willReturnCallback(
+            static fn (string $userId, string $categoryId): ?array => isset($current[$userId])
+                ? ['id' => 'row-' . $userId, 'effect' => $current[$userId]]
+                : null,
+        );
+
+        return $this->exceptionService($userAccess);
+    }
+
+    public function testSyncAddsChangesAndRemovesExceptions(): void
+    {
+        $service = $this->syncService(['u1' => 'allow', 'u2' => 'deny', 'u3' => 'allow'], $userAccess);
+
+        $userAccess->expects($this->once())->method('update')->with('row-u1', ['effect' => 'deny']);
+        $userAccess->expects($this->once())->method('insert')->with([
+            'user_id'             => 'u4',
+            'request_category_id' => 'B',
+            'effect'              => 'allow',
+        ]);
+        $userAccess->expects($this->once())->method('delete')->with('row-u3');
+
+        $service->syncUserExceptionsForCategory('B', ['u1' => 'deny', 'u2' => 'deny', 'u4' => 'allow'], 'admin-1');
+    }
+
+    public function testSyncRejectsGrantingTheActorAnException(): void
+    {
+        $service = $this->syncService([], $userAccess);
+
+        $userAccess->expects($this->never())->method('insert');
+        $userAccess->expects($this->never())->method('update');
+        $userAccess->expects($this->never())->method('delete');
+        $this->expectException(BusinessException::class);
+
+        $service->syncUserExceptionsForCategory('B', ['admin-1' => 'allow'], 'admin-1');
+    }
+
+    public function testSyncRejectsRemovingTheActorsOwnException(): void
+    {
+        $service = $this->syncService(['admin-1' => 'deny'], $userAccess);
+
+        $userAccess->expects($this->never())->method('delete');
+        $this->expectException(BusinessException::class);
+
+        $service->syncUserExceptionsForCategory('B', [], 'admin-1');
+    }
+
+    public function testSyncLeavesAnUnchangedOwnExceptionAlone(): void
+    {
+        $service = $this->syncService(['admin-1' => 'allow'], $userAccess);
+
+        $userAccess->expects($this->once())->method('insert')->with($this->callback(
+            static fn (array $row): bool => $row['user_id'] === 'u2' && $row['effect'] === 'deny',
+        ));
+        $userAccess->expects($this->never())->method('update');
+        $userAccess->expects($this->never())->method('delete');
+
+        $service->syncUserExceptionsForCategory('B', ['admin-1' => 'allow', 'u2' => 'deny'], 'admin-1');
+    }
+
+    public function testSyncRejectsAnUnknownEffectBeforeWritingAnything(): void
+    {
+        $service = $this->syncService([], $userAccess);
+
+        $userAccess->expects($this->never())->method('insert');
+        $this->expectException(BusinessException::class);
+
+        $service->syncUserExceptionsForCategory('B', ['u2' => 'allow', 'u3' => 'maybe'], 'admin-1');
     }
 }

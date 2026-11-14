@@ -48,15 +48,15 @@ class PermissionModel extends Model
     public const GROUPS = [
         'Panel Admin' => [
             'icon' => 'fa-gauge-high',
-            'description' => 'Pintu masuk panel admin dan halaman ringkasannya.',
+            'description' => 'Masuk ke panel admin.',
             'permissions' => [
-                self::ADMIN_ACCESS => ['label' => 'Akses panel admin', 'description' => 'Bisa masuk ke panel admin. Wajib untuk semua fitur admin.'],
+                self::ADMIN_ACCESS => ['label' => 'Akses panel admin', 'description' => 'Syarat untuk memakai semua fitur admin.'],
                 self::ADMIN_DASHBOARD_VIEW => ['label' => 'Lihat dashboard', 'description' => 'Melihat ringkasan aktivitas layanan.'],
             ],
         ],
-        'Roles Category' => [
+        'Role' => [
             'icon' => 'fa-user-shield',
-            'description' => 'Mengatur role dan hak akses setiap role.',
+            'description' => 'Kelola role dan hak aksesnya.',
             'permissions' => [
                 self::ADMIN_ROLES_VIEW => ['label' => 'Lihat role', 'description' => 'Melihat daftar role dan hak aksesnya.'],
                 self::ADMIN_ROLES_CREATE => ['label' => 'Tambah role', 'description' => 'Membuat role baru.'],
@@ -64,35 +64,37 @@ class PermissionModel extends Model
                 self::ADMIN_ROLES_DELETE => ['label' => 'Hapus role', 'description' => 'Menghapus role yang tidak dipakai pengguna.'],
             ],
         ],
-        'User Management' => [
+        'Pengguna' => [
             'icon' => 'fa-users',
-            'description' => 'Daftar pengguna portal beserta role-nya.',
+            'description' => 'Lihat pengguna dan atur role-nya.',
             'permissions' => [
                 self::ADMIN_USERS_VIEW => ['label' => 'Lihat pengguna', 'description' => 'Melihat daftar pengguna dan role-nya.'],
                 self::ADMIN_USERS_UPDATE => ['label' => 'Ubah role pengguna', 'description' => 'Memindahkan pengguna ke role lain.'],
-                self::ADMIN_USERS_CATEGORY_ACCESS => ['label' => 'Kelola akses kategori user', 'description' => 'Mengelola pengecualian izin dan blokir akses kategori request per pengguna.'],
+                self::ADMIN_USERS_CATEGORY_ACCESS => ['label' => 'Kelola akses kategori user', 'description' => 'Mengatur izin atau blokir kategori untuk satu pengguna.'],
             ],
         ],
-        'Request Category' => [
+        'Kategori Request' => [
             'icon' => 'fa-folder-open',
-            'description' => 'Kategori request yang dipilih saat membuat tiket.',
+            'description' => 'Jenis request pada tiket.',
             'permissions' => [
                 self::ADMIN_REQUEST_CATEGORIES_VIEW => ['label' => 'Lihat kategori request', 'description' => 'Melihat daftar kategori request.'],
-                self::ADMIN_REQUEST_CATEGORIES_CREATE => ['label' => 'Tambah kategori request', 'description' => 'Membuat kategori request baru dan menentukan job title yang boleh melihat tiketnya (akses ke tiket rahasia).'],
-                self::ADMIN_REQUEST_CATEGORIES_UPDATE => ['label' => 'Ubah kategori request', 'description' => 'Mengubah nama dan status kategori request serta job title yang boleh melihat tiketnya (akses ke tiket rahasia).'],
+                self::ADMIN_REQUEST_CATEGORIES_CREATE => ['label' => 'Tambah kategori request', 'description' => 'Membuat kategori baru dan menentukan job title yang boleh melihat tiketnya.'],
+                self::ADMIN_REQUEST_CATEGORIES_UPDATE => ['label' => 'Ubah kategori request', 'description' => 'Mengubah nama, status, dan job title yang boleh melihat tiketnya.'],
                 self::ADMIN_REQUEST_CATEGORIES_DELETE => ['label' => 'Hapus kategori request', 'description' => 'Menghapus kategori request yang tidak dipakai.'],
             ],
         ],
         'Tiket' => [
             'icon' => 'fa-ticket',
-            'description' => 'Akses ke tiket layanan.',
+            'description' => 'Siapa yang boleh melihat tiket.',
             'permissions' => [
-                self::ADMIN_TICKETS_VIEW_ALL => ['label' => 'Lihat semua tiket', 'description' => 'Melihat tiket dari semua kategori tanpa dibatasi akses kategori.'],
+                self::ADMIN_TICKETS_VIEW_ALL => ['label' => 'Lihat semua tiket', 'description' => 'Melihat tiket semua kategori, tanpa batasan akses.'],
+                self::ADMIN_TICKETS_UPDATE => ['label' => 'Ubah status tiket', 'description' => 'Memindahkan tiket ke status berikutnya (diproses, ditunda, resolved, dst.).'],
+                self::ADMIN_TICKETS_ASSIGN => ['label' => 'Tetapkan PIC tiket', 'description' => 'Menetapkan PIC Helpdesk dan PIC Resolver pada tiket.'],
             ],
         ],
-        'SLA Policies' => [
+        'SLA' => [
             'icon' => 'fa-clock',
-            'description' => 'Batas waktu respons dan penyelesaian tiket.',
+            'description' => 'Batas waktu penanganan tiket.',
             'permissions' => [
                 self::ADMIN_SLA_VIEW => ['label' => 'Lihat SLA', 'description' => 'Melihat daftar kebijakan SLA.'],
                 self::ADMIN_SLA_CREATE => ['label' => 'Tambah SLA', 'description' => 'Membuat kebijakan SLA baru.'],
@@ -100,23 +102,25 @@ class PermissionModel extends Model
                 self::ADMIN_SLA_DELETE => ['label' => 'Hapus SLA', 'description' => 'Menghapus kebijakan SLA.'],
             ],
         ],
-        'Holiday' => [
+        'Hari Libur' => [
             'icon' => 'fa-calendar-days',
-            'description' => 'Hari libur dan hari off mingguan yang tidak dihitung dalam SLA.',
+            'description' => 'Hari yang tidak dihitung dalam SLA.',
             'permissions' => [
-                self::ADMIN_HOLIDAYS_VIEW => ['label' => 'Lihat hari libur', 'description' => 'Membuka halaman Holiday: daftar hari libur dan hari off mingguan.'],
+                self::ADMIN_HOLIDAYS_VIEW => ['label' => 'Lihat hari libur', 'description' => 'Membuka daftar hari libur dan hari off mingguan.'],
                 self::ADMIN_HOLIDAYS_CREATE => ['label' => 'Tambah hari libur', 'description' => 'Menambahkan hari libur secara manual.'],
                 self::ADMIN_HOLIDAYS_UPDATE => ['label' => 'Ubah hari libur', 'description' => 'Mengubah tanggal, nama, dan jenis hari libur.'],
                 self::ADMIN_HOLIDAYS_DELETE => ['label' => 'Hapus hari libur', 'description' => 'Menghapus hari libur.'],
-                self::ADMIN_HOLIDAYS_SYNC => ['label' => 'Sync hari libur', 'description' => 'Menarik daftar hari libur terbaru dari aplikasi eksternal.'],
-                self::ADMIN_OFF_DAYS_UPDATE => ['label' => 'Ubah hari off mingguan', 'description' => 'Memilih hari off mingguan, mis. Sabtu dan Minggu.'],
+                self::ADMIN_HOLIDAYS_SYNC => ['label' => 'Sync hari libur', 'description' => 'Mengambil daftar hari libur terbaru dari aplikasi eksternal.'],
+                self::ADMIN_OFF_DAYS_UPDATE => ['label' => 'Ubah hari off mingguan', 'description' => 'Memilih hari off tiap minggu, mis. Sabtu dan Minggu.'],
             ],
         ],
-        'Portal User' => [
+        'Portal Karyawan' => [
             'icon' => 'fa-house-user',
-            'description' => 'Halaman portal untuk karyawan.',
+            'description' => 'Halaman yang dipakai karyawan.',
             'permissions' => [
-                self::USER_DASHBOARD_VIEW => ['label' => 'Lihat dashboard user', 'description' => 'Membuka dashboard di portal karyawan.'],
+                self::USER_DASHBOARD_VIEW => ['label' => 'Lihat dashboard user', 'description' => 'Membuka dashboard di portal.'],
+                self::USER_TICKETS_VIEW => ['label' => 'Lihat tiket saya', 'description' => 'Membuka daftar tiket miliknya di portal.'],
+                self::USER_TICKETS_CREATE => ['label' => 'Buat tiket', 'description' => 'Membuat tiket baru di portal.'],
             ],
         ],
     ];

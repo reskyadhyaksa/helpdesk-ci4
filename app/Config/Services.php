@@ -5,6 +5,7 @@ namespace Config;
 use App\Models\HolidayModel;
 use App\Models\PermissionModel;
 use App\Models\RequestCategoryAccessJobTitleModel;
+use App\Models\RequestCategoryAccessRoleModel;
 use App\Models\RequestCategoryAccessUserModel;
 use App\Models\RequestCategoryModel;
 use App\Models\RoleModel;
@@ -94,7 +95,10 @@ class Services extends BaseService
         );
     }
 
+            model(RequestCategoryAccessRoleModel::class),
     public static function categoryAccess(bool $getShared = true): CategoryAccessService
+            model(RoleModel::class),
+            static::categoryAccess(),
     {
         if ($getShared) {
             return static::getSharedInstance('categoryAccess');
@@ -107,3 +111,4 @@ class Services extends BaseService
         );
     }
 }
+            model(RequestCategoryAccessRoleModel::class),

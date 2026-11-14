@@ -10,6 +10,7 @@ use App\Models\RequestCategoryAccessUserModel;
  * @var list<array>                                                       $categories  semua kategori berurutan (utama lalu sub)
  * @var array<string, array{access: bool, reason: string, detail: ?string}> $explained   kunci = id kategori
  * @var list<array{request_category_id: string, effect: string}>           $exceptions
+ * @var string                                                            $roleName    nama role user (alasan "sesuai role")
  */
 $errors = session('errors') ?? [];
 
@@ -73,7 +74,9 @@ $effectOptions = [
                 </td>
                 <td>
                     <?= esc(lang('Admin.categoryAccess.reasons.' . $result['reason'])) ?>
-                    <?php if ($result['detail'] !== null): ?>
+                    <?php if ($result['reason'] === 'role'): ?>
+                        <small><?= esc($roleName) ?></small>
+                    <?php elseif ($result['detail'] !== null): ?>
                         <small><?= esc($result['detail']) ?></small>
                     <?php endif ?>
                 </td>

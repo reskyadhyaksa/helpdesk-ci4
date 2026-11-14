@@ -33,6 +33,14 @@ class RoleModel extends Model
         'slug' => ['is_unique' => 'Slug role sudah dipakai.'],
     ];
 
+    /**
+     * @return array<string, string> id => nama role, urut nama (untuk dropdown)
+     */
+    public function nameOptions(): array
+    {
+        return array_column($this->select('id, name')->orderBy('name', 'ASC')->findAll(), 'name', 'id');
+    }
+
     public function idBySlug(string $slug): ?string
     {
         return $this->where('slug', $slug)->first()['id'] ?? null;

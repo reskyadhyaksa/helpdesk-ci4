@@ -40,9 +40,11 @@ class RequestCategoryModel extends Model
     /**
      * Sama seperti allOrdered() plus parent_name dan sla_name, dipaginasi (pager di $this->pager).
      *
+     * @param array{parent_id?: list<string>, job_title?: list<string>, role_id?: list<string>} $filters
+     *
      * @return list<array>
      */
-    public function paginateForAdmin(?string $keyword): array
+    public function paginateForAdmin(?string $keyword, array $filters = []): array
     {
         $this->select('request_categories.id, request_categories.parent_id, request_categories.name, '
             . 'request_categories.description, request_categories.sla_policy_id, request_categories.is_active, '
@@ -55,6 +57,8 @@ class RequestCategoryModel extends Model
                 ->orLike('request_categories.description', $keyword)
                 ->groupEnd();
         }
+
+        $this->applyFilters($filters);
 
         return $this->orderedUnderParent()->paginate();
     }
@@ -89,3 +93,29 @@ class RequestCategoryModel extends Model
             ->orderBy('request_categories.name', 'ASC');
     }
 }
+    /**
+     * Filter parent: kategori itu beserta subnya. Filter akses: aturan job title/role disimpan di kategori
+     * utama dan diikuti sub, jadi yang dicocokkan adalah kategori utama dari baris tersebut.
+     */
+    private function applyFilters(array $filters): void
+    {
+        if (isset($filters['parent_id'])) {
+            $this->groupStart()
+                ->whereIn('request_categories.id', $filters['parent_id'])
+                ->orWhereIn('request_categories.parent_id', $filters['parent_id'])
+                ->groupEnd();
+        }
+
+        $root = 'COALESCE(request_categories.parent_id, request_categories.id)';
+
+        if (isset($filters['job_title'])) {
+            $this->where("EXISTS (SELECT 1 FROM request_category_access_job_title a WHERE a.request_category_id = {$root}"
+                . ' AND a.job_title IN (' . implode(',', $this->db->escape($filters['job_title'])) . '))', null, false);
+        }
+
+        if (isset($filters['role_id'])) {
+            $this->where("EXISTS (SELECT 1 FROM request_category_access_role a WHERE a.request_category_id = {$root}"
+                . ' AND a.role_id IN (' . implode(',', $this->db->escape($filters['role_id'])) . '))', null, false);
+        }
+    }
+

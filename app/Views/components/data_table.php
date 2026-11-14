@@ -28,12 +28,12 @@ use Config\Pager as PagerConfig;
  * @var Pager|null  $pager         tampilkan total + navigasi halaman
  * @var string|null $totalLabel    satuan di footer, mis. "pengguna"
  */
-$slot         ??= '';
-$emptyIcon    ??= 'fa-inbox';
-$emptyTitle   ??= null;
+$slot ??= '';
+$emptyIcon ??= 'fa-inbox';
+$emptyTitle ??= null;
 $emptyMessage ??= null;
-$pager        ??= null;
-$totalLabel   ??= 'data';
+$pager ??= null;
+$totalLabel ??= 'data';
 
 $isEmpty = trim($slot) === '';
 ?>
@@ -56,8 +56,8 @@ $isEmpty = trim($slot) === '';
                     <tr>
                         <td colspan="<?= count($columns) ?>">
                             <?= component('empty_state', [
-                                'icon'    => $emptyIcon,
-                                'title'   => $emptyTitle,
+                                'icon' => $emptyIcon,
+                                'title' => $emptyTitle,
                                 'message' => $emptyMessage,
                             ]) ?>
                         </td>
@@ -69,28 +69,29 @@ $isEmpty = trim($slot) === '';
         </table>
     </div>
 
-    <?php if ($pager !== null && ! $isEmpty): ?>
+    <?php if ($pager !== null && !$isEmpty): ?>
         <?php
         $total = $pager->getTotal();
-        $from  = ($pager->getCurrentPage() - 1) * $pager->getPerPage() + 1;
-        $to    = min($from + $pager->getPerPage() - 1, $total);
+        $from = ($pager->getCurrentPage() - 1) * $pager->getPerPage() + 1;
+        $to = min($from + $pager->getPerPage() - 1, $total);
         ?>
         <div class="admin-table-footer">
             <div class="admin-table-footer-start">
                 <?php // Pilihan baris per halaman: js/app.js menulis ?per_page=… ke URL dan kembali ke halaman 1 ?>
                 <div class="admin-table-size">
                     <?= component('select', [
-                        'name'      => 'per_page',
-                        'label'     => 'Baris per halaman',
+                        'name' => 'per_page',
+                        'label' => 'Baris per halaman',
                         'hideLabel' => true,
-                        'options'   => array_combine(PagerConfig::PER_PAGE_OPTIONS, PagerConfig::PER_PAGE_OPTIONS),
-                        'selected'  => (string) $pager->getPerPage(),
-                        'size'      => 'is-small',
+                        'options' => array_combine(PagerConfig::PER_PAGE_OPTIONS, PagerConfig::PER_PAGE_OPTIONS),
+                        'selected' => (string) $pager->getPerPage(),
+                        'size' => 'is-small',
                         'fullwidth' => true,
                     ]) ?>
                 </div>
                 <p class="admin-table-info">
-                    Menampilkan <strong><?= number_format($from, 0, ',', '.') ?>–<?= number_format($to, 0, ',', '.') ?></strong>
+                    Menampilkan
+                    <strong><?= number_format($from, 0, ',', '.') ?>–<?= number_format($to, 0, ',', '.') ?></strong>
                     dari <strong><?= number_format($total, 0, ',', '.') ?></strong> <?= esc($totalLabel) ?>
                 </p>
             </div>

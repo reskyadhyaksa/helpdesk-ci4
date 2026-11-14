@@ -36,7 +36,7 @@ class Validation extends BaseConfig
      * @var array<string, string>
      */
     public array $templates = [
-        'list'   => 'CodeIgniter\Validation\Views\list',
+        'list' => 'CodeIgniter\Validation\Views\list',
         'single' => 'CodeIgniter\Validation\Views\single',
     ];
 
@@ -58,7 +58,7 @@ class Validation extends BaseConfig
             'rules' => 'required|in_list[' . SlaPolicy::PRIORITY_URGENT . ',' . SlaPolicy::PRIORITY_HIGH . ','
                 . SlaPolicy::PRIORITY_MEDIUM . ',' . SlaPolicy::PRIORITY_LOW . ']',
         ],
-        'response_minutes'   => ['label' => 'Target respons pertama', 'rules' => 'required|is_natural_no_zero|less_than_equal_to[43200]'],
+        'response_minutes' => ['label' => 'Target respons pertama', 'rules' => 'required|is_natural_no_zero|less_than_equal_to[43200]'],
         'resolution_minutes' => ['label' => 'Target penyelesaian', 'rules' => 'required|is_natural_no_zero|less_than_equal_to[43200]'],
         'description'        => ['label' => 'Deskripsi', 'rules' => 'permit_empty|max_length[255]'],
         'is_holiday'         => ['label' => 'Lewati hari libur', 'rules' => 'required|in_list[0,1]'],
@@ -67,18 +67,18 @@ class Validation extends BaseConfig
     ];
 
     public array $requestCategory = [
-        'name'          => ['label' => 'Nama kategori', 'rules' => 'required|max_length[100]'],
-        'description'   => ['label' => 'Deskripsi', 'rules' => 'permit_empty|max_length[255]'],
-        'parent_id'     => ['label' => 'Kategori induk', 'rules' => 'permit_empty|exact_length[36]'],
+        'name' => ['label' => 'Nama kategori', 'rules' => 'required|max_length[100]'],
+        'description' => ['label' => 'Deskripsi', 'rules' => 'permit_empty|max_length[255]'],
+        'parent_id' => ['label' => 'Kategori Utama', 'rules' => 'permit_empty|exact_length[36]'],
         'sla_policy_id' => ['label' => 'Kebijakan SLA', 'rules' => 'permit_empty|exact_length[36]'],
         'is_active'     => ['label' => 'Status aktif', 'rules' => 'required|in_list[0,1]'],
         'job_titles.*'  => ['label' => 'Job title', 'rules' => 'permit_empty|max_length[100]'],
     ];
 
     public array $holiday = [
-        'holiday_date'  => ['label' => 'Tanggal', 'rules' => 'required|valid_date[Y-m-d]'],
-        'name'          => ['label' => 'Nama hari libur', 'rules' => 'required|max_length[150]'],
-        'description'   => ['label' => 'Deskripsi', 'rules' => 'permit_empty|max_length[255]'],
+        'holiday_date' => ['label' => 'Tanggal', 'rules' => 'required|valid_date[Y-m-d]'],
+        'name' => ['label' => 'Nama hari libur', 'rules' => 'required|max_length[150]'],
+        'description' => ['label' => 'Deskripsi', 'rules' => 'permit_empty|max_length[255]'],
         'is_mass_leave' => ['label' => 'Cuti bersama', 'rules' => 'required|in_list[0,1]'],
     ];
 
@@ -93,7 +93,7 @@ class Validation extends BaseConfig
 
     public array $categoryAccessException = [
         'category_id' => ['label' => 'Kategori', 'rules' => 'required|exact_length[36]'],
-        'effect'      => [
+        'effect' => [
             'label' => 'Efek',
             'rules' => 'required|in_list[' . RequestCategoryAccessUserModel::EFFECT_ALLOW . ',' . RequestCategoryAccessUserModel::EFFECT_DENY . ']',
         ],
@@ -101,7 +101,7 @@ class Validation extends BaseConfig
 
     // Slug tidak diisi admin; dibuat otomatis dari nama oleh RoleService.
     public array $role = [
-        'name'          => ['label' => 'Nama role', 'rules' => 'required|max_length[100]'],
+        'name' => ['label' => 'Nama role', 'rules' => 'required|max_length[100]'],
         'permissions.*' => ['label' => 'Permission', 'rules' => 'permit_empty|max_length[100]'],
     ];
 }

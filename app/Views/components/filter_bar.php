@@ -11,6 +11,12 @@
  *       <a class="button is-primary" href="...">Tambah</a>
  *   <?= component_end() ?>
  *
+ * Dropdown filter standar (multi-pilih dengan checkbox, ada kotak cari) cukup ditulis lewat $filters:
+ *
+ *   <?= component('filter_bar', ['action' => ..., 'keyword' => $keyword, 'isFiltered' => $isFiltered, 'filters' => [
+ *       'job_title' => ['placeholder' => 'Semua jabatan', 'options' => $map, 'selected' => $selected['job_title'] ?? []],
+ *   ]]) ?>
+ *
  * Tanpa filter khusus cukup: <?= component('filter_bar', ['action' => ..., 'keyword' => $keyword]) ?>
  *
  * @var string      $action       URL halaman (tujuan form dan tombol Reset)
@@ -18,17 +24,20 @@
  * @var string|null $placeholder  teks bantuan kolom cari
  * @var string|null $searchName   nama parameter cari, default "q"
  * @var bool|null   $isFiltered   ada filter aktif? default: hanya jika $keyword terisi
- * @var string      $slot         field filter tambahan
+ * @var array<string, array{placeholder: string, options: array<string, string>, selected?: list<string>, searchable?: bool, emptyLabel?: string}> $filters
+ *                                kunci = nama parameter; placeholder = teks saat tidak ada yang dipilih
+ * @var string      $slot         field filter tambahan (dropdown dengan pengaturan lain)
  * @var string      $actions      tombol di kanan
  */
 $keyword     ??= '';
 $placeholder ??= 'Cari…';
 $searchName  ??= 'q';
 $isFiltered  ??= $keyword !== '';
+$filters     ??= [];
 $slot        ??= '';
 $actions     ??= '';
 
-$hasFilters = trim($slot) !== '';
+$hasFilters = $filters !== [] || trim($slot) !== '';
 $perPage    = config(\Config\Pager::class)->perPage;
 $resetLink  = $isFiltered
     ? '<a class="button is-light" href="' . esc($action, 'attr') . '">Reset</a>'
@@ -44,6 +53,22 @@ $resetLink  = $isFiltered
         <?php // Kiri: dropdown filter + Reset. Tanpa dropdown, Reset ikut di samping kolom cari ?>
         <?php if ($hasFilters): ?>
             <div class="admin-toolbar-selects">
+                <?php foreach ($filters as $name => $filter): ?>
+                    <div class="admin-toolbar-select">
+                        <?= component('select', [
+                            'name'        => $name,
+                            'label'       => $filter['placeholder'],
+                            'hideLabel'   => true,
+                            'options'     => $filter['options'],
+                            'selected'    => $filter['selected'] ?? [],
+                            'placeholder' => $filter['placeholder'],
+                            'fullwidth'   => true,
+                            'searchable'  => $filter['searchable'] ?? true,
+                            'multiple'    => true,
+                            'emptyLabel'  => $filter['emptyLabel'] ?? 'Tanpa filter',
+                        ]) ?>
+                    </div>
+                <?php endforeach ?>
                 <?= $slot ?>
                 <?= $resetLink ?>
             </div>
