@@ -169,3 +169,4 @@ return [
     'collapseSidebar'    => 'Perkecil sidebar',
     'expandSidebar'      => 'Perluas sidebar',
 ];
+        'workHoursInvalid' => 'Jam kerja hari {0} harus diisi dan jam selesai harus lebih akhir dari jam mulai.',

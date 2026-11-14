@@ -29,12 +29,14 @@ class SlaPolicy extends Entity
     /**
      * is_holiday: tanggal merah & cuti bersama tidak dihitung dalam target SLA.
      * is_off_day: hari off mingguan (default Sabtu & Minggu) tidak dihitung dalam target SLA.
+     * is_work_hours: target SLA hanya berjalan pada jam kerja tiap hari (diatur di weekly_off_days).
      */
     protected $casts = [
         'response_minutes'   => 'integer',
         'resolution_minutes' => 'integer',
         'is_holiday'         => 'boolean',
         'is_off_day'         => 'boolean',
+        'is_work_hours'      => 'boolean',
         'is_active'          => 'boolean',
     ];
 

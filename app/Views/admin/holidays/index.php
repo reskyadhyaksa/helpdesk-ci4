@@ -52,21 +52,35 @@ $isFiltered = $keyword !== '' || $selectedMonths !== [] || $selectedYears !== [(
         <?= csrf_field() ?>
 
         <div class="form-card-body">
-            <p class="form-section-label mb-1">Hari Off Mingguan</p>
+            <p class="form-section-label mb-1">Hari Off dan Jam Kerja Mingguan</p>
             <p class="is-size-7 has-text-grey-dark mb-4">
                 Hari yang dicentang tidak dihitung pada kebijakan SLA yang mengaktifkan opsi <strong>Lewati hari off</strong>.
+                Jam kerja tiap hari dipakai kebijakan SLA yang mengaktifkan opsi <strong>Hanya jam kerja</strong>.
                 Perubahan berlaku untuk perhitungan SLA berikutnya.
             </p>
 
             <fieldset disabled style="min-width: 0; border: 0">
-                <legend class="is-sr-only">Pilih hari off mingguan</legend>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: 0.75rem">
+                <legend class="is-sr-only">Pilih hari off dan jam kerja mingguan</legend>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.75rem">
                     <?php foreach (WeeklyOffDayModel::DAYS as $number => $label): ?>
-                        <label class="option-card is-locked">
-                            <input type="checkbox" name="off_days[]" value="<?= $number ?>"
-                                <?= in_array($number, $offDayNums, true) ? 'checked' : '' ?>>
-                            <span class="option-card-label"><?= esc($label) ?></span>
-                        </label>
+                        <?php
+                        $start = $schedule[$number]['start'] ?? WeeklyOffDayModel::DEFAULT_WORK_START;
+                        $end   = $schedule[$number]['end'] ?? WeeklyOffDayModel::DEFAULT_WORK_END;
+                        ?>
+                        <div class="option-card is-locked" style="flex-direction: column; gap: 0.5rem">
+                            <label class="option-card-label" style="cursor: inherit">
+                                <input type="checkbox" name="off_days[]" value="<?= $number ?>"
+                                    <?= in_array($number, $offDayNums, true) ? 'checked' : '' ?>>
+                                <span><?= esc($label) ?> libur</span>
+                            </label>
+                            <div class="is-flex is-align-items-center" style="gap: 0.4rem">
+                                <input class="input is-small" type="time" name="work_start[<?= $number ?>]"
+                                    value="<?= esc($start, 'attr') ?>" aria-label="Jam mulai <?= esc($label, 'attr') ?>">
+                                <span aria-hidden="true">–</span>
+                                <input class="input is-small" type="time" name="work_end[<?= $number ?>]"
+                                    value="<?= esc($end, 'attr') ?>" aria-label="Jam selesai <?= esc($label, 'attr') ?>">
+                            </div>
+                        </div>
                     <?php endforeach ?>
                 </div>
             </fieldset>

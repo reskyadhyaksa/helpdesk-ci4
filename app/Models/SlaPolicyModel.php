@@ -19,7 +19,7 @@ class SlaPolicyModel extends Model
     protected $beforeInsert     = ['generateUuid'];
     protected $allowedFields    = [
         'name', 'priority', 'response_minutes', 'resolution_minutes', 'description',
-        'is_holiday', 'is_off_day', 'is_active',
+        'is_holiday', 'is_off_day', 'is_work_hours', 'is_active',
     ];
 
     protected $validationRules = [

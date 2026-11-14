@@ -60,10 +60,11 @@ class Validation extends BaseConfig
         ],
         'response_minutes' => ['label' => 'Target respons pertama', 'rules' => 'required|is_natural_no_zero|less_than_equal_to[43200]'],
         'resolution_minutes' => ['label' => 'Target penyelesaian', 'rules' => 'required|is_natural_no_zero|less_than_equal_to[43200]'],
-        'description'        => ['label' => 'Deskripsi', 'rules' => 'permit_empty|max_length[255]'],
-        'is_holiday'         => ['label' => 'Lewati hari libur', 'rules' => 'required|in_list[0,1]'],
-        'is_off_day'         => ['label' => 'Lewati hari off', 'rules' => 'required|in_list[0,1]'],
-        'is_active'          => ['label' => 'Status aktif', 'rules' => 'required|in_list[0,1]'],
+        'description' => ['label' => 'Deskripsi', 'rules' => 'permit_empty|max_length[255]'],
+        'is_holiday' => ['label' => 'Lewati hari libur', 'rules' => 'required|in_list[0,1]'],
+        'is_off_day' => ['label' => 'Lewati hari off', 'rules' => 'required|in_list[0,1]'],
+        'is_work_hours' => ['label' => 'Hanya jam kerja', 'rules' => 'required|in_list[0,1]'],
+        'is_active' => ['label' => 'Status aktif', 'rules' => 'required|in_list[0,1]'],
     ];
 
     public array $requestCategory = [
@@ -105,3 +106,5 @@ class Validation extends BaseConfig
         'permissions.*' => ['label' => 'Permission', 'rules' => 'permit_empty|max_length[100]'],
     ];
 }
+        'work_start.*' => ['label' => 'Jam mulai', 'rules' => 'permit_empty|regex_match[/^([01]\d|2[0-3]):[0-5]\d$/]'],
+        'work_end.*' => ['label' => 'Jam selesai', 'rules' => 'permit_empty|regex_match[/^([01]\d|2[0-3]):[0-5]\d$/]'],

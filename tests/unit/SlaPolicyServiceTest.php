@@ -21,8 +21,21 @@ final class SlaPolicyServiceTest extends CIUnitTestCase
             'description'        => '  ',
             'is_holiday'         => '1',
             'is_off_day'         => '0',
+            'is_work_hours'      => '1',
             'is_active'          => '1',
         ], $overrides);
+    }
+
+    public function testCreateCastsWorkHoursFlagOffToZero(): void
+    {
+        $model = $this->createMock(SlaPolicyModel::class);
+        $model->expects($this->once())
+            ->method('insert')
+            ->with($this->callback(static fn (array $row) => $row['is_work_hours'] === 0), true)
+            ->willReturn('01936b2a-1c2d-7e3f-8a4b-5c6d7e8f9a0b');
+        $model->method('find')->willReturn(new SlaPolicy());
+
+        (new SlaPolicyService($model))->create($this->validData(['is_work_hours' => '0']));
     }
 
     public function testCreateRejectsResolutionFasterThanResponse(): void
@@ -43,6 +56,7 @@ final class SlaPolicyServiceTest extends CIUnitTestCase
             ->with($this->callback(static fn (array $row) => $row['is_active'] === 1
                 && $row['is_holiday'] === 1
                 && $row['is_off_day'] === 0
+                && $row['is_work_hours'] === 1
                 && $row['description'] === null), true)
             ->willReturn('01936b2a-1c2d-7e3f-8a4b-5c6d7e8f9a0b');
         $model->method('find')->willReturn(new SlaPolicy());
