@@ -4,6 +4,9 @@ namespace Config;
 
 use App\Models\HolidayModel;
 use App\Models\PermissionModel;
+use App\Models\RequestCategoryAccessJobTitleModel;
+use App\Models\RequestCategoryAccessUserModel;
+use App\Models\RequestCategoryModel;
 use App\Models\RoleModel;
 use App\Models\RolePermissionModel;
 use App\Models\SlaPolicyModel;
@@ -11,6 +14,7 @@ use App\Models\UserModel;
 use App\Models\WeeklyOffDayModel;
 use App\Services\Auth\KeycloakAuthService;
 use App\Services\AuthService;
+use App\Services\CategoryAccessService;
 use App\Services\HolidayService;
 use App\Services\RoleService;
 use App\Services\SlaPolicyService;
@@ -72,6 +76,19 @@ class Services extends BaseService
             model(RolePermissionModel::class),
             model(UserModel::class),
             db_connect(),
+        );
+    }
+
+    public static function categoryAccess(bool $getShared = true): CategoryAccessService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('categoryAccess');
+        }
+
+        return new CategoryAccessService(
+            model(RequestCategoryModel::class),
+            model(RequestCategoryAccessJobTitleModel::class),
+            model(RequestCategoryAccessUserModel::class),
         );
     }
 }
