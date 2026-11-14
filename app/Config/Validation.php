@@ -3,6 +3,7 @@
 namespace Config;
 
 use App\Entities\SlaPolicy;
+use App\Models\RequestCategoryAccessUserModel;
 use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Validation\StrictRules\CreditCardRules;
 use CodeIgniter\Validation\StrictRules\FileRules;
@@ -88,6 +89,14 @@ class Validation extends BaseConfig
 
     public array $userRole = [
         'role_id' => ['label' => 'Role', 'rules' => 'required|exact_length[36]'],
+    ];
+
+    public array $categoryAccessException = [
+        'category_id' => ['label' => 'Kategori', 'rules' => 'required|exact_length[36]'],
+        'effect'      => [
+            'label' => 'Efek',
+            'rules' => 'required|in_list[' . RequestCategoryAccessUserModel::EFFECT_ALLOW . ',' . RequestCategoryAccessUserModel::EFFECT_DENY . ']',
+        ],
     ];
 
     // Slug tidak diisi admin; dibuat otomatis dari nama oleh RoleService.

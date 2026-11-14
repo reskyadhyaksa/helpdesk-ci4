@@ -49,6 +49,9 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'au
     // User Management: daftar pengguna dan penggantian role
     $routes->get('users', 'UserController::index', ['as' => 'admin.users.index', 'filter' => 'auth:admin.users.view']);
     $routes->post('users/(:uuid)/role', 'UserController::updateRole/$1', ['as' => 'admin.users.role', 'filter' => 'auth:admin.users.update']);
+    $routes->get('users/(:uuid)/category-access', 'UserCategoryAccessController::show/$1', ['as' => 'admin.users.category-access', 'filter' => 'auth:admin.users.category-access']);
+    $routes->post('users/(:uuid)/category-access', 'UserCategoryAccessController::store/$1', ['as' => 'admin.users.category-access.store', 'filter' => 'auth:admin.users.category-access']);
+    $routes->post('users/(:uuid)/category-access/(:uuid)/delete', 'UserCategoryAccessController::delete/$1/$2', ['as' => 'admin.users.category-access.delete', 'filter' => 'auth:admin.users.category-access']);
 
     // SLA Policies
     $routes->get('sla-policies', 'SlaPolicyController::index', ['as' => 'admin.sla-policies.index', 'filter' => 'auth:admin.sla-policies.view']);

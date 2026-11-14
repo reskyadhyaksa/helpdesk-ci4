@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Entities\User;
+use App\Exceptions\BusinessException;
 use App\Models\RequestCategoryAccessJobTitleModel;
 use App\Models\RequestCategoryAccessUserModel;
 use App\Models\RequestCategoryModel;
@@ -52,10 +53,11 @@ class CategoryAccessService
         $denied   = [];
 
         foreach ($this->userAccess->forUser((string) $user->id) as $exception) {
-            if ($exception['effect'] === RequestCategoryAccessUserModel::EFFECT_DENY) {
-                $denied[$exception['request_category_id']] = true;
-            } else {
+            // Hanya allow yang persis boleh memberi akses; nilai lain (termasuk yang tidak dikenal) dianggap deny.
+            if ($exception['effect'] === RequestCategoryAccessUserModel::EFFECT_ALLOW) {
                 $allowed[$exception['request_category_id']] = true;
+            } else {
+                $denied[$exception['request_category_id']] = true;
             }
         }
 
@@ -66,6 +68,54 @@ class CategoryAccessService
         }
 
         return $explained;
+    }
+
+    /**
+     * @return list<array{request_category_id: string, effect: string}>
+     */
+    public function exceptionsFor(User $user): array
+    {
+        return $this->userAccess->forUser((string) $user->id);
+    }
+
+    /**
+     * Menambah pengecualian user + kategori; bila sudah ada, efeknya diganti.
+     *
+     * @throws BusinessException
+     */
+    public function addException(User $user, string $categoryId, string $effect): void
+    {
+        if (! in_array($effect, [RequestCategoryAccessUserModel::EFFECT_ALLOW, RequestCategoryAccessUserModel::EFFECT_DENY], true)) {
+            throw new BusinessException(lang('Admin.categoryAccess.invalidEffect'));
+        }
+
+        if ($this->categories->find($categoryId) === null) {
+            throw new BusinessException(lang('Admin.categoryAccess.unknownCategory'));
+        }
+
+        $userId   = (string) $user->id;
+        $existing = $this->userAccess->findOne($userId, $categoryId);
+
+        if ($existing !== null) {
+            $this->userAccess->update($existing['id'], ['effect' => $effect]);
+
+            return;
+        }
+
+        $this->userAccess->insert([
+            'user_id'             => $userId,
+            'request_category_id' => $categoryId,
+            'effect'              => $effect,
+        ]);
+    }
+
+    public function removeException(User $user, string $categoryId): void
+    {
+        $existing = $this->userAccess->findOne((string) $user->id, $categoryId);
+
+        if ($existing !== null) {
+            $this->userAccess->delete($existing['id']);
+        }
     }
 
     /**

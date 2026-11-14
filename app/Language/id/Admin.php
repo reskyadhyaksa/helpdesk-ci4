@@ -71,6 +71,25 @@ return [
         'emptyMessage'        => 'Pengguna terdaftar otomatis saat pertama kali login ke portal.',
     ],
 
+    'categoryAccess' => [
+        'title'           => 'Akses Kategori Pengguna',
+        'subtitle'        => 'Atur pengecualian akses kategori untuk pengguna ini di luar aturan job title.',
+        'effectiveTitle'  => 'Akses efektif',
+        'exceptionsTitle' => 'Pengecualian',
+        'added'           => 'Pengecualian akses berhasil disimpan.',
+        'removed'         => 'Pengecualian akses berhasil dihapus.',
+        'invalidEffect'   => 'Efek pengecualian harus boleh atau blokir.',
+        'unknownCategory' => 'Kategori yang dipilih tidak ditemukan.',
+        'reasons'         => [
+            'job_title'      => 'Sesuai job title',
+            'allow'          => 'Diizinkan lewat pengecualian',
+            'inherited'      => 'Mengikuti kategori induk',
+            'deny'           => 'Diblokir lewat pengecualian',
+            'inherited_deny' => 'Induk kategori diblokir',
+            'none'           => 'Tidak ada aturan yang memberi akses',
+        ],
+    ],
+
     'roles' => [
         'createTitle'        => 'Tambah Role',
         'editTitle'          => 'Ubah Role',
