@@ -26,9 +26,9 @@ class SlaPolicyService
     /**
      * @return array<string, string> id => nama kebijakan aktif untuk dropdown
      */
-    public function activeOptions(): array
+    public function activeOptions(?string $alsoId = null): array
     {
-        return $this->policies->activeNames();
+        return $this->policies->activeNames($alsoId);
     }
 
     public function find(string $id): ?SlaPolicy

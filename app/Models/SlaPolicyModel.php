@@ -47,12 +47,25 @@ class SlaPolicyModel extends Model
     }
 
     /**
-     * @return array<string, string> id => nama kebijakan aktif, urut nama
+     * @param string|null $alsoId kebijakan tersimpan yang tetap ditampilkan walau sudah nonaktif
+     *
+     * @return array<string, string> id => nama kebijakan aktif (plus $alsoId), urut nama
      */
-    public function activeNames(): array
+    public function activeNames(?string $alsoId = null): array
     {
-        $rows = $this->select('id, name')->where('is_active', 1)->orderBy('name', 'ASC')->asArray()->findAll();
+        $this->select('id, name, is_active')->groupStart()->where('is_active', 1);
 
-        return array_column($rows, 'name', 'id');
+        if ($alsoId !== null) {
+            $this->orWhere('id', $alsoId);
+        }
+
+        $rows   = $this->groupEnd()->orderBy('name', 'ASC')->asArray()->findAll();
+        $labels = [];
+
+        foreach ($rows as $row) {
+            $labels[$row['id']] = $row['is_active'] ? $row['name'] : $row['name'] . ' (nonaktif)';
+        }
+
+        return $labels;
     }
 }

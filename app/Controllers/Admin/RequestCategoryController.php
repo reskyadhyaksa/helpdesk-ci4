@@ -28,7 +28,7 @@ class RequestCategoryController extends BaseController
         return view('admin/request_categories/new', [
             'title'    => lang('Admin.requestCategory.createTitle'),
             'category' => ['id' => null, 'parent_id' => null, 'name' => '', 'description' => null, 'sla_policy_id' => null, 'is_active' => 1],
-        ] + $this->formOptions(null, []));
+        ] + $this->formOptions(null, null, []));
     }
 
     public function create(): RedirectResponse
@@ -53,7 +53,7 @@ class RequestCategoryController extends BaseController
         return view('admin/request_categories/edit', [
             'title'    => lang('Admin.requestCategory.editTitle'),
             'category' => $category,
-        ] + $this->formOptions($category['id'], service('requestCategories')->jobTitlesFor($category['id'])));
+        ] + $this->formOptions($category['id'], $category['sla_policy_id'], service('requestCategories')->jobTitlesFor($category['id'])));
     }
 
     public function update(string $id): RedirectResponse
@@ -94,7 +94,7 @@ class RequestCategoryController extends BaseController
      *
      * @param list<string> $savedJobTitles
      */
-    private function formOptions(?string $categoryId, array $savedJobTitles): array
+    private function formOptions(?string $categoryId, ?string $savedSlaId, array $savedJobTitles): array
     {
         $categories = service('requestCategories');
         $parents    = array_filter($categories->topLevel(), static fn (array $parent) => $parent['id'] !== $categoryId);
@@ -102,7 +102,7 @@ class RequestCategoryController extends BaseController
 
         return [
             'parentOptions'   => array_column($parents, 'name', 'id'),
-            'slaOptions'      => service('slaPolicies')->activeOptions(),
+            'slaOptions'      => service('slaPolicies')->activeOptions($savedSlaId),
             'jobTitleOptions' => array_combine($titles, $titles),
             'savedJobTitles'  => $savedJobTitles,
         ];
