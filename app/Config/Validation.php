@@ -65,6 +65,15 @@ class Validation extends BaseConfig
         'is_active'          => ['label' => 'Status aktif', 'rules' => 'required|in_list[0,1]'],
     ];
 
+    public array $requestCategory = [
+        'name'          => ['label' => 'Nama kategori', 'rules' => 'required|max_length[100]'],
+        'description'   => ['label' => 'Deskripsi', 'rules' => 'permit_empty|max_length[255]'],
+        'parent_id'     => ['label' => 'Kategori induk', 'rules' => 'permit_empty|exact_length[36]'],
+        'sla_policy_id' => ['label' => 'Kebijakan SLA', 'rules' => 'permit_empty|exact_length[36]'],
+        'is_active'     => ['label' => 'Status aktif', 'rules' => 'required|in_list[0,1]'],
+        'job_titles.*'  => ['label' => 'Job title', 'rules' => 'permit_empty|max_length[100]'],
+    ];
+
     public array $holiday = [
         'holiday_date'  => ['label' => 'Tanggal', 'rules' => 'required|valid_date[Y-m-d]'],
         'name'          => ['label' => 'Nama hari libur', 'rules' => 'required|max_length[150]'],

@@ -16,6 +16,7 @@ use App\Services\Auth\KeycloakAuthService;
 use App\Services\AuthService;
 use App\Services\CategoryAccessService;
 use App\Services\HolidayService;
+use App\Services\RequestCategoryService;
 use App\Services\RoleService;
 use App\Services\SlaPolicyService;
 use App\Services\UserService;
@@ -74,6 +75,20 @@ class Services extends BaseService
             model(RoleModel::class),
             model(PermissionModel::class),
             model(RolePermissionModel::class),
+            model(UserModel::class),
+            db_connect(),
+        );
+    }
+
+    public static function requestCategories(bool $getShared = true): RequestCategoryService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('requestCategories');
+        }
+
+        return new RequestCategoryService(
+            model(RequestCategoryModel::class),
+            model(RequestCategoryAccessJobTitleModel::class),
             model(UserModel::class),
             db_connect(),
         );
