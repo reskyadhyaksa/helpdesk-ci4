@@ -38,6 +38,7 @@ class Filters extends BaseFilters
         'performance'   => PerformanceMetrics::class,
         'auth'          => AuthFilter::class,
         'guest'         => GuestFilter::class,
+        'throttle'      => \App\Filters\ThrottleFilter::class,
     ];
 
     /**

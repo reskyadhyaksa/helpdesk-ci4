@@ -34,7 +34,11 @@ class PermissionSeeder extends Seeder
 
         // Permission bawaan tiap role. Admin mendapat semua (termasuk area user /u); user hanya portal.
         $defaults = [
-            RoleModel::SLUG_USER  => [PermissionModel::USER_DASHBOARD_VIEW],
+            RoleModel::SLUG_USER  => [
+                PermissionModel::USER_DASHBOARD_VIEW,
+                PermissionModel::USER_TICKETS_VIEW,
+                PermissionModel::USER_TICKETS_CREATE,
+            ],
             RoleModel::SLUG_ADMIN => $definedSlugs,
         ];
 

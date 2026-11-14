@@ -19,7 +19,7 @@ class SlaPolicyModel extends Model
     protected $beforeInsert     = ['generateUuid'];
     protected $allowedFields    = [
         'name', 'priority', 'response_minutes', 'resolution_minutes', 'description',
-        'is_holiday', 'is_off_day', 'is_active',
+        'is_holiday', 'is_off_day', 'is_work_hours', 'is_active',
     ];
 
     protected $validationRules = [
@@ -44,5 +44,28 @@ class SlaPolicyModel extends Model
         return $this->orderBy('is_active', 'DESC')
             ->orderBy('response_minutes', 'ASC')
             ->paginate();
+    }
+
+    /**
+     * @param string|null $alsoId kebijakan tersimpan yang tetap ditampilkan walau sudah nonaktif
+     *
+     * @return array<string, string> id => nama kebijakan aktif (plus $alsoId), urut nama
+     */
+    public function activeNames(?string $alsoId = null): array
+    {
+        $this->select('id, name, is_active')->groupStart()->where('is_active', 1);
+
+        if ($alsoId !== null) {
+            $this->orWhere('id', $alsoId);
+        }
+
+        $rows   = $this->groupEnd()->orderBy('name', 'ASC')->asArray()->findAll();
+        $labels = [];
+
+        foreach ($rows as $row) {
+            $labels[$row['id']] = $row['is_active'] ? $row['name'] : $row['name'] . ' (nonaktif)';
+        }
+
+        return $labels;
     }
 }

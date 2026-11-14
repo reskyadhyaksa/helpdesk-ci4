@@ -23,6 +23,14 @@ class SlaPolicyService
         return ['policies' => $policies, 'pager' => $this->policies->pager];
     }
 
+    /**
+     * @return array<string, string> id => nama kebijakan aktif untuk dropdown
+     */
+    public function activeOptions(?string $alsoId = null): array
+    {
+        return $this->policies->activeNames($alsoId);
+    }
+
     public function find(string $id): ?SlaPolicy
     {
         return $this->policies->find($id);
@@ -73,6 +81,7 @@ class SlaPolicyService
         $data['is_active']   = (int) $data['is_active'];
         $data['is_holiday']  = (int) $data['is_holiday'];
         $data['is_off_day']  = (int) $data['is_off_day'];
+        $data['is_work_hours'] = (int) $data['is_work_hours'];
         $data['description'] = trim($data['description'] ?? '') ?: null;
 
         return $data;

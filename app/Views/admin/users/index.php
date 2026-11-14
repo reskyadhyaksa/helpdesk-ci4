@@ -13,7 +13,9 @@ use CodeIgniter\Pager\Pager;
  * @var array<string, list<string>> $filterOptions  pilihan dropdown per kolom
  */
 $canUpdate   = auth_can(PermissionModel::ADMIN_USERS_UPDATE);
-$myId        = auth_user()['id'];
+$canAccess   = auth_can(PermissionModel::ADMIN_USERS_CATEGORY_ACCESS);
+$hasActions  = $canUpdate || $canAccess;
+$myId       = auth_user()['id'];
 $roleOptions = array_column($roles, 'name', 'id');
 
 // Teks dropdown filter: opsi kosong = tanpa filter. Kolom sesuai UserModel::FILTER_COLUMNS.
@@ -23,9 +25,19 @@ $filterLabels = [
     'organization'   => 'Semua organisasi',
 ];
 
+$dropdownFilters = [];
+
+foreach ($filterLabels as $column => $allLabel) {
+    $dropdownFilters[$column] = [
+        'placeholder' => $allLabel,
+        'options'     => array_combine($filterOptions[$column], $filterOptions[$column]),
+        'selected'    => $filters[$column] ?? [],
+    ];
+}
+
 $columns = ['Pengguna', 'NIK', 'Jabatan', 'Role', 'Login Terakhir', 'Status'];
 
-if ($canUpdate) {
+if ($hasActions) {
     $columns[] = ['label' => 'Aksi', 'align' => 'right'];
 }
 ?>
@@ -38,29 +50,13 @@ if ($canUpdate) {
         'subtitle' => lang('Admin.pages.users.subtitle'),
     ]) ?>
 
-    <?php component_start('filter_bar', [
+    <?= component('filter_bar', [
         'action'      => url_to('admin.users.index'),
         'keyword'     => $keyword,
         'placeholder' => lang('Admin.users.searchPlaceholder'),
         'isFiltered'  => $keyword !== '' || $filters !== [],
+        'filters'     => $dropdownFilters,
     ]) ?>
-        <?php foreach ($filterLabels as $column => $allLabel): ?>
-            <div class="admin-toolbar-select">
-                <?= component('select', [
-                    'name'        => $column,
-                    'label'       => $allLabel,
-                    'hideLabel'   => true,
-                    'options'     => array_combine($filterOptions[$column], $filterOptions[$column]),
-                    'selected'    => $filters[$column] ?? [],
-                    'placeholder' => $allLabel,
-                    'fullwidth'   => true,
-                    'searchable'  => true,
-                    'multiple'    => true,
-                    'emptyLabel'  => 'Tanpa filter',
-                ]) ?>
-            </div>
-        <?php endforeach ?>
-    <?= component_end() ?>
 
     <?php if (! $canUpdate): ?>
         <?= component('readonly_notice', ['message' => 'Anda tidak punya izin mengubah role pengguna.']) ?>
@@ -110,13 +106,15 @@ if ($canUpdate) {
                         <span class="tag is-light is-rounded">Nonaktif</span>
                     <?php endif ?>
                 </td>
-                <?php if ($canUpdate): ?>
+                <?php if ($hasActions): ?>
                     <td class="has-text-right">
                         <?php if ($isMe): ?>
                             <span class="is-size-7 has-text-grey" title="<?= esc(lang('Admin.users.cannotChangeOwnRole'), 'attr') ?>">
                                 <i class="fa-solid fa-lock" aria-hidden="true"></i> Akun Anda
                             </span>
                         <?php else: ?>
+                            <div class="buttons is-right is-flex-wrap-nowrap">
+                            <?php if ($canUpdate): ?>
                             <button type="button" class="button is-small is-light"
                                 data-modal-open="roleModal"
                                 data-role-action="<?= url_to('admin.users.role', $user->id) ?>"
@@ -128,6 +126,15 @@ if ($canUpdate) {
                                 <span class="icon"><i class="fa-solid fa-pen" aria-hidden="true"></i></span>
                                 <span>Ubah Role</span>
                             </button>
+                            <?php endif ?>
+                            <?php if ($canAccess): ?>
+                                <a class="button is-small is-light" href="<?= url_to('admin.users.category-access', $user->id) ?>"
+                                    aria-label="Akses kategori <?= esc($user->name, 'attr') ?>">
+                                    <span class="icon"><i class="fa-solid fa-folder-open" aria-hidden="true"></i></span>
+                                    <span>Akses kategori</span>
+                                </a>
+                            <?php endif ?>
+                            </div>
                         <?php endif ?>
                     </td>
                 <?php endif ?>

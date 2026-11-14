@@ -26,7 +26,7 @@ class SlaPolicyController extends BaseController
         return view('admin/sla_policies/new', [
             'title'  => lang('Admin.sla.createTitle'),
             // Default sama dengan kolom database: hari libur dan hari off tidak dihitung
-            'policy' => new SlaPolicy(['is_active' => true, 'is_holiday' => true, 'is_off_day' => true]),
+            'policy' => new SlaPolicy(['is_active' => true, 'is_holiday' => true, 'is_off_day' => true, 'is_work_hours' => true]),
         ]);
     }
 

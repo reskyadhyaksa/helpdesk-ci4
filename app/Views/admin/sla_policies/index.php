@@ -9,7 +9,7 @@ $canDelete = auth_can(PermissionModel::ADMIN_SLA_DELETE);
 
 // Tanpa izin aksi apa pun: kolom Aksi disembunyikan, diganti satu keterangan di atas tabel
 $hasActions = $canUpdate || $canDelete;
-$columns    = ['Nama Kebijakan', 'Prioritas', 'Respons Pertama', 'Penyelesaian', 'Hari Dilewati', 'Status'];
+$columns    = ['Nama Kebijakan', 'Prioritas', 'Respons Pertama', 'Penyelesaian', 'Waktu Tidak Dihitung', 'Status'];
 
 if ($hasActions) {
     $columns[] = ['label' => 'Aksi', 'align' => 'right'];
@@ -50,10 +50,13 @@ if ($hasActions) {
                 <td><?= esc(format_duration($policy->response_minutes)) ?></td>
                 <td><?= esc(format_duration($policy->resolution_minutes)) ?></td>
                 <td>
-                    <?php if (! $policy->is_holiday && ! $policy->is_off_day): ?>
-                        <span class="has-text-grey">Semua hari dihitung</span>
+                    <?php if (! $policy->is_holiday && ! $policy->is_off_day && ! $policy->is_work_hours): ?>
+                        <span class="has-text-grey">Semua waktu dihitung</span>
                     <?php else: ?>
                         <div class="tags">
+                            <?php if ($policy->is_work_hours): ?>
+                                <span class="tag is-light is-rounded">Di luar jam kerja</span>
+                            <?php endif ?>
                             <?php if ($policy->is_holiday): ?>
                                 <span class="tag is-light is-rounded">Hari libur</span>
                             <?php endif ?>

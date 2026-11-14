@@ -17,9 +17,13 @@ class WeeklyOffDaySeeder extends Seeder
 
         foreach (array_keys(WeeklyOffDayModel::DAYS) as $day) {
             if ($days->findByDay($day) === null) {
+                $isOff = in_array($day, WeeklyOffDayModel::DEFAULT_OFF_DAYS, true);
+
                 $days->insert([
                     'day_of_week' => $day,
-                    'is_off'      => in_array($day, WeeklyOffDayModel::DEFAULT_OFF_DAYS, true) ? 1 : 0,
+                    'is_off'      => $isOff ? 1 : 0,
+                    'work_start'  => $isOff ? null : WeeklyOffDayModel::DEFAULT_WORK_START,
+                    'work_end'    => $isOff ? null : WeeklyOffDayModel::DEFAULT_WORK_END,
                 ]);
             }
         }

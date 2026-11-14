@@ -56,11 +56,29 @@ class HolidayService
     }
 
     /**
-     * @param list<int|string> $days nomor hari yang dijadikan hari off; sisanya hari kerja
+     * @return array<int, array{is_off: bool, start: ?string, end: ?string}> jadwal tujuh hari; jam "HH:MM"
+     */
+    public function schedule(): array
+    {
+        return $this->offDays->schedule();
+    }
+
+    /**
+     * @return list<string> tanggal libur "Y-m-d" mulai $date dan sesudahnya
+     */
+    public function holidayDatesFrom(string $date): array
+    {
+        return $this->holidays->datesFrom($date);
+    }
+
+    /**
+     * @param list<int|string>  $days   nomor hari yang dijadikan hari off; sisanya hari kerja
+     * @param array<int, mixed> $starts jam mulai "HH:MM" per nomor hari
+     * @param array<int, mixed> $ends   jam selesai "HH:MM" per nomor hari
      *
      * @throws BusinessException
      */
-    public function updateOffDays(array $days): void
+    public function updateOffDays(array $days, array $starts, array $ends): void
     {
         $offDays = array_map('intval', $days);
 
@@ -68,9 +86,15 @@ class HolidayService
             throw new BusinessException(lang('Admin.holiday.allDaysOff'));
         }
 
+        // Semua hari divalidasi dulu supaya tidak ada yang tersimpan sebagian
+        $rows = [];
+
         foreach (array_keys(WeeklyOffDayModel::DAYS) as $day) {
-            $row = ['day_of_week' => $day, 'is_off' => in_array($day, $offDays, true) ? 1 : 0];
-            $existing = $this->offDays->findByDay($day);
+            $rows[] = $this->dayRow($day, in_array($day, $offDays, true), $starts, $ends);
+        }
+
+        foreach ($rows as $row) {
+            $existing = $this->offDays->findByDay($row['day_of_week']);
             $saved    = $existing === null
                 ? $this->offDays->insert($row) !== false
                 : $this->offDays->update($existing['id'], $row);
@@ -140,6 +164,30 @@ class HolidayService
         }
 
         return $synced;
+    }
+
+    /**
+     * Hari off tidak punya jam; hari kerja wajib punya jam selesai yang lebih akhir dari jam mulai.
+     *
+     * @throws BusinessException
+     */
+    private function dayRow(int $day, bool $isOff, array $starts, array $ends): array
+    {
+        $row = ['day_of_week' => $day, 'is_off' => $isOff ? 1 : 0, 'work_start' => null, 'work_end' => null];
+
+        if ($isOff) {
+            return $row;
+        }
+
+        $start = substr(trim((string) ($starts[$day] ?? '')), 0, 5);
+        $end   = substr(trim((string) ($ends[$day] ?? '')), 0, 5);
+
+        // Format "HH:MM" sama panjang, jadi perbandingan teks sama dengan perbandingan waktu
+        if ($start === '' || $end === '' || $end <= $start) {
+            throw new BusinessException(lang('Admin.holiday.workHoursInvalid', [WeeklyOffDayModel::DAYS[$day]]));
+        }
+
+        return ['work_start' => $start, 'work_end' => $end] + $row;
     }
 
     private function normalize(array $data): array
