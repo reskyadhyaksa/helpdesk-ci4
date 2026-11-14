@@ -45,4 +45,14 @@ class SlaPolicyModel extends Model
             ->orderBy('response_minutes', 'ASC')
             ->paginate();
     }
+
+    /**
+     * @return array<string, string> id => nama kebijakan aktif, urut nama
+     */
+    public function activeNames(): array
+    {
+        $rows = $this->select('id, name')->where('is_active', 1)->orderBy('name', 'ASC')->asArray()->findAll();
+
+        return array_column($rows, 'name', 'id');
+    }
 }

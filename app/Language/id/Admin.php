@@ -99,6 +99,24 @@ return [
         'emptyMessage'             => 'Tambahkan kebijakan pertama untuk mengatur batas waktu penanganan tiket.',
     ],
 
+    'requestCategory' => [
+        'createTitle'           => 'Tambah Request Category',
+        'editTitle'             => 'Ubah Request Category',
+        'formSubtitle'          => 'Kategori layanan yang dipilih karyawan saat membuat tiket.',
+        'created'               => 'Kategori berhasil ditambahkan.',
+        'updated'               => 'Kategori berhasil diperbarui.',
+        'deleted'               => 'Kategori berhasil dihapus.',
+        'confirmDelete'         => 'Hapus kategori ini? Tindakan ini tidak bisa dibatalkan.',
+        'emptyTitle'            => 'Belum ada kategori',
+        'emptyMessage'          => 'Tambahkan kategori pertama agar karyawan bisa memilihnya saat membuat tiket.',
+        'searchPlaceholder'     => 'Cari nama atau deskripsi kategori',
+        'parentInvalid'         => 'Kategori induk tidak valid. Induk harus berupa kategori utama lain.',
+        'nameTaken'             => 'Nama kategori sudah dipakai pada tingkat yang sama.',
+        'jobTitlesOnlyTopLevel' => 'Job title hanya bisa diatur pada kategori utama. Sub kategori mengikuti induknya.',
+        'unknownJobTitle'       => 'Ada job title yang tidak dikenali. Pilih dari daftar yang tersedia.',
+        'hasSubCategories'      => 'Kategori ini masih punya sub kategori. Hapus atau pindahkan sub kategorinya lebih dulu.',
+    ],
+
     'holiday' => [
         'searchPlaceholder' => 'Cari nama hari libur',
         'filterYear'    => 'Tahun',

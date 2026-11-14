@@ -26,7 +26,7 @@ $menuGroups = [
         'items' => [
             ['page' => 'roles', 'icon' => 'fa-user-shield', 'route' => 'admin.roles.index', 'path' => 'admin/roles*', 'permission' => PermissionModel::ADMIN_ROLES_VIEW],
             ['page' => 'slaPolicies', 'icon' => 'fa-clock', 'route' => 'admin.sla-policies.index', 'path' => 'admin/sla-policies*', 'permission' => PermissionModel::ADMIN_SLA_VIEW],
-            ['page' => 'requestCategories', 'icon' => 'fa-folder-open', 'route' => 'admin.request-categories.index', 'path' => 'admin/request-categories*'],
+            ['page' => 'requestCategories', 'icon' => 'fa-folder-open', 'route' => 'admin.request-categories.index', 'path' => 'admin/request-categories*', 'permission' => PermissionModel::ADMIN_REQUEST_CATEGORIES_VIEW],
             ['page' => 'faqs', 'icon' => 'fa-circle-question', 'route' => 'admin.faqs.index', 'path' => 'admin/faqs*'],
             ['page' => 'forms', 'icon' => 'fa-file-pen', 'route' => 'admin.forms.index', 'path' => 'admin/forms*'],
         ],

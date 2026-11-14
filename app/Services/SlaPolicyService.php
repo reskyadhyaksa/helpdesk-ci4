@@ -23,6 +23,14 @@ class SlaPolicyService
         return ['policies' => $policies, 'pager' => $this->policies->pager];
     }
 
+    /**
+     * @return array<string, string> id => nama kebijakan aktif untuk dropdown
+     */
+    public function activeOptions(): array
+    {
+        return $this->policies->activeNames();
+    }
+
     public function find(string $id): ?SlaPolicy
     {
         return $this->policies->find($id);
