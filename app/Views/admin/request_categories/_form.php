@@ -15,6 +15,8 @@
 $errors   = session('errors') ?? [];
 $isActive = (string) old('is_active', (string) $category['is_active']) === '1';
 $parentId = old('parent_id', $category['parent_id']);
+// Select multi-pilih tanpa pilihan tidak mengirim apa pun; setelah submit gagal, pilihan kosong harus tetap kosong
+$jobTitlesSelected = old('name') !== null ? (old('job_titles') ?? []) : $savedJobTitles;
 $isSub    = $parentId !== null && $parentId !== '';
 ?>
 <form class="box p-0" action="<?= esc($formAction, 'attr') ?>" method="post" novalidate>
@@ -87,12 +89,12 @@ $isSub    = $parentId !== null && $parentId !== '';
                             'name'        => 'job_titles',
                             'label'       => 'Job title yang boleh melihat',
                             'options'     => $jobTitleOptions,
-                            'selected'    => old('job_titles', $savedJobTitles),
-                            'placeholder' => 'Semua job title',
+                            'selected'    => $jobTitlesSelected,
+                            'placeholder' => 'Belum ada job title (tidak ada akses lewat aturan)',
                             'fullwidth'   => true,
                             'multiple'    => true,
                             'searchable'  => true,
-                            'emptyLabel'  => 'Belum ada job title',
+                            'emptyLabel'  => 'Belum ada job title (tidak ada akses lewat aturan)',
                             'disabled'    => $isSub,
                             'help'        => 'Hanya untuk kategori utama. Sub kategori mengikuti induknya.',
                             'error'       => $errors['job_titles.*'] ?? null,

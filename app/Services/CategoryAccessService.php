@@ -25,6 +25,17 @@ class CategoryAccessService
     }
 
     /**
+     * Kontrak untuk modul tiket (TicketModel::visibleTo()) di masa depan.
+     *
+     * 1. Tiket terlihat bila: pemohon = user INI, ATAU kategori tiket termasuk hasil method ini,
+     *    ATAU user punya permission admin.tickets.view-all.
+     * 2. Berikan entity User yang dimuat segar dari database, jangan yang dibangun dari auth_user()/session:
+     *    salinan job_title di session bisa basi, sedangkan method ini membaca $user->job_title.
+     * 3. Jangan kirim daftar kosong ke whereIn([]). Daftar kosong berarti "tanpa kategori": hanya tiket sendiri.
+     * 4. view-all berasal dari permission di session, jadi pencabutannya baru berlaku setelah login ulang;
+     *    akses kategori dihitung ulang di setiap request.
+     * 5. Tiket menunjuk kategori paling spesifik (sub bila ada). Kategori nonaktif tetap terlihat.
+     *
      * @return list<string> id kategori utama dan sub yang boleh dilihat, termasuk yang nonaktif
      */
     public function effectiveCategoryIds(User $user): array
@@ -100,15 +111,15 @@ class CategoryAccessService
 
         if ($existing !== null) {
             $this->userAccess->update($existing['id'], ['effect' => $effect]);
-
-            return;
+        } else {
+            $this->userAccess->insert([
+                'user_id'             => $userId,
+                'request_category_id' => $categoryId,
+                'effect'              => $effect,
+            ]);
         }
 
-        $this->userAccess->insert([
-            'user_id'             => $userId,
-            'request_category_id' => $categoryId,
-            'effect'              => $effect,
-        ]);
+        log_message('info', "Category access: exception {$effect} user={$userId} category={$categoryId} actor={$actorId}");
     }
 
     /**
@@ -118,11 +129,15 @@ class CategoryAccessService
     {
         $this->assertNotOwnAccount($user, $actorId);
 
-        $existing = $this->userAccess->findOne((string) $user->id, $categoryId);
+        $userId   = (string) $user->id;
+        $existing = $this->userAccess->findOne($userId, $categoryId);
 
-        if ($existing !== null) {
-            $this->userAccess->delete($existing['id']);
+        if ($existing === null) {
+            return;
         }
+
+        $this->userAccess->delete($existing['id']);
+        log_message('info', "Category access: exception removed user={$userId} category={$categoryId} actor={$actorId}");
     }
 
     /**

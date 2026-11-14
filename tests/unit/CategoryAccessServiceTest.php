@@ -181,6 +181,20 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
         $this->assertContains('B', $service->effectiveCategoryIds($this->user()));
     }
 
+    public function testAllowOnParentGrantsItsSubCategories(): void
+    {
+        $service = new CategoryAccessService($this->categories(), $this->jobTitleModel([]), $this->userModel(['A' => 'allow']));
+
+        $this->assertSame(['A', 'A1'], $this->sorted($service->effectiveCategoryIds($this->user())));
+    }
+
+    public function testJobTitleRuleReasonOutranksAllowReason(): void
+    {
+        $service = new CategoryAccessService($this->categories(), $this->jobTitleModel(['A']), $this->userModel(['A' => 'allow']));
+
+        $this->assertSame('job_title', $service->explain($this->user())['A']['reason']);
+    }
+
     public function testExplainReportsReasons(): void
     {
         $service = new CategoryAccessService(

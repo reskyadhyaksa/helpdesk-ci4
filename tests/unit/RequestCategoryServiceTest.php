@@ -30,13 +30,13 @@ final class RequestCategoryServiceTest extends CIUnitTestCase
         $this->users->method('filterOptions')->willReturn(['job_title' => ['Payroll Staff', 'HC Officer']]);
     }
 
-    private function service(): RequestCategoryService
+    private function service(?BaseConnection $db = null): RequestCategoryService
     {
         return new RequestCategoryService(
             $this->categories,
             $this->jobTitleAccess,
             $this->users,
-            $this->createMock(BaseConnection::class),
+            $db ?? $this->createMock(BaseConnection::class),
         );
     }
 
@@ -95,6 +95,88 @@ final class RequestCategoryServiceTest extends CIUnitTestCase
         $this->expectException(BusinessException::class);
 
         $this->service()->create($this->data(['job_titles' => ['Tukang Sulap']]));
+    }
+
+    public function testJobTitleWithEdgeWhitespaceInUserDataCanBeSelected(): void
+    {
+        $users = $this->createMock(UserModel::class);
+        $users->method('filterOptions')->willReturn(['job_title' => ['Payroll Staff ', 'HC Officer']]);
+        $service = new RequestCategoryService(
+            $this->categories,
+            $this->jobTitleAccess,
+            $users,
+            $this->createMock(BaseConnection::class),
+        );
+        $this->categories->expects($this->once())->method('insert')->willReturn(self::CATEGORY_ID);
+        $this->jobTitleAccess->expects($this->once())->method('replaceFor')->with(self::CATEGORY_ID, ['Payroll Staff']);
+
+        $service->create($this->data(['job_titles' => ['Payroll Staff']]));
+
+        $this->assertContains('Payroll Staff', $service->jobTitleOptions());
+        $this->assertNotContains('Payroll Staff ', $service->jobTitleOptions());
+    }
+
+    public function testUpdateExcludesOwnIdWhenCheckingNameUniqueness(): void
+    {
+        $this->categories->expects($this->once())
+            ->method('nameExists')
+            ->with('Payroll', null, self::CATEGORY_ID)
+            ->willReturn(false);
+        $this->categories->method('update')->willReturn(true);
+
+        $this->service()->update(['id' => self::CATEGORY_ID, 'parent_id' => null], $this->data());
+    }
+
+    public function testCategoryCannotBeItsOwnParent(): void
+    {
+        $this->categories->method('find')->willReturn(['id' => self::CATEGORY_ID, 'parent_id' => null]);
+        $this->categories->expects($this->never())->method('update');
+        $this->expectException(BusinessException::class);
+
+        $this->service()->update(
+            ['id' => self::CATEGORY_ID, 'parent_id' => null],
+            $this->data(['parent_id' => self::CATEGORY_ID]),
+        );
+    }
+
+    public function testTopLevelCategoryWithSubCategoriesCannotBecomeASub(): void
+    {
+        $this->categories->method('find')->willReturn(['id' => self::PARENT_ID, 'parent_id' => null]);
+        $this->categories->method('hasChildren')->willReturn(true);
+        $this->categories->expects($this->never())->method('update');
+        $this->jobTitleAccess->expects($this->never())->method('replaceFor');
+        $this->expectException(BusinessException::class);
+
+        $this->service()->update(
+            ['id' => self::CATEGORY_ID, 'parent_id' => null],
+            $this->data(['parent_id' => self::PARENT_ID]),
+        );
+    }
+
+    public function testTransactionRollsBackWhenSavingFails(): void
+    {
+        $db = $this->createMock(BaseConnection::class);
+        $db->expects($this->once())->method('transBegin');
+        $db->expects($this->once())->method('transRollback');
+        $db->expects($this->never())->method('transCommit');
+        $this->categories->method('update')->willReturn(true);
+        $this->jobTitleAccess->method('replaceFor')->willThrowException(new RuntimeException('db down'));
+        $this->expectException(RuntimeException::class);
+
+        $this->service($db)->update(['id' => self::CATEGORY_ID, 'parent_id' => null], $this->data());
+    }
+
+    public function testTransactionRollsBackWhenCategoryCannotBeSaved(): void
+    {
+        $db = $this->createMock(BaseConnection::class);
+        $db->expects($this->once())->method('transRollback');
+        $db->expects($this->never())->method('transCommit');
+        $this->categories->method('update')->willReturn(false);
+        $this->categories->method('errors')->willReturn(['name' => 'gagal']);
+        $this->jobTitleAccess->expects($this->never())->method('replaceFor');
+        $this->expectException(BusinessException::class);
+
+        $this->service($db)->update(['id' => self::CATEGORY_ID, 'parent_id' => null], $this->data());
     }
 
     public function testDeleteRefusedWhenCategoryHasSubCategories(): void

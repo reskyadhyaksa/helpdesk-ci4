@@ -28,9 +28,9 @@ class RequestCategoryAccessJobTitleModel extends Model
      */
     public function categoryIdsForJobTitle(string $jobTitle): array
     {
-        // Kolasi bawaan MariaDB tidak membedakan huruf besar-kecil; jabatan harus cocok persis.
+        // Kolom job_title bersifat case-sensitive (utf8mb4_bin), jadi jabatan harus cocok persis.
         $rows = $this->select('request_category_id')
-            ->where('job_title COLLATE utf8mb4_bin = ' . $this->db->escape($jobTitle), null, false)
+            ->where('job_title', $jobTitle)
             ->findAll();
 
         return array_column($rows, 'request_category_id');

@@ -67,7 +67,9 @@ class RequestCategoryService
      */
     public function jobTitleOptions(array $alsoInclude = []): array
     {
-        $options = array_unique(array_merge($this->users->filterOptions()['job_title'], $alsoInclude));
+        // Data HR bisa berspasi di tepi; form selalu mengirim nilai yang sudah di-trim
+        $options = array_map('trim', array_merge($this->users->filterOptions()['job_title'], $alsoInclude));
+        $options = array_unique(array_filter($options, static fn (string $title) => $title !== ''));
         sort($options);
 
         return $options;
@@ -86,6 +88,7 @@ class RequestCategoryService
             $this->ensureSaved($id !== false);
 
             $this->jobTitleAccess->replaceFor($id, $data['job_titles']);
+            $this->logJobTitleRules($id, $data['job_titles']);
         });
     }
 
@@ -102,6 +105,7 @@ class RequestCategoryService
             $this->ensureSaved($saved);
 
             $this->jobTitleAccess->replaceFor($category['id'], $data['job_titles']);
+            $this->logJobTitleRules($category['id'], $data['job_titles']);
         });
     }
 
@@ -170,6 +174,14 @@ class RequestCategoryService
             'is_active'     => (int) $data['is_active'],
             'job_titles'    => array_values(array_unique(array_filter($jobTitles, static fn (string $title) => $title !== ''))),
         ];
+    }
+
+    /**
+     * @param list<string> $jobTitles
+     */
+    private function logJobTitleRules(string $categoryId, array $jobTitles): void
+    {
+        log_message('info', 'Category access: job title rules category=' . $categoryId . ' job_titles=' . implode(',', $jobTitles));
     }
 
     private function categoryRow(array $data): array

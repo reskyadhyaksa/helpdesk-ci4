@@ -70,7 +70,7 @@ class PermissionModel extends Model
             'permissions' => [
                 self::ADMIN_USERS_VIEW => ['label' => 'Lihat pengguna', 'description' => 'Melihat daftar pengguna dan role-nya.'],
                 self::ADMIN_USERS_UPDATE => ['label' => 'Ubah role pengguna', 'description' => 'Memindahkan pengguna ke role lain.'],
-                self::ADMIN_USERS_CATEGORY_ACCESS => ['label' => 'Kelola akses kategori user', 'description' => 'Mengatur kategori request yang boleh dilihat tiketnya oleh pengguna.'],
+                self::ADMIN_USERS_CATEGORY_ACCESS => ['label' => 'Kelola akses kategori user', 'description' => 'Mengelola pengecualian izin dan blokir akses kategori request per pengguna.'],
             ],
         ],
         'Request Category' => [
@@ -78,8 +78,8 @@ class PermissionModel extends Model
             'description' => 'Kategori request yang dipilih saat membuat tiket.',
             'permissions' => [
                 self::ADMIN_REQUEST_CATEGORIES_VIEW => ['label' => 'Lihat kategori request', 'description' => 'Melihat daftar kategori request.'],
-                self::ADMIN_REQUEST_CATEGORIES_CREATE => ['label' => 'Tambah kategori request', 'description' => 'Membuat kategori request baru.'],
-                self::ADMIN_REQUEST_CATEGORIES_UPDATE => ['label' => 'Ubah kategori request', 'description' => 'Mengubah nama dan status kategori request.'],
+                self::ADMIN_REQUEST_CATEGORIES_CREATE => ['label' => 'Tambah kategori request', 'description' => 'Membuat kategori request baru dan menentukan job title yang boleh melihat tiketnya (akses ke tiket rahasia).'],
+                self::ADMIN_REQUEST_CATEGORIES_UPDATE => ['label' => 'Ubah kategori request', 'description' => 'Mengubah nama dan status kategori request serta job title yang boleh melihat tiketnya (akses ke tiket rahasia).'],
                 self::ADMIN_REQUEST_CATEGORIES_DELETE => ['label' => 'Hapus kategori request', 'description' => 'Menghapus kategori request yang tidak dipakai.'],
             ],
         ],
