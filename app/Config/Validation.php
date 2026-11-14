@@ -72,8 +72,36 @@ class Validation extends BaseConfig
         'description' => ['label' => 'Deskripsi', 'rules' => 'permit_empty|max_length[255]'],
         'parent_id' => ['label' => 'Kategori Utama', 'rules' => 'permit_empty|exact_length[36]'],
         'sla_policy_id' => ['label' => 'Kebijakan SLA', 'rules' => 'permit_empty|exact_length[36]'],
-        'is_active'     => ['label' => 'Status aktif', 'rules' => 'required|in_list[0,1]'],
-        'job_titles.*'  => ['label' => 'Job title', 'rules' => 'permit_empty|max_length[100]'],
+        'is_active' => ['label' => 'Status aktif', 'rules' => 'required|in_list[0,1]'],
+        'job_titles.*' => ['label' => 'Job title', 'rules' => 'permit_empty|max_length[100]'],
+        'role_ids.*' => ['label' => 'Role', 'rules' => 'permit_empty|exact_length[36]'],
+        'user_access.*' => ['label' => 'Pengecualian user', 'rules' => 'permit_empty|in_list[allow,deny]'],
+    ];
+
+    public array $publicTicket = [
+        'nip'          => ['label' => 'NIK', 'rules' => 'required|max_length[50]'],
+        'organization' => ['label' => 'Divisi / Regional', 'rules' => 'required|max_length[150]'],
+        'phone'        => ['label' => 'Nomor handphone', 'rules' => 'required|regex_match[/^[0-9+\s\-()]{8,30}$/]'],
+        'email'        => ['label' => 'E-mail', 'rules' => 'permit_empty|valid_email|max_length[255]'],
+        'category_id'  => ['label' => 'Kategori', 'rules' => 'required|exact_length[36]'],
+        'subject'      => ['label' => 'Judul', 'rules' => 'required|max_length[150]'],
+        'description'  => ['label' => 'Deskripsi', 'rules' => 'required|max_length[2000]'],
+    ];
+
+    public array $ticket = [
+        'for_nip'     => ['label' => 'NIK pemohon', 'rules' => 'permit_empty|max_length[50]'],
+        'category_id' => ['label' => 'Kategori', 'rules' => 'required|exact_length[36]'],
+        'subject' => ['label' => 'Judul', 'rules' => 'required|max_length[150]'],
+        'description' => ['label' => 'Deskripsi', 'rules' => 'required|max_length[2000]'],
+    ];
+
+    public array $ticketStatus = [
+        'status' => ['label' => 'Status', 'rules' => 'required|in_list[OPEN,IN_PROGRESS,NEED_RESPONSE,ON_HOLD,ESCALATED,RESOLVED,REOPENED,CLOSED,CANCELLED]'],
+    ];
+
+    public array $ticketAssign = [
+        'role'    => ['label' => 'Peran PIC', 'rules' => 'required|in_list[assignee,resolver]'],
+        'user_id' => ['label' => 'PIC', 'rules' => 'permit_empty|exact_length[36]'],
     ];
 
     public array $holiday = [

@@ -11,6 +11,8 @@ use App\Models\RequestCategoryModel;
 use App\Models\RoleModel;
 use App\Models\RolePermissionModel;
 use App\Models\SlaPolicyModel;
+use App\Models\TicketActivityModel;
+use App\Models\TicketModel;
 use App\Models\UserModel;
 use App\Models\WeeklyOffDayModel;
 use App\Services\Auth\KeycloakAuthService;
@@ -19,6 +21,7 @@ use App\Services\CategoryAccessService;
 use App\Services\HolidayService;
 use App\Services\RequestCategoryService;
 use App\Services\RoleService;
+use App\Services\SlaCalculator;
 use App\Services\SlaPolicyService;
 use App\Services\UserService;
 use CodeIgniter\Config\BaseService;
@@ -93,6 +96,42 @@ class Services extends BaseService
             model(UserModel::class),
             db_connect(),
         );
+            model(UserModel::class),
+            model(RoleModel::class),
+            static::categoryAccess(),
+            db_connect(),
+        );
+    }
+
+    public static function tickets(bool $getShared = true): TicketService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('tickets');
+        }
+
+        return new TicketService(
+            model(TicketModel::class),
+            model(TicketActivityModel::class),
+            model(RequestCategoryModel::class),
+            model(SlaPolicyModel::class),
+            static::holidays(),
+            new SlaCalculator(),
+            static::categoryAccess(),
+            model(UserModel::class),
+            new KeycloakAuthService(),
+            db_connect(),
+        );
+    }
+
+    public static function whatsapp(bool $getShared = true): WhatsAppService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('whatsapp');
+        }
+
+        return new WhatsAppService(static::curlrequest(['timeout' => 10, 'http_errors' => false]), config(Integration::class));
+    }
+
     }
 
             model(RequestCategoryAccessRoleModel::class),

@@ -63,6 +63,26 @@ class RequestCategoryModel extends Model
         return $this->orderedUnderParent()->paginate();
     }
 
+    /**
+     * Tujuan tiket: kategori aktif yang tidak punya sub kategori (tiket menunjuk kategori paling spesifik).
+     *
+     * @return list<array> id, name, parent_name; kategori utama diikuti subnya, urut nama
+     */
+    public function selectableForTicket(): array
+    {
+        $this->select('request_categories.id, request_categories.name, parent.name AS parent_name')
+            ->where('request_categories.is_active', 1)
+            ->groupStart()->where('parent.id IS NULL', null, false)->orWhere('parent.is_active', 1)->groupEnd()
+            ->where('NOT EXISTS (SELECT 1 FROM request_categories child WHERE child.parent_id = request_categories.id)', null, false);
+
+        return $this->orderedUnderParent()->findAll();
+    }
+
+    public function hasTickets(string $id): bool
+    {
+        return $this->db->table('tickets')->where('request_category_id', $id)->countAllResults() > 0;
+    }
+
     public function hasChildren(string $id): bool
     {
         return $this->where('parent_id', $id)->countAllResults() > 0;

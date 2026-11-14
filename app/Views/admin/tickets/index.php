@@ -1,3 +1,9 @@
+<?php
+/**
+ * @var list<array>              $tickets
+ * @var \CodeIgniter\Pager\Pager $pager
+ */
+?>
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('content') ?>
@@ -7,9 +13,15 @@
         'subtitle' => lang('Admin.pages.tickets.subtitle'),
     ]) ?>
 
-    <?= component('data_table', [
-        'emptyIcon' => 'fa-ticket',
-        'columns' => ['No. Tiket', 'Judul', 'Pelapor', 'Kategori', 'Status', 'SLA', 'Dibuat'],
+    <?php component_start('data_table', [
+        'columns'      => ['No. Tiket', 'Judul', 'Pelapor', 'Kategori', 'Status', 'PIC Helpdesk', 'Respons Sebelum', 'Selesai Sebelum', 'Dibuat'],
+        'emptyIcon'    => 'fa-ticket',
+        'emptyTitle'   => lang('Ticket.emptyTitle'),
+        'emptyMessage' => lang('Ticket.emptyMessage'),
+        'pager'        => $pager,
+        'totalLabel'   => 'tiket',
     ]) ?>
+        <?= view('tickets/_rows', ['tickets' => $tickets, 'showRequester' => true, 'detailRoute' => 'admin.tickets.show']) ?>
+    <?= component_end() ?>
 </section>
 <?= $this->endSection() ?>

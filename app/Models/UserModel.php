@@ -109,6 +109,21 @@ class UserModel extends Model
         return $this->where('role_id', $roleId)->countAllResults();
     }
 
+    /**
+     * @return list<array{id: string, name: string, employee_no: string}> user aktif yang rolenya punya permission, urut nama
+     */
+    public function withPermission(string $slug): array
+    {
+        return $this->select('users.id, users.name, users.employee_no')
+            ->join('role_permissions rp', 'rp.role_id = users.role_id')
+            ->join('permissions p', 'p.id = rp.permission_id')
+            ->where('p.slug', $slug)
+            ->where('users.is_active', 1)
+            ->orderBy('users.name', 'ASC')
+            ->asArray()
+            ->findAll();
+    }
+
     public function findByEmployeeNo(string $employeeNo): ?User
     {
         return $this->select('users.*, roles.slug AS role_slug, roles.name AS role_name')

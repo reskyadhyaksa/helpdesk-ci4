@@ -14,6 +14,8 @@ class PermissionModel extends Model
     public const ADMIN_ACCESS = 'admin.access';
     public const ADMIN_DASHBOARD_VIEW = 'admin.dashboard.view';
     public const USER_DASHBOARD_VIEW = 'user.dashboard.view';
+    public const USER_TICKETS_VIEW = 'user.tickets.view';
+    public const USER_TICKETS_CREATE = 'user.tickets.create';
 
     public const ADMIN_ROLES_VIEW = 'admin.roles.view';
     public const ADMIN_ROLES_CREATE = 'admin.roles.create';
@@ -30,6 +32,8 @@ class PermissionModel extends Model
     public const ADMIN_REQUEST_CATEGORIES_DELETE = 'admin.request-categories.delete';
 
     public const ADMIN_TICKETS_VIEW_ALL = 'admin.tickets.view-all';
+    public const ADMIN_TICKETS_UPDATE = 'admin.tickets.update';
+    public const ADMIN_TICKETS_ASSIGN = 'admin.tickets.assign';
 
     public const ADMIN_SLA_VIEW = 'admin.sla-policies.view';
     public const ADMIN_SLA_CREATE = 'admin.sla-policies.create';

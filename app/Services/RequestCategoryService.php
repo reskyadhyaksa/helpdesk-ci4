@@ -185,6 +185,11 @@ class RequestCategoryService
             throw new BusinessException(lang('Admin.requestCategory.hasSubCategories'));
         }
 
+        // Tiket menunjuk kategori ini (foreign key RESTRICT): tolak dengan pesan, jangan biarkan database yang gagal
+        if ($this->categories->hasTickets($category['id'])) {
+            throw new BusinessException(lang('Admin.requestCategory.hasTickets'));
+        }
+
         $this->categories->delete($category['id']);
     }
 

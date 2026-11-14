@@ -29,6 +29,12 @@ $routes->group('u', ['namespace' => 'App\Controllers\User', 'filter' => 'auth:us
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'auth:admin.access'], static function (RouteCollection $routes) {
     $routes->get('/', 'DashboardController::index', ['as' => 'admin.dashboard', 'filter' => 'auth:admin.dashboard.view']);
 
+    // Tiket: daftar tiket yang terlihat oleh user, dan form buat tiket
+    $routes->get('tickets', 'TicketController::index', ['as' => 'user.tickets.index', 'filter' => 'auth:user.tickets.view']);
+    $routes->get('tickets/new', 'TicketController::new', ['as' => 'user.tickets.new', 'filter' => 'auth:user.tickets.create']);
+    $routes->get('tickets/(:uuid)', 'TicketController::show/$1', ['as' => 'user.tickets.show', 'filter' => 'auth:user.tickets.view']);
+    $routes->post('tickets', 'TicketController::create', ['as' => 'user.tickets.create', 'filter' => 'auth:user.tickets.create']);
+
     // Halaman kerangka: cukup gerbang admin.access. Tambah permission per halaman saat fiturnya dibuat.
     $routes->get('tickets', 'TicketController::index', ['as' => 'admin.tickets.index']);
     $routes->get('tickets/mine', 'TicketController::mine', ['as' => 'admin.tickets.mine']);
@@ -37,6 +43,9 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'au
     $routes->get('reports', 'ReportController::index', ['as' => 'admin.reports.index']);
 
     // CRUD: tiap aksi dijaga permission-nya sendiri (view, create, update, delete)
+    $routes->get('tickets/(:uuid)', 'TicketController::show/$1', ['as' => 'admin.tickets.show']);
+    $routes->post('tickets/(:uuid)/status', 'TicketController::updateStatus/$1', ['as' => 'admin.tickets.status', 'filter' => 'auth:admin.tickets.update']);
+    $routes->post('tickets/(:uuid)/assign', 'TicketController::assign/$1', ['as' => 'admin.tickets.assign', 'filter' => 'auth:admin.tickets.assign']);
 
     // Roles Category: role dan permission-nya
     $routes->get('roles', 'RoleController::index', ['as' => 'admin.roles.index', 'filter' => 'auth:admin.roles.view']);
