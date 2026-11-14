@@ -36,7 +36,7 @@ class UserCategoryAccessController extends BaseController
         $input = $this->validator->getValidated();
 
         try {
-            service('categoryAccess')->addException($user, $input['category_id'], $input['effect']);
+            service('categoryAccess')->addException($user, $input['category_id'], $input['effect'], auth_user()['id']);
         } catch (BusinessException $e) {
             return redirect()->back()->withInput()->with('danger', $e->getMessage());
         }
@@ -46,7 +46,11 @@ class UserCategoryAccessController extends BaseController
 
     public function delete(string $userId, string $categoryId): RedirectResponse
     {
-        service('categoryAccess')->removeException($this->findUser($userId), $categoryId);
+        try {
+            service('categoryAccess')->removeException($this->findUser($userId), $categoryId, auth_user()['id']);
+        } catch (BusinessException $e) {
+            return redirect()->back()->with('danger', $e->getMessage());
+        }
 
         return redirect()->back()->with('success', lang('Admin.categoryAccess.removed'));
     }

@@ -80,6 +80,7 @@ return [
         'removed'         => 'Pengecualian akses berhasil dihapus.',
         'invalidEffect'   => 'Efek pengecualian harus boleh atau blokir.',
         'unknownCategory' => 'Kategori yang dipilih tidak ditemukan.',
+        'cannotChangeOwn' => 'Anda tidak bisa mengubah pengecualian akses akun sendiri.',
         'reasons'         => [
             'job_title'      => 'Sesuai job title',
             'allow'          => 'Diizinkan lewat pengecualian',

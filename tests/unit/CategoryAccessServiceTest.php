@@ -240,7 +240,7 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
         ]);
         $userAccess->expects($this->never())->method('update');
 
-        $this->exceptionService($userAccess)->addException($this->user(), 'B', 'allow');
+        $this->exceptionService($userAccess)->addException($this->user(), 'B', 'allow', 'admin-1');
     }
 
     public function testAddingSameExceptionTwiceUpdatesEffect(): void
@@ -250,7 +250,7 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
         $userAccess->expects($this->once())->method('update')->with('row-1', ['effect' => 'deny']);
         $userAccess->expects($this->never())->method('insert');
 
-        $this->exceptionService($userAccess)->addException($this->user(), 'B', 'deny');
+        $this->exceptionService($userAccess)->addException($this->user(), 'B', 'deny', 'admin-1');
     }
 
     public function testInvalidEffectIsRejected(): void
@@ -260,7 +260,7 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
 
         $this->expectException(BusinessException::class);
 
-        $this->exceptionService($userAccess)->addException($this->user(), 'B', 'maybe');
+        $this->exceptionService($userAccess)->addException($this->user(), 'B', 'maybe', 'admin-1');
     }
 
     public function testUnknownCategoryIsRejected(): void
@@ -273,7 +273,7 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
 
         $this->expectException(BusinessException::class);
 
-        $this->exceptionService($userAccess, $categories)->addException($this->user(), 'missing', 'allow');
+        $this->exceptionService($userAccess, $categories)->addException($this->user(), 'missing', 'allow', 'admin-1');
     }
 
     public function testRemoveExceptionDeletesRow(): void
@@ -282,6 +282,31 @@ final class CategoryAccessServiceTest extends CIUnitTestCase
         $userAccess->method('findOne')->with('user-1', 'B')->willReturn(['id' => 'row-1', 'effect' => 'allow']);
         $userAccess->expects($this->once())->method('delete')->with('row-1');
 
-        $this->exceptionService($userAccess)->removeException($this->user(), 'B');
+        $this->exceptionService($userAccess)->removeException($this->user(), 'B', 'admin-1');
+    }
+
+    private function untouchedUserAccess(): RequestCategoryAccessUserModel
+    {
+        $userAccess = $this->createMock(RequestCategoryAccessUserModel::class);
+        $userAccess->expects($this->never())->method('findOne');
+        $userAccess->expects($this->never())->method('insert');
+        $userAccess->expects($this->never())->method('update');
+        $userAccess->expects($this->never())->method('delete');
+
+        return $userAccess;
+    }
+
+    public function testAddExceptionOnOwnAccountIsRejected(): void
+    {
+        $this->expectException(BusinessException::class);
+
+        $this->exceptionService($this->untouchedUserAccess())->addException($this->user(), 'B', 'allow', 'user-1');
+    }
+
+    public function testRemoveExceptionOnOwnAccountIsRejected(): void
+    {
+        $this->expectException(BusinessException::class);
+
+        $this->exceptionService($this->untouchedUserAccess())->removeException($this->user(), 'B', 'user-1');
     }
 }

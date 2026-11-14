@@ -83,8 +83,10 @@ class CategoryAccessService
      *
      * @throws BusinessException
      */
-    public function addException(User $user, string $categoryId, string $effect): void
+    public function addException(User $user, string $categoryId, string $effect, string $actorId): void
     {
+        $this->assertNotOwnAccount($user, $actorId);
+
         if (! in_array($effect, [RequestCategoryAccessUserModel::EFFECT_ALLOW, RequestCategoryAccessUserModel::EFFECT_DENY], true)) {
             throw new BusinessException(lang('Admin.categoryAccess.invalidEffect'));
         }
@@ -109,8 +111,13 @@ class CategoryAccessService
         ]);
     }
 
-    public function removeException(User $user, string $categoryId): void
+    /**
+     * @throws BusinessException
+     */
+    public function removeException(User $user, string $categoryId, string $actorId): void
     {
+        $this->assertNotOwnAccount($user, $actorId);
+
         $existing = $this->userAccess->findOne((string) $user->id, $categoryId);
 
         if ($existing !== null) {
@@ -152,6 +159,18 @@ class CategoryAccessService
         }
 
         return $this->result(false, self::REASON_NONE);
+    }
+
+    /**
+     * Mencegah admin memberi atau mencabut pengecualian akses untuk akunnya sendiri.
+     *
+     * @throws BusinessException
+     */
+    private function assertNotOwnAccount(User $user, string $actorId): void
+    {
+        if ((string) $user->id === $actorId) {
+            throw new BusinessException(lang('Admin.categoryAccess.cannotChangeOwn'));
+        }
     }
 
     /**
