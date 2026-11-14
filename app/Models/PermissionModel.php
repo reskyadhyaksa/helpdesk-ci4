@@ -22,6 +22,14 @@ class PermissionModel extends Model
 
     public const ADMIN_USERS_VIEW = 'admin.users.view';
     public const ADMIN_USERS_UPDATE = 'admin.users.update';
+    public const ADMIN_USERS_CATEGORY_ACCESS = 'admin.users.category-access';
+
+    public const ADMIN_REQUEST_CATEGORIES_VIEW = 'admin.request-categories.view';
+    public const ADMIN_REQUEST_CATEGORIES_CREATE = 'admin.request-categories.create';
+    public const ADMIN_REQUEST_CATEGORIES_UPDATE = 'admin.request-categories.update';
+    public const ADMIN_REQUEST_CATEGORIES_DELETE = 'admin.request-categories.delete';
+
+    public const ADMIN_TICKETS_VIEW_ALL = 'admin.tickets.view-all';
 
     public const ADMIN_SLA_VIEW = 'admin.sla-policies.view';
     public const ADMIN_SLA_CREATE = 'admin.sla-policies.create';
@@ -62,6 +70,24 @@ class PermissionModel extends Model
             'permissions' => [
                 self::ADMIN_USERS_VIEW => ['label' => 'Lihat pengguna', 'description' => 'Melihat daftar pengguna dan role-nya.'],
                 self::ADMIN_USERS_UPDATE => ['label' => 'Ubah role pengguna', 'description' => 'Memindahkan pengguna ke role lain.'],
+                self::ADMIN_USERS_CATEGORY_ACCESS => ['label' => 'Kelola akses kategori user', 'description' => 'Mengatur kategori request yang boleh dilihat tiketnya oleh pengguna.'],
+            ],
+        ],
+        'Request Category' => [
+            'icon' => 'fa-folder-open',
+            'description' => 'Kategori request yang dipilih saat membuat tiket.',
+            'permissions' => [
+                self::ADMIN_REQUEST_CATEGORIES_VIEW => ['label' => 'Lihat kategori request', 'description' => 'Melihat daftar kategori request.'],
+                self::ADMIN_REQUEST_CATEGORIES_CREATE => ['label' => 'Tambah kategori request', 'description' => 'Membuat kategori request baru.'],
+                self::ADMIN_REQUEST_CATEGORIES_UPDATE => ['label' => 'Ubah kategori request', 'description' => 'Mengubah nama dan status kategori request.'],
+                self::ADMIN_REQUEST_CATEGORIES_DELETE => ['label' => 'Hapus kategori request', 'description' => 'Menghapus kategori request yang tidak dipakai.'],
+            ],
+        ],
+        'Tiket' => [
+            'icon' => 'fa-ticket',
+            'description' => 'Akses ke tiket layanan.',
+            'permissions' => [
+                self::ADMIN_TICKETS_VIEW_ALL => ['label' => 'Lihat semua tiket', 'description' => 'Melihat tiket dari semua kategori tanpa dibatasi akses kategori.'],
             ],
         ],
         'SLA Policies' => [
