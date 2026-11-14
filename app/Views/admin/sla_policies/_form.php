@@ -23,6 +23,7 @@ $targets = [
 $calendarFlags = [
     'is_holiday' => ['label' => 'Lewati hari libur', 'desc' => 'Tanggal merah dan cuti bersama tidak dihitung.'],
     'is_off_day' => ['label' => 'Lewati hari off', 'desc' => 'Hari off mingguan (default Sabtu & Minggu) tidak dihitung.'],
+    'is_work_hours' => ['label' => 'Hanya jam kerja', 'desc' => 'Waktu dihitung hanya pada jam kerja tiap hari. Matikan untuk hitungan 24 jam.'],
 ];
 ?>
 <form class="box p-0" action="<?= esc($formAction, 'attr') ?>" method="post" novalidate>
@@ -91,7 +92,7 @@ $calendarFlags = [
                     <?php endforeach ?>
                 </div>
                 <p class="help mt-0">
-                    Daftar tanggal libur dan hari off diatur di
+                    Daftar tanggal libur, hari off, dan jam kerja diatur di
                     <a href="<?= url_to('admin.holidays.index') ?>">Data Management › Holiday</a>.
                 </p>
             </div>

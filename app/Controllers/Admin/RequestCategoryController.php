@@ -4,6 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Exceptions\BusinessException;
+use App\Models\PermissionModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\RedirectResponse;
 
@@ -12,13 +13,32 @@ class RequestCategoryController extends BaseController
     public function index(): string
     {
         $keyword = trim((string) $this->request->getGet('q'));
-        $result  = service('requestCategories')->paginate($keyword);
+        $filters = [];
+
+        // Filter multi-pilih dari query string (job_title[]=A&job_title[]=B); nama parameter = kunci filter.
+        // Filter tanpa nilai diabaikan.
+        foreach (['parent_id', 'job_title', 'role_id'] as $name) {
+            $values = array_values(array_filter(
+                array_map('trim', array_map('strval', (array) $this->request->getGet($name))),
+                static fn (string $value): bool => $value !== '',
+            ));
+
+            if ($values !== []) {
+                $filters[$name] = $values;
+            }
+        }
+
+        $categories = service('requestCategories');
+        $result     = $categories->paginate($keyword, $filters);
 
         return view('admin/request_categories/index', [
             'title'      => lang('Admin.pages.requestCategories.title'),
             'keyword'    => $keyword,
+            'filters'    => $filters,
+            'filterOptions' => $categories->filterOptions(),
             'categories' => $result['categories'],
             'jobTitles'  => $result['jobTitles'],
+            'roles'      => $result['roles'],
             'pager'      => $result['pager'],
         ]);
     }
@@ -38,7 +58,7 @@ class RequestCategoryController extends BaseController
         }
 
         try {
-            service('requestCategories')->create($this->validator->getValidated());
+            service('requestCategories')->create($this->validator->getValidated(), auth_user()['id'], $this->canManageUserAccess());
         } catch (BusinessException $e) {
             return redirect()->back()->withInput()->with('danger', $e->getMessage());
         }
@@ -65,7 +85,7 @@ class RequestCategoryController extends BaseController
         }
 
         try {
-            service('requestCategories')->update($category, $this->validator->getValidated());
+            service('requestCategories')->update($category, $this->validator->getValidated(), auth_user()['id'], $this->canManageUserAccess());
         } catch (BusinessException $e) {
             return redirect()->back()->withInput()->with('danger', $e->getMessage());
         }
@@ -89,22 +109,54 @@ class RequestCategoryController extends BaseController
         return service('requestCategories')->find($id) ?? throw PageNotFoundException::forPageNotFound();
     }
 
+    private function canManageUserAccess(): bool
+    {
+        return service('auth')->can(PermissionModel::ADMIN_USERS_CATEGORY_ACCESS);
+    }
+
     /**
-     * Data dropdown form. Kategori yang sedang diubah tidak boleh menjadi induknya sendiri.
+     * Data form. Kategori yang sedang diubah tidak boleh menjadi induknya sendiri; akun sendiri tidak
+     * ditawarkan di pilihan user karena pengecualian akun sendiri tidak boleh diubah.
      *
      * @param list<string> $savedJobTitles
      */
     private function formOptions(?string $categoryId, ?string $savedSlaId, array $savedJobTitles): array
     {
-        $categories = service('requestCategories');
-        $parents    = array_filter($categories->topLevel(), static fn (array $parent) => $parent['id'] !== $categoryId);
-        $titles     = $categories->jobTitleOptions($savedJobTitles);
+        $categories  = service('requestCategories');
+        $parents     = array_filter($categories->topLevel(), static fn (array $parent) => $parent['id'] !== $categoryId);
+        $titles      = $categories->jobTitleOptions($savedJobTitles);
+        $userOptions = $categories->userOptions();
+
+        unset($userOptions[auth_user()['id']]);
 
         return [
-            'parentOptions'   => array_column($parents, 'name', 'id'),
-            'slaOptions'      => service('slaPolicies')->activeOptions($savedSlaId),
-            'jobTitleOptions' => array_combine($titles, $titles),
-            'savedJobTitles'  => $savedJobTitles,
+            'parentOptions'       => array_column($parents, 'name', 'id'),
+            'slaOptions'          => service('slaPolicies')->activeOptions($savedSlaId),
+            'jobTitleOptions'     => array_combine($titles, $titles),
+            'roleOptions'         => $categories->roleOptions(),
+            'userOptions'         => $userOptions,
+            'accessEntries'       => $categories->accessEntries($categoryId, $this->submittedAccess()),
+            'canManageUserAccess' => $this->canManageUserAccess(),
+            'actorId'             => auth_user()['id'],
+        ];
+    }
+
+    /**
+     * Akses yang dikirim pada form yang gagal disimpan (null = form dibuka pertama kali). Pilihan kosong tidak
+     * terkirim sama sekali, jadi kehadiran field `name` (selalu terkirim) menandai tampilan ulang.
+     *
+     * @return array{job_titles: array, role_ids: array, user_access: array}|null
+     */
+    private function submittedAccess(): ?array
+    {
+        if ($this->request->getOldInput('name') === null) {
+            return null;
+        }
+
+        return [
+            'job_titles'  => (array) $this->request->getOldInput('job_titles'),
+            'role_ids'    => (array) $this->request->getOldInput('role_ids'),
+            'user_access' => (array) $this->request->getOldInput('user_access'),
         ];
     }
 }

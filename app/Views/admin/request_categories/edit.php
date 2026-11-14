@@ -8,13 +8,17 @@
     ]) ?>
 
     <?= view('admin/request_categories/_form', [
-        'category'        => $category,
-        'parentOptions'   => $parentOptions,
-        'slaOptions'      => $slaOptions,
-        'jobTitleOptions' => $jobTitleOptions,
-        'savedJobTitles'  => $savedJobTitles,
-        'formAction'      => url_to('admin.request-categories.update', $category['id']),
-        'submitLabel'     => 'Simpan Perubahan',
+        'category'            => $category,
+        'parentOptions'       => $parentOptions,
+        'slaOptions'          => $slaOptions,
+        'jobTitleOptions'     => $jobTitleOptions,
+        'roleOptions'         => $roleOptions,
+        'userOptions'         => $userOptions,
+        'accessEntries'       => $accessEntries,
+        'canManageUserAccess' => $canManageUserAccess,
+        'actorId'             => $actorId,
+        'formAction'          => url_to('admin.request-categories.update', $category['id']),
+        'submitLabel'         => 'Simpan Perubahan',
     ]) ?>
 </section>
 <?= $this->endSection() ?>

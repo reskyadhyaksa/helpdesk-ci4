@@ -37,6 +37,7 @@ class HolidayController extends BaseController
             'holidays'       => $result['holidays'],
             'pager'          => $result['pager'],
             'offDayNums'     => $holidays->offDayNumbers(),
+            'schedule'       => $holidays->schedule(),
         ]);
     }
 
@@ -113,7 +114,11 @@ class HolidayController extends BaseController
         }
 
         try {
-            service('holidays')->updateOffDays($this->request->getPost('off_days') ?? []);
+            service('holidays')->updateOffDays(
+                $this->request->getPost('off_days') ?? [],
+                $this->request->getPost('work_start') ?? [],
+                $this->request->getPost('work_end') ?? [],
+            );
         } catch (BusinessException $e) {
             return redirect()->to(url_to('admin.holidays.index'))->with('danger', $e->getMessage());
         }

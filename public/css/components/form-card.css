@@ -36,16 +36,16 @@
 .form-panel {
   height: 100%;
   padding: 1.25rem;
-  border: 1px solid #eef0f4;
+  border: 1px solid var(--app-stroke-blue);
   border-radius: 0.9rem;
-  background-color: #f8fafc;
+  background-color: var(--app-fill-blue);
 }
 
 .form-panel + .form-panel,
 .form-panel-divider {
   margin-top: 1.25rem;
   padding-top: 1.25rem;
-  border-top: 1px solid #e5e9f0;
+  border-top: 1px solid var(--app-stroke-blue);
 }
 
 /* Checkbox berbentuk kartu */
@@ -67,8 +67,9 @@
 }
 
 .option-card:has(input:checked) {
-  border-color: hsl(222deg 75% 22% / 0.3);
-  background-color: hsl(222deg 75% 22% / 0.04);
+  border-color: var(--app-stroke-blue);
+  /* fill-blue 50% di atas putih: lebih terang dari panel fill-blue, jadi kartu tetap terlihat */
+  background-color: color-mix(in srgb, var(--app-fill-blue) 50%, #fff);
 }
 
 .option-card:has(input:focus-visible) {
@@ -126,6 +127,216 @@
 
 @media (prefers-reduced-motion: reduce) {
   .option-card {
+    transition: none;
+  }
+}
+
+/*
+ * Tabel akses di form Request Category (views/admin/request_categories/_form.php):
+ * daftar job title / role / user + baris tambah (tipe sebagai kontrol segmen, lalu pilihan nama dengan pencarian).
+ */
+.access-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eef0f4;
+}
+
+.access-table-wrap {
+  border: 1px solid #e5e9f0;
+  border-radius: 0.85rem;
+  background-color: #fff;
+}
+
+.access-table {
+  margin-bottom: 0;
+}
+
+.access-table th {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Ukuran dan ketebalan seragam: nama, tipe, dan hak sama-sama 0.875rem / 600 */
+.access-table td {
+  vertical-align: middle;
+  font-size: 0.875rem;
+}
+
+.access-table td strong,
+.access-table td .tag {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.access-table td small {
+  display: block;
+  color: #64748b;
+}
+
+.access-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.access-tag {
+  gap: 0.25rem;
+}
+
+.access-tag.is-job_title {
+  background-color: hsl(222deg 75% 22% / 0.08);
+  color: var(--bulma-primary);
+}
+
+.access-tag.is-role {
+  background-color: hsl(262deg 70% 94%);
+  color: hsl(262deg 55% 38%);
+}
+
+.access-tag.is-user {
+  background-color: hsl(190deg 70% 92%);
+  color: hsl(190deg 70% 26%);
+}
+
+.access-remove {
+  color: hsl(348deg 70% 45%);
+}
+
+.access-remove:hover,
+.access-remove:focus-visible {
+  background-color: hsl(348deg 86% 61% / 0.1);
+  color: hsl(348deg 70% 38%);
+}
+
+/* Baris tambah: kotak putus-putus berisi [tipe] [nama] ([boleh|blokir]) [Tambah] */
+.access-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  margin-top: 1rem;
+  padding: 0.85rem 1rem 1rem;
+  border: 1px dashed var(--app-stroke-blue);
+  border-radius: 0.85rem;
+  background-color: var(--app-fill-blue);
+}
+
+.access-add-title {
+  padding: 0 0.35rem;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.access-picker {
+  flex: 1 1 16rem;
+  min-width: 12rem;
+}
+
+.access-add-button {
+  flex-shrink: 0;
+}
+
+/* Kontrol segmen dari radio: radio asli tetap ada (fokus dan keyboard), tampilannya tombol */
+.access-types {
+  display: inline-flex;
+  gap: 0.2rem;
+  padding: 0.2rem;
+  border: 1px solid var(--app-stroke-blue);
+  border-radius: 0.75rem;
+  background-color: #fff;
+}
+
+.access-type {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.35rem;
+  padding: 0 0.85rem;
+  border-radius: 0.55rem;
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.access-type input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.access-type:hover {
+  background-color: #f1f5f9;
+}
+
+.access-type:has(input:checked) {
+  background-color: var(--bulma-primary);
+  color: #fff;
+}
+
+.access-type.is-allow:has(input:checked) {
+  background-color: hsl(153deg 50% 30%);
+}
+
+.access-type.is-deny:has(input:checked) {
+  background-color: hsl(348deg 70% 42%);
+}
+
+.access-type:has(input:focus-visible) {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: 2px;
+}
+
+.access-type.is-disabled,
+.access-type.is-disabled input {
+  cursor: not-allowed;
+}
+
+.access-type.is-disabled {
+  opacity: 0.45;
+}
+
+@media (max-width: 768px) {
+  .access-add {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .access-types {
+    display: flex;
+  }
+
+  .access-type {
+    flex: 1;
+    justify-content: center;
+    min-height: 2.75rem;
+  }
+
+  .access-picker {
+    flex-basis: auto;
+  }
+
+  .access-add-button {
+    width: 100%;
+  }
+}
+
+@media (pointer: coarse) {
+  .access-type {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .access-type {
     transition: none;
   }
 }

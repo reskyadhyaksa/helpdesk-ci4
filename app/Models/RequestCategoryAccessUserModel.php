@@ -35,6 +35,18 @@ class RequestCategoryAccessUserModel extends Model
         return $this->select('request_category_id, effect')->where('user_id', $userId)->findAll();
     }
 
+    /**
+     * @return list<array{user_id: string, effect: string, name: string, employee_no: string}> pengecualian untuk satu kategori, urut nama
+     */
+    public function forCategory(string $categoryId): array
+    {
+        return $this->select('request_category_access_user.user_id, request_category_access_user.effect, users.name, users.employee_no')
+            ->join('users', 'users.id = request_category_access_user.user_id')
+            ->where('request_category_access_user.request_category_id', $categoryId)
+            ->orderBy('users.name', 'ASC')
+            ->findAll();
+    }
+
     public function findOne(string $userId, string $categoryId): ?array
     {
         return $this->where('user_id', $userId)->where('request_category_id', $categoryId)->first();

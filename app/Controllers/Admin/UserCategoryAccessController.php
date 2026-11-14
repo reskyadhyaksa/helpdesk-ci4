@@ -22,6 +22,7 @@ class UserCategoryAccessController extends BaseController
             'categories' => $categories,
             'explained'  => $access->explain($user),
             'exceptions' => $access->exceptionsFor($user),
+            'roleName'   => service('roles')->find((string) $user->role_id)['name'] ?? '',
         ]);
     }
 

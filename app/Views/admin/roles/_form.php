@@ -34,7 +34,7 @@ $checked = old('name') !== null ? (old('permissions') ?? []) : $granted;
         </div>
 
         <p class="label mb-1">Hak Akses</p>
-        <p class="help mt-0 mb-4">
+        <p class="help mt-0 mb-3">
             <?= esc(lang('Admin.roles.reloginHint')) ?>
             <?php if ($locked !== []): ?>
                 <?= esc(lang('Admin.roles.lockedHint')) ?>

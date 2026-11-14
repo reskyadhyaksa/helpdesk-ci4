@@ -37,6 +37,16 @@ class RequestCategoryAccessJobTitleModel extends Model
     }
 
     /**
+     * @return list<string> job title yang dipakai di aturan akses kategori mana pun
+     */
+    public function usedJobTitles(): array
+    {
+        $rows = $this->distinct()->select('job_title')->orderBy('job_title', 'ASC')->findAll();
+
+        return array_column($rows, 'job_title');
+    }
+
+    /**
      * @return list<string>
      */
     public function jobTitlesFor(string $categoryId): array

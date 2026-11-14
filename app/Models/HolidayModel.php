@@ -72,6 +72,14 @@ class HolidayModel extends Model
         return array_map('intval', array_column($rows, 'year'));
     }
 
+    /**
+     * @return list<string> tanggal libur "Y-m-d" mulai $date (termasuk) dan sesudahnya
+     */
+    public function datesFrom(string $date): array
+    {
+        return array_column($this->select('holiday_date')->where('holiday_date >=', $date)->findAll(), 'holiday_date');
+    }
+
     public function findByDate(string $date): ?array
     {
         return $this->where('holiday_date', $date)->first();

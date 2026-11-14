@@ -21,6 +21,8 @@
   --app-secondary: hsl(49deg 81% 52%);
   --app-secondary-soft: hsl(49deg 81% 52% / 0.18);
   --app-secondary-ink: hsl(222deg 75% 22%);
+  --app-stroke-blue: #bfdbfe;
+  --app-fill-blue: #eff6ff;
   /* Danger bawaan Bulma (l 70%) hanya ±2.6:1 di latar putih; versi gelap ini untuk teks */
   --app-danger-ink: hsl(348deg 75% 40%);
 

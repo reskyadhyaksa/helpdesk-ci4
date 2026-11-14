@@ -25,6 +25,16 @@ $filterLabels = [
     'organization'   => 'Semua organisasi',
 ];
 
+$dropdownFilters = [];
+
+foreach ($filterLabels as $column => $allLabel) {
+    $dropdownFilters[$column] = [
+        'placeholder' => $allLabel,
+        'options'     => array_combine($filterOptions[$column], $filterOptions[$column]),
+        'selected'    => $filters[$column] ?? [],
+    ];
+}
+
 $columns = ['Pengguna', 'NIK', 'Jabatan', 'Role', 'Login Terakhir', 'Status'];
 
 if ($hasActions) {
@@ -40,29 +50,13 @@ if ($hasActions) {
         'subtitle' => lang('Admin.pages.users.subtitle'),
     ]) ?>
 
-    <?php component_start('filter_bar', [
+    <?= component('filter_bar', [
         'action'      => url_to('admin.users.index'),
         'keyword'     => $keyword,
         'placeholder' => lang('Admin.users.searchPlaceholder'),
         'isFiltered'  => $keyword !== '' || $filters !== [],
+        'filters'     => $dropdownFilters,
     ]) ?>
-        <?php foreach ($filterLabels as $column => $allLabel): ?>
-            <div class="admin-toolbar-select">
-                <?= component('select', [
-                    'name'        => $column,
-                    'label'       => $allLabel,
-                    'hideLabel'   => true,
-                    'options'     => array_combine($filterOptions[$column], $filterOptions[$column]),
-                    'selected'    => $filters[$column] ?? [],
-                    'placeholder' => $allLabel,
-                    'fullwidth'   => true,
-                    'searchable'  => true,
-                    'multiple'    => true,
-                    'emptyLabel'  => 'Tanpa filter',
-                ]) ?>
-            </div>
-        <?php endforeach ?>
-    <?= component_end() ?>
 
     <?php if (! $canUpdate): ?>
         <?= component('readonly_notice', ['message' => 'Anda tidak punya izin mengubah role pengguna.']) ?>

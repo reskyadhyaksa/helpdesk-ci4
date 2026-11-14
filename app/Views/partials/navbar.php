@@ -12,7 +12,7 @@ if ($user === null) {
 } else {
     $menu = [
         ['label' => 'Dashboard', 'icon' => 'home.svg', 'href' => url_to('user.dashboard'), 'active' => url_is('u')],
-        ['label' => 'Riwayat Tiket & Pengajuan', 'icon' => 'doc-search.svg', 'href' => '#', 'active' => false],
+        ['label' => 'Riwayat Tiket & Pengajuan', 'icon' => 'doc-search.svg', 'href' => url_to('user.tickets.index'), 'active' => url_is('u/tickets*')],
         ['label' => 'FAQ & Help Center', 'icon' => 'shield-question.svg', 'href' => '#', 'active' => false],
     ];
 }
@@ -59,7 +59,7 @@ if ($user === null) {
                 <?php if ($user === null): ?>
                     <div class="navbar-item">
                         <div class="buttons">
-                            <a class="button is-primary is-rounded" href="#">+ Buat Tiket</a>
+                            <a class="button is-primary is-rounded" href="<?= url_to('public.tickets.new') ?>">+ Buat Tiket</a>
                             <a class="button is-primary is-outlined is-rounded" href="<?= url_to('login') ?>">Masuk</a>
                         </div>
                     </div>
@@ -83,12 +83,12 @@ if ($user === null) {
                                 <span class="tag is-rounded profile-role is-hidden-touch"><?= esc($user['role_name']) ?></span>
                             </div>
 
-                            <a class="navbar-item profile-cta" href="#">
+                            <a class="navbar-item profile-cta" href="<?= url_to('user.tickets.new') ?>">
                                 <span class="menu-icon"><i class="fa-solid fa-circle-plus" aria-hidden="true"></i></span>
                                 Buat Tiket Baru
                             </a>
                             <!-- Di layar sentuh sudah ada di navigasi, jadi disembunyikan -->
-                            <a class="navbar-item is-hidden-touch" href="#">
+                            <a class="navbar-item is-hidden-touch" href="<?= url_to('user.tickets.index') ?>">
                                 <span class="menu-icon"><i class="fa-solid fa-ticket" aria-hidden="true"></i></span>
                                 Riwayat Tiket &amp; Pengajuan
                             </a>
@@ -119,7 +119,7 @@ if ($user === null) {
                     </div>
 
                     <div class="navbar-item is-hidden-touch">
-                        <a class="button is-primary is-rounded" href="#">
+                        <a class="button is-primary is-rounded" href="<?= url_to('user.tickets.new') ?>">
                             <span class="icon is-small"><i class="fa-solid fa-plus" aria-hidden="true"></i></span>
                             <span>Buat Tiket</span>
                         </a>
