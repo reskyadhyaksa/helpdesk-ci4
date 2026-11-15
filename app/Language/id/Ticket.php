@@ -2,15 +2,15 @@
 
 return [
     'status' => [
-        'OPEN'          => 'Baru',
-        'IN_PROGRESS'   => 'Sedang Diproses',
-        'NEED_RESPONSE' => 'Menunggu Respons',
-        'ON_HOLD'       => 'Ditunda',
-        'ESCALATED'     => 'Dieskalasi',
+        'OPEN'          => 'Open',
+        'IN_PROGRESS'   => 'In Progress',
+        'NEED_RESPONSE' => 'Need Response',
+        'ON_HOLD'       => 'On Hold',
+        'ESCALATED'     => 'Escalated',
         'RESOLVED'      => 'Resolved',
-        'REOPENED'      => 'Dibuka Kembali',
-        'CLOSED'        => 'Ditutup',
-        'CANCELLED'     => 'Dibatalkan',
+        'REOPENED'      => 'Reopened',
+        'CLOSED'        => 'Closed',
+        'CANCELLED'     => 'Cancelled',
     ],
     'created'         => 'Tiket berhasil dibuat.',
     'commentAdded'    => 'Pesan berhasil dikirim.',

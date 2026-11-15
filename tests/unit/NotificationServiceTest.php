@@ -64,7 +64,7 @@ final class NotificationServiceTest extends CIUnitTestCase
 
         $payload = json_decode($this->rows[0]['payload'], true);
         $this->assertStringContainsString('TKT-261115-AAAAAA', $payload['subject']);
-        $this->assertStringContainsString('Sedang Diproses', $payload['body']);
+        $this->assertStringContainsString('In Progress', $payload['body']);
         $this->assertSame('status_changed', $this->rows[0]['event_type']);
         $this->assertSame('PENDING', $this->rows[0]['status']);
     }
