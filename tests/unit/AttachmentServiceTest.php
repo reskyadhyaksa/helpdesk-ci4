@@ -131,6 +131,28 @@ final class AttachmentServiceTest extends CIUnitTestCase
         $this->assertLessThanOrEqual(8, $total);
     }
 
+    public function testRemoveDeletesTheStoredFileAndReportsSuccess(): void
+    {
+        $service = $this->service();
+
+        $ok = $service->remove(['storage_key' => self::TICKET_ID . '/01936b2a-1c2d-7e3f-8a4b-5c6d7e8f9a0c.png']);
+
+        $this->assertTrue($ok);
+        $this->assertCount(1, $service->deleted);
+        $this->assertStringEndsWith(self::TICKET_ID . '/01936b2a-1c2d-7e3f-8a4b-5c6d7e8f9a0c.png', $service->deleted[0]);
+    }
+
+    public function testRemoveRefusesAStorageKeyThatCouldEscapeTheUploadFolder(): void
+    {
+        $service = $this->service();
+
+        foreach (['../../.env', self::TICKET_ID . '/../../x.png', '/etc/passwd', 'a/b', '', self::TICKET_ID . '/x.png.php'] as $key) {
+            $this->assertFalse($service->remove(['storage_key' => $key]), "kunci '{$key}' harus ditolak");
+        }
+
+        $this->assertSame([], $service->deleted);
+    }
+
     public function testRejectsFailedUpload(): void
     {
         $this->expectException(BusinessException::class);

@@ -20,6 +20,14 @@ $renderAttachments = static function (array $attachments) use ($attachmentRoute)
     $html = '<ul class="mt-2">';
 
     foreach ($attachments as $attachment) {
+        // Lampiran yang sudah dihapus oleh kebijakan retensi: tampil sebagai teks redup, tanpa tautan unduh
+        if (! empty($attachment['purged_at'])) {
+            $html .= '<li class="has-text-grey"><i class="fa-solid fa-paperclip" aria-hidden="true"></i> '
+                . esc($attachment['original_name']) . ' <span class="is-size-7">(' . esc(lang('Attachment.purged')) . ')</span></li>';
+
+            continue;
+        }
+
         $html .= '<li><a href="' . esc(url_to($attachmentRoute, $attachment['id']), 'attr') . '">'
             . '<i class="fa-solid fa-paperclip" aria-hidden="true"></i> ' . esc($attachment['original_name']) . '</a>'
             . ' <span class="has-text-grey is-size-7">(' . esc(number_format($attachment['size_bytes'] / 1024, 0, ',', '.')) . ' KB)</span></li>';

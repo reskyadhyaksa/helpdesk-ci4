@@ -36,6 +36,9 @@ class PermissionModel extends Model
     public const ADMIN_TICKETS_ASSIGN = 'admin.tickets.assign';
     public const ADMIN_TICKETS_COMMENT = 'admin.tickets.comment';
 
+    // Pengaturan sistem (lampiran, retensi, notifikasi, SLA): satu halaman, jadi hanya ada ubah
+    public const ADMIN_SETTINGS_UPDATE = 'admin.settings.update';
+
     public const ADMIN_SLA_VIEW = 'admin.sla-policies.view';
     public const ADMIN_SLA_CREATE = 'admin.sla-policies.create';
     public const ADMIN_SLA_UPDATE = 'admin.sla-policies.update';
@@ -96,6 +99,13 @@ class PermissionModel extends Model
                 self::ADMIN_TICKETS_UPDATE => ['label' => 'Ubah status tiket', 'description' => 'Memindahkan tiket ke status berikutnya (diproses, ditunda, resolved, dst.).'],
                 self::ADMIN_TICKETS_ASSIGN => ['label' => 'Tetapkan PIC tiket', 'description' => 'Menetapkan PIC Helpdesk dan PIC Resolver pada tiket.'],
                 self::ADMIN_TICKETS_COMMENT => ['label' => 'Balas tiket', 'description' => 'Membalas pemohon dan menulis catatan internal pada tiket.'],
+            ],
+        ],
+        'Pengaturan Sistem' => [
+            'icon' => 'fa-sliders',
+            'description' => 'Batas lampiran, masa retensi, kanal notifikasi, dan jendela peringatan SLA.',
+            'permissions' => [
+                self::ADMIN_SETTINGS_UPDATE => ['label' => 'Ubah pengaturan sistem', 'description' => 'Membuka dan mengubah halaman Pengaturan Sistem.'],
             ],
         ],
         'SLA' => [

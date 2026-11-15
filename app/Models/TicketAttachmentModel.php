@@ -17,7 +17,7 @@ class TicketAttachmentModel extends Model
     protected $returnType       = 'array';
     protected $beforeInsert     = ['generateUuid'];
     protected $allowedFields    = [
-        'ticket_id', 'comment_id', 'original_name', 'storage_key', 'content_type', 'size_bytes', 'checksum_sha256',
+        'ticket_id', 'comment_id', 'original_name', 'storage_key', 'content_type', 'size_bytes', 'checksum_sha256', 'purged_at',
     ];
 
     protected $validationRules = [
@@ -46,6 +46,29 @@ class TicketAttachmentModel extends Model
         }
 
         return $this->orderBy('ticket_attachments.created_at', 'ASC')->findAll();
+    }
+
+    /**
+     * Lampiran yang filenya sudah waktunya dihapus: belum dihapus dan tiketnya CLOSED sejak $closedBefore atau lebih lama.
+     * Tiket CLOSED tanpa closed_at tidak pernah ikut (waktu tutupnya tidak diketahui).
+     *
+     * @return list<array>
+     */
+    public function dueForPurge(string $closedBefore, int $limit): array
+    {
+        return $this->select('ticket_attachments.id, ticket_attachments.storage_key')
+            ->join('tickets', 'tickets.id = ticket_attachments.ticket_id')
+            ->where('tickets.status', 'CLOSED')
+            ->where('tickets.closed_at IS NOT NULL', null, false)
+            ->where('tickets.closed_at <=', $closedBefore)
+            ->where('ticket_attachments.purged_at IS NULL', null, false)
+            ->orderBy('tickets.closed_at', 'ASC')
+            ->findAll($limit);
+    }
+
+    public function markPurged(string $id, string $now): void
+    {
+        $this->builder()->where('id', $id)->update(['purged_at' => $now]);
     }
 
     /**

@@ -8,4 +8,5 @@ return [
     'tooLarge'     => 'File "{0}" melebihi batas {1} MB.',
     'badType'      => 'Jenis file "{0}" tidak diizinkan. Yang diizinkan: {1}.',
     'notFound'     => 'Lampiran tidak ditemukan.',
+    'purged'       => 'dihapus otomatis setelah tiket ditutup',
 ];

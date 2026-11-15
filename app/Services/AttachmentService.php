@@ -123,6 +123,30 @@ class AttachmentService
     }
 
     /**
+     * Menghapus file lampiran dari disk (retensi). Kunci penyimpanan harus berbentuk "<uuid tiket>/<uuid>.<ekstensi>"
+     * persis seperti yang dibuat store(); bentuk lain ditolak agar tidak ada penghapusan di luar folder unggahan.
+     *
+     * @return bool true bila file sudah tidak ada (dihapus atau memang hilang); false bila ditolak atau gagal dihapus
+     */
+    public function remove(array $attachment): bool
+    {
+        $key = (string) ($attachment['storage_key'] ?? '');
+
+        if (preg_match('#^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z0-9]{1,10}$#', $key) !== 1) {
+            log_message('warning', 'Lampiran dengan kunci penyimpanan tidak wajar tidak dihapus: ' . $key);
+
+            return false;
+        }
+
+        $path = $this->baseDirectory() . $key;
+
+        $this->deleteFile($path);
+        $this->removeEmptyDirectory(dirname($path));
+
+        return ! is_file($path);
+    }
+
+    /**
      * Menghapus file yang sudah terlanjur disimpan bila proses pemanggil dibatalkan.
      *
      * @param list<array> $stored baris hasil store()
@@ -161,6 +185,13 @@ class AttachmentService
     {
         if (is_file($path)) {
             unlink($path);
+        }
+    }
+
+    protected function removeEmptyDirectory(string $directory): void
+    {
+        if (is_dir($directory) && count(scandir($directory)) === 2) {
+            rmdir($directory);
         }
     }
 
