@@ -83,7 +83,8 @@ $isSub = $parentId !== null && $parentId !== '';
                             'label' => 'Kebijakan SLA',
                             'options' => $slaOptions,
                             'selected' => old('sla_policy_id', $category['sla_policy_id']),
-                            'placeholder' => 'Tanpa SLA / ikut kategori utama',
+                            'placeholder' => 'Pilih kebijakan SLA',
+                            'help' => 'Wajib untuk kategori utama. Sub kategori boleh dikosongkan: SLA otomatis mengikuti kategori utamanya.',
                             'fullwidth' => true,
                             'error' => $errors['sla_policy_id'] ?? null,
                         ]) ?>

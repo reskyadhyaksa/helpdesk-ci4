@@ -90,6 +90,8 @@ if ($hasActions) {
             <td>
                 <?php if ($category['sla_name'] !== null): ?>
                     <?= esc($category['sla_name']) ?>
+                <?php elseif ($category['parent_id'] !== null): ?>
+                    <span class="has-text-grey">Ikut kategori utama</span>
                 <?php else: ?>
                     <span class="has-text-grey">—</span>
                 <?php endif ?>
