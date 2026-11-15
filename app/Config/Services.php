@@ -11,10 +11,14 @@ use App\Models\RequestCategoryModel;
 use App\Models\RoleModel;
 use App\Models\RolePermissionModel;
 use App\Models\SlaPolicyModel;
+use App\Models\SystemParameterModel;
 use App\Models\TicketActivityModel;
+use App\Models\TicketAttachmentModel;
+use App\Models\TicketCommentModel;
 use App\Models\TicketModel;
 use App\Models\UserModel;
 use App\Models\WeeklyOffDayModel;
+use App\Services\AttachmentService;
 use App\Services\Auth\KeycloakAuthService;
 use App\Services\AuthService;
 use App\Services\CategoryAccessService;
@@ -23,6 +27,7 @@ use App\Services\RequestCategoryService;
 use App\Services\RoleService;
 use App\Services\SlaCalculator;
 use App\Services\SlaPolicyService;
+use App\Services\TicketCommentService;
 use App\Services\TicketService;
 use App\Services\WhatsAppService;
 use App\Services\UserService;
@@ -119,6 +124,30 @@ class Services extends BaseService
             static::categoryAccess(),
             model(UserModel::class),
             new KeycloakAuthService(),
+            static::attachments(),
+            db_connect(),
+        );
+    }
+
+    public static function attachments(bool $getShared = true): AttachmentService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('attachments');
+        }
+
+        return new AttachmentService(model(TicketAttachmentModel::class), model(SystemParameterModel::class));
+    }
+
+    public static function ticketComments(bool $getShared = true): TicketCommentService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('ticketComments');
+        }
+
+        return new TicketCommentService(
+            static::tickets(),
+            model(TicketCommentModel::class),
+            static::attachments(),
             db_connect(),
         );
     }

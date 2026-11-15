@@ -10,11 +10,13 @@ use App\Models\TicketActivityModel;
 use App\Models\TicketModel;
 use App\Models\UserModel;
 use App\Services\Auth\KeycloakAuthService;
+use App\Services\AttachmentService;
 use App\Services\CategoryAccessService;
 use App\Services\HolidayService;
 use App\Services\SlaCalculator;
 use App\Services\TicketService;
 use CodeIgniter\Database\BaseConnection;
+use CodeIgniter\HTTP\Files\UploadedFile;
 use CodeIgniter\Test\CIUnitTestCase;
 
 /**
@@ -33,6 +35,7 @@ final class TicketServiceTest extends CIUnitTestCase
     private CategoryAccessService $access;
     private UserModel $users;
     private KeycloakAuthService $hr;
+    private AttachmentService $attachmentService;
 
     /** @var list<array> baris yang di-insert ke tickets */
     private array $inserted = [];
@@ -49,6 +52,8 @@ final class TicketServiceTest extends CIUnitTestCase
         $this->access     = $this->createMock(CategoryAccessService::class);
         $this->users      = $this->createMock(UserModel::class);
         $this->hr         = $this->createMock(KeycloakAuthService::class);
+        $this->attachmentService = $this->createMock(AttachmentService::class);
+        $this->attachmentService->method('validateAll')->willReturnArgument(0);
 
         $this->tickets->method('insert')->willReturnCallback(function (array $row) {
             $this->inserted[] = $row;
@@ -74,6 +79,7 @@ final class TicketServiceTest extends CIUnitTestCase
             $this->access,
             $this->users,
             $this->hr,
+            $this->attachmentService,
             $this->createMock(BaseConnection::class),
         );
     }
@@ -329,6 +335,67 @@ final class TicketServiceTest extends CIUnitTestCase
         $this->service()->createPublic($this->publicData());
 
         $this->assertSame(0, $this->inserted[0]['is_requester_verified']);
+    }
+
+    // --- Lampiran saat tiket dibuat ---------------------------------------
+
+    public function testCreateValidatesFilesBeforeInsertAndStoresThemAfterwards(): void
+    {
+        $file = $this->createMock(UploadedFile::class);
+        $this->categories->method('find')->willReturn($this->category());
+        $this->users->method('find')->willReturn($this->actorUser());
+        $this->attachmentService = $this->createMock(AttachmentService::class);
+        $this->attachmentService->expects($this->once())->method('validateAll')->with([$file])->willReturn([$file]);
+        $this->attachmentService->expects($this->once())->method('store')->with('t1', null, $file)->willReturn(['id' => 'a1', 'storage_key' => 'k']);
+
+        $this->service()->create($this->data(), $this->actor(), [$file]);
+
+        $this->assertCount(1, $this->inserted);
+    }
+
+    public function testCreateRejectsInvalidFilesBeforeAnythingIsSaved(): void
+    {
+        $this->categories->method('find')->willReturn($this->category());
+        $this->users->method('find')->willReturn($this->actorUser());
+        $this->attachmentService = $this->createMock(AttachmentService::class);
+        $this->attachmentService->method('validateAll')->willThrowException(new BusinessException('terlalu besar'));
+
+        try {
+            $this->service()->create($this->data(), $this->actor(), [$this->createMock(UploadedFile::class)]);
+            $this->fail('BusinessException diharapkan');
+        } catch (BusinessException) {
+            $this->assertSame([], $this->inserted);
+        }
+    }
+
+    public function testCreatePublicAcceptsFiles(): void
+    {
+        $file = $this->createMock(UploadedFile::class);
+        $this->categories->method('find')->willReturn($this->category());
+        $this->hr->method('getHelpdeskUserData')->willReturn(null);
+        $this->attachmentService = $this->createMock(AttachmentService::class);
+        $this->attachmentService->method('validateAll')->willReturn([$file]);
+        $this->attachmentService->expects($this->once())->method('store')->with('t1', null, $file)->willReturn(['id' => 'a1', 'storage_key' => 'k']);
+
+        $this->service()->createPublic($this->publicData(), [$file]);
+    }
+
+    public function testStoredFilesAreDiscardedWhenALaterFileFails(): void
+    {
+        $first  = $this->createMock(UploadedFile::class);
+        $second = $this->createMock(UploadedFile::class);
+        $this->categories->method('find')->willReturn($this->category());
+        $this->users->method('find')->willReturn($this->actorUser());
+        $this->attachmentService = $this->createMock(AttachmentService::class);
+        $this->attachmentService->method('validateAll')->willReturn([$first, $second]);
+        $this->attachmentService->method('store')->willReturnOnConsecutiveCalls(
+            ['id' => 'a1', 'storage_key' => 'k1'],
+            $this->throwException(new BusinessException('gagal')),
+        );
+        $this->attachmentService->expects($this->once())->method('discard')->with([['id' => 'a1', 'storage_key' => 'k1']]);
+        $this->expectException(BusinessException::class);
+
+        $this->service()->create($this->data(), $this->actor(), [$first, $second]);
     }
 
     // --- Status dan PIC ----------------------------------------------------

@@ -39,6 +39,7 @@ class TicketService
         private readonly CategoryAccessService $access,
         private readonly UserModel $users,
         private readonly KeycloakAuthService $hr,
+        private readonly AttachmentService $attachments,
         private readonly BaseConnection $db,
     ) {
     }
@@ -60,11 +61,11 @@ class TicketService
      *
      * @throws BusinessException
      */
-    public function create(array $data, array $actor): array
+    public function create(array $data, array $actor, array $files = []): array
     {
         $requester = $this->requesterFor($actor, trim((string) ($data['for_nip'] ?? '')));
 
-        return $this->store($data, $requester, TicketModel::CHANNEL_PORTAL, $actor['id']);
+        return $this->store($data, $requester, TicketModel::CHANNEL_PORTAL, $actor['id'], $files);
     }
 
     /**
@@ -75,7 +76,7 @@ class TicketService
      *
      * @throws BusinessException
      */
-    public function createPublic(array $data): array
+    public function createPublic(array $data, array $files = []): array
     {
         $nip      = trim($data['nip']);
         $employee = $this->hr->getHelpdeskUserData($nip);
@@ -90,7 +91,7 @@ class TicketService
             'is_requester_verified'  => $this->matchesHr($employee, $data) ? 1 : 0,
         ];
 
-        return $this->store($data, $requester, TicketModel::CHANNEL_PUBLIC_FORM, null);
+        return $this->store($data, $requester, TicketModel::CHANNEL_PUBLIC_FORM, null, $files);
     }
 
     /**
@@ -296,7 +297,7 @@ class TicketService
     /**
      * @throws BusinessException
      */
-    private function store(array $data, array $requester, string $channel, ?string $actorId): array
+    private function store(array $data, array $requester, string $channel, ?string $actorId, array $files): array
     {
         $category = $this->categories->find($data['category_id']);
 
@@ -307,6 +308,9 @@ class TicketService
         if ($this->categories->hasChildren($category['id'])) {
             throw new BusinessException(lang('Ticket.categoryHasSub'));
         }
+
+        // Lampiran divalidasi sebelum apa pun disimpan, supaya file yang ditolak tidak meninggalkan tiket setengah jadi
+        $files = $this->attachments->validateAll($files);
 
         $policy = $this->activePolicy($category['sla_policy_id'] ?? null);
         $now    = new DateTimeImmutable('now', new DateTimeZone(app_timezone()));
@@ -324,17 +328,29 @@ class TicketService
             'resolution_due_at'   => $policy === null ? null : $this->dueAt($now, $policy->resolution_minutes, $policy),
         ];
 
-        $id = null;
+        $id     = null;
+        $stored = [];
 
-        $this->inTransaction(function () use ($row, $actorId, &$id): void {
-            $id = $this->tickets->insert($row, true);
+        try {
+            $this->inTransaction(function () use ($row, $actorId, $files, &$id, &$stored): void {
+                $id = $this->tickets->insert($row, true);
 
-            if ($id === false) {
-                throw new BusinessException(implode(' ', $this->tickets->errors()));
-            }
+                if ($id === false) {
+                    throw new BusinessException(implode(' ', $this->tickets->errors()));
+                }
 
-            $this->activities->record($id, $actorId, TicketActivityModel::ACTION_CREATED);
-        });
+                $this->activities->record($id, $actorId, TicketActivityModel::ACTION_CREATED);
+
+                foreach ($files as $file) {
+                    $stored[] = $this->attachments->store($id, null, $file);
+                }
+            });
+        } catch (Throwable $e) {
+            // Baris database sudah dibatalkan; file yang terlanjur tersimpan ikut dibuang
+            $this->attachments->discard($stored);
+
+            throw $e;
+        }
 
         return $this->tickets->find($id);
     }
