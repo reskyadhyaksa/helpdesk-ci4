@@ -11,15 +11,25 @@ use App\Models\RequestCategoryModel;
 use App\Models\RoleModel;
 use App\Models\RolePermissionModel;
 use App\Models\SlaPolicyModel;
+use App\Models\NotificationOutboxModel;
 use App\Models\SystemParameterModel;
+use App\Models\UserNotificationModel;
 use App\Models\TicketActivityModel;
 use App\Models\TicketAttachmentModel;
 use App\Models\TicketCommentModel;
 use App\Models\TicketModel;
 use App\Models\UserModel;
 use App\Models\WeeklyOffDayModel;
+use App\Services\AttachmentRetentionService;
 use App\Services\AttachmentService;
 use App\Services\Auth\KeycloakAuthService;
+use App\Services\InAppNotificationService;
+use App\Services\MessageQueue;
+use App\Services\NotificationPusher;
+use App\Services\SlaAlertService;
+use App\Services\TicketNotifier;
+use App\Services\NotificationDispatcher;
+use App\Services\NotificationService;
 use App\Services\AuthService;
 use App\Services\CategoryAccessService;
 use App\Services\HolidayService;
@@ -27,6 +37,7 @@ use App\Services\RequestCategoryService;
 use App\Services\RoleService;
 use App\Services\SlaCalculator;
 use App\Services\SlaPolicyService;
+use App\Services\SystemParameterService;
 use App\Services\TicketCommentService;
 use App\Services\TicketService;
 use App\Services\WhatsAppService;
@@ -125,8 +136,90 @@ class Services extends BaseService
             model(UserModel::class),
             new KeycloakAuthService(),
             static::attachments(),
+            static::ticketNotifier(),
             db_connect(),
         );
+    }
+
+    public static function ticketNotifier(bool $getShared = true): TicketNotifier
+    {
+        if ($getShared) {
+            return static::getSharedInstance('ticketNotifier');
+        }
+
+        return new TicketNotifier(static::notifications(), static::inAppNotifications(), static::notificationPusher());
+    }
+
+    public static function inAppNotifications(bool $getShared = true): InAppNotificationService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('inAppNotifications');
+        }
+
+        return new InAppNotificationService(model(UserNotificationModel::class), model(UserModel::class));
+    }
+
+    public static function systemParameters(bool $getShared = true): SystemParameterService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('systemParameters');
+        }
+
+        return new SystemParameterService(model(SystemParameterModel::class));
+    }
+
+    public static function attachmentRetention(bool $getShared = true): AttachmentRetentionService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('attachmentRetention');
+        }
+
+        return new AttachmentRetentionService(model(TicketAttachmentModel::class), static::attachments(), model(SystemParameterModel::class));
+    }
+
+    public static function slaAlerts(bool $getShared = true): SlaAlertService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('slaAlerts');
+        }
+
+        return new SlaAlertService(model(TicketModel::class), static::inAppNotifications(), static::notificationPusher(), model(SystemParameterModel::class));
+    }
+
+    public static function notificationPusher(bool $getShared = true): NotificationPusher
+    {
+        if ($getShared) {
+            return static::getSharedInstance('notificationPusher');
+        }
+
+        return new NotificationPusher();
+    }
+
+    public static function messageQueue(bool $getShared = true): MessageQueue
+    {
+        if ($getShared) {
+            return static::getSharedInstance('messageQueue');
+        }
+
+        return new MessageQueue();
+    }
+
+    public static function notificationDispatcher(bool $getShared = true): NotificationDispatcher
+    {
+        if ($getShared) {
+            return static::getSharedInstance('notificationDispatcher');
+        }
+
+        return new NotificationDispatcher(model(NotificationOutboxModel::class), static::messageQueue(), static::email(), static::whatsapp());
+    }
+
+    public static function notifications(bool $getShared = true): NotificationService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('notifications');
+        }
+
+        return new NotificationService(model(NotificationOutboxModel::class), static::messageQueue(), model(UserModel::class), model(SystemParameterModel::class));
     }
 
     public static function attachments(bool $getShared = true): AttachmentService
@@ -148,6 +241,7 @@ class Services extends BaseService
             static::tickets(),
             model(TicketCommentModel::class),
             static::attachments(),
+            static::ticketNotifier(),
             db_connect(),
         );
     }

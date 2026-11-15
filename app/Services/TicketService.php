@@ -23,6 +23,8 @@ class TicketService
     public const SCOPE_MINE     = 'mine';
     public const SCOPE_ASSIGNED = 'assigned';
 
+    private const NO_NOTIFICATIONS = ['outbox' => [], 'inApp' => []];
+
     // Peran PIC → kolom tiket dan nama aktivitas
     private const PIC_ROLES = [
         'assignee' => ['column' => 'assignee_id', 'action' => TicketActivityModel::ACTION_ASSIGNEE_CHANGED],
@@ -40,6 +42,7 @@ class TicketService
         private readonly UserModel $users,
         private readonly KeycloakAuthService $hr,
         private readonly AttachmentService $attachments,
+        private readonly TicketNotifier $notifications,
         private readonly BaseConnection $db,
     ) {
     }
@@ -106,10 +109,19 @@ class TicketService
             throw new BusinessException(lang('Ticket.illegalTransition', [$from->label(), $to->label()]));
         }
 
-        $this->inTransaction(function () use ($ticketId, $from, $to, $actorId): void {
-            $this->tickets->update($ticketId, ['status' => $to->value]);
+        $pending = self::NO_NOTIFICATIONS;
+
+        $this->inTransaction(function () use ($ticket, $ticketId, $from, $to, $actorId, &$pending): void {
+            // closed_at dipakai kebijakan retensi lampiran (hapus N hari setelah CLOSED)
+            $changes = ['status' => $to->value] + ($to === TicketStatus::Closed ? ['closed_at' => date('Y-m-d H:i:s')] : []);
+
+            $this->tickets->update($ticketId, $changes);
             $this->activities->record($ticketId, $actorId, TicketActivityModel::ACTION_STATUS_CHANGED, $from->value, $to->value);
+
+            $pending = $this->queueNotifications(fn (): array => $this->notifications->forStatusChange($ticket, $from, $to, $actorId));
         });
+
+        $this->notifications->dispatch($pending);
     }
 
     /**
@@ -126,10 +138,38 @@ class TicketService
         $oldUserId = $ticket[$config['column']] ?? null;
         $oldName   = $oldUserId === null ? null : $this->users->find($oldUserId)?->name;
 
-        $this->inTransaction(function () use ($ticketId, $config, $userId, $actorId, $oldName, $newName): void {
+        $pending = self::NO_NOTIFICATIONS;
+
+        $this->inTransaction(function () use ($ticket, $ticketId, $role, $config, $userId, $oldUserId, $actorId, $oldName, $newName, &$pending): void {
             $this->tickets->update($ticketId, [$config['column'] => $userId]);
             $this->activities->record($ticketId, $actorId, $config['action'], $oldName, $newName);
+
+            // Hanya PIC yang benar-benar baru yang diberi tahu
+            if ($userId !== null && $userId !== $oldUserId) {
+                $pending = $this->queueNotifications(fn (): array => $this->notifications->forAssignment($ticket, $role, $userId, $actorId));
+            }
         });
+
+        $this->notifications->dispatch($pending);
+    }
+
+    /**
+     * Menulis outbox di transaksi perubahan tiket. Gagal menyusun notifikasi hanya dicatat di log:
+     * perubahan tiket tidak boleh batal karena notifikasi.
+     *
+     * @param callable(): array{outbox: list<string>, inApp: list<array>} $queue
+     *
+     * @return array{outbox: list<string>, inApp: list<array>} notifikasi yang menunggu dispatch setelah commit
+     */
+    private function queueNotifications(callable $queue): array
+    {
+        try {
+            return $queue();
+        } catch (Throwable $e) {
+            log_message('error', 'Notifikasi tiket gagal disusun: ' . $e->getMessage());
+
+            return self::NO_NOTIFICATIONS;
+        }
     }
 
     /**
@@ -312,7 +352,7 @@ class TicketService
         // Lampiran divalidasi sebelum apa pun disimpan, supaya file yang ditolak tidak meninggalkan tiket setengah jadi
         $files = $this->attachments->validateAll($files);
 
-        $policy = $this->activePolicy($category['sla_policy_id'] ?? null);
+        $policy = $this->activePolicy($this->effectiveSlaPolicyId($category));
         $now    = new DateTimeImmutable('now', new DateTimeZone(app_timezone()));
 
         $row = $requester + [
@@ -353,6 +393,22 @@ class TicketService
         }
 
         return $this->tickets->find($id);
+    }
+
+    /**
+     * SLA kategori itu sendiri; bila sub kategori tidak memilih SLA, SLA kategori utamanya.
+     */
+    private function effectiveSlaPolicyId(array $category): ?string
+    {
+        if (! empty($category['sla_policy_id'])) {
+            return $category['sla_policy_id'];
+        }
+
+        if (($category['parent_id'] ?? null) === null) {
+            return null;
+        }
+
+        return $this->categories->find($category['parent_id'])['sla_policy_id'] ?? null;
     }
 
     /**
