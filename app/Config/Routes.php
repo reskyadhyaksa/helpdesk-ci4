@@ -17,6 +17,14 @@ $routes->get('tiket/baru', 'PublicTicketController::new', ['as' => 'public.ticke
 // Dibatasi 5 pengajuan per 10 menit per IP: tiap pengajuan memanggil API kepegawaian
 $routes->post('tiket', 'PublicTicketController::create', ['as' => 'public.tickets.create', 'filter' => 'throttle:5,600']);
 
+// Lonceng notifikasi dalam aplikasi (API JSON, hanya untuk pengguna login)
+$routes->group('notifications', ['filter' => 'auth'], static function (RouteCollection $routes) {
+    $routes->get('/', 'NotificationController::index', ['as' => 'notifications.index']);
+    $routes->get('token', 'NotificationController::token', ['as' => 'notifications.token']);
+    $routes->post('read-all', 'NotificationController::readAll', ['as' => 'notifications.read-all']);
+    $routes->post('(:uuid)/read', 'NotificationController::read/$1', ['as' => 'notifications.read']);
+});
+
 // Tamu saja
 $routes->group('', ['filter' => 'guest'], static function (RouteCollection $routes) {
     $routes->get('login', 'AuthController::showLogin', ['as' => 'login']);
@@ -70,6 +78,10 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'au
     $routes->get('users/(:uuid)/category-access', 'UserCategoryAccessController::show/$1', ['as' => 'admin.users.category-access', 'filter' => 'auth:admin.users.category-access']);
     $routes->post('users/(:uuid)/category-access', 'UserCategoryAccessController::store/$1', ['as' => 'admin.users.category-access.store', 'filter' => 'auth:admin.users.category-access']);
     $routes->post('users/(:uuid)/category-access/(:uuid)/delete', 'UserCategoryAccessController::delete/$1/$2', ['as' => 'admin.users.category-access.delete', 'filter' => 'auth:admin.users.category-access']);
+
+    // Pengaturan sistem
+    $routes->get('settings', 'SettingController::index', ['as' => 'admin.settings.index', 'filter' => 'auth:admin.settings.update']);
+    $routes->post('settings', 'SettingController::update', ['as' => 'admin.settings.update', 'filter' => 'auth:admin.settings.update']);
 
     // SLA Policies
     $routes->get('sla-policies', 'SlaPolicyController::index', ['as' => 'admin.sla-policies.index', 'filter' => 'auth:admin.sla-policies.view']);

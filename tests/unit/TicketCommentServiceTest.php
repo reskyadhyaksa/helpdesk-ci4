@@ -5,6 +5,7 @@ use App\Exceptions\BusinessException;
 use App\Models\TicketCommentModel;
 use App\Services\AttachmentService;
 use App\Services\TicketCommentService;
+use App\Services\TicketNotifier;
 use App\Services\TicketService;
 use CodeIgniter\Database\BaseConnection;
 use CodeIgniter\HTTP\Files\UploadedFile;
@@ -20,6 +21,11 @@ final class TicketCommentServiceTest extends CIUnitTestCase
     private TicketService $tickets;
     private TicketCommentModel $comments;
     private AttachmentService $attachments;
+    private TicketNotifier $notifier;
+    private BaseConnection $connection;
+
+    /** @var list<string> */
+    private array $events = [];
 
     /** @var list<array> */
     private array $inserted = [];
@@ -31,6 +37,17 @@ final class TicketCommentServiceTest extends CIUnitTestCase
         $this->tickets     = $this->createMock(TicketService::class);
         $this->comments    = $this->createMock(TicketCommentModel::class);
         $this->attachments = $this->createMock(AttachmentService::class);
+        $this->notifier    = $this->createMock(TicketNotifier::class);
+        $this->notifier->method('forComment')->willReturn(['outbox' => [], 'inApp' => []]);
+        $this->notifier->method('dispatch')->willReturnCallback(function (): void {
+            $this->events[] = 'dispatch';
+        });
+        $this->connection = $this->createMock(BaseConnection::class);
+        $this->connection->method('transCommit')->willReturnCallback(function (): bool {
+            $this->events[] = 'commit';
+
+            return true;
+        });
 
         $this->comments->method('insert')->willReturnCallback(function (array $row) {
             $this->inserted[] = $row;
@@ -43,7 +60,7 @@ final class TicketCommentServiceTest extends CIUnitTestCase
 
     private function service(): TicketCommentService
     {
-        return new TicketCommentService($this->tickets, $this->comments, $this->attachments, $this->createMock(BaseConnection::class));
+        return new TicketCommentService($this->tickets, $this->comments, $this->attachments, $this->notifier, $this->connection);
     }
 
     private function viewer(): array
@@ -60,6 +77,49 @@ final class TicketCommentServiceTest extends CIUnitTestCase
             'id' => self::TICKET_ID, 'status' => $status, 'requester_id' => 'u1', 'requester_nip' => '00001',
             'is_requester_verified' => 1, 'created_by' => '00001', 'assignee_id' => null, 'resolver_id' => null,
         ]);
+    }
+
+    public function testTheNotifierIsToldWhoWroteWhatAndDispatchesOnlyAfterCommit(): void
+    {
+        $this->ticketIs('OPEN');
+        $this->notifier = $this->createMock(TicketNotifier::class);
+        $this->notifier->expects($this->once())
+            ->method('forComment')
+            ->with($this->callback(static fn (array $t) => $t['status'] === 'OPEN'), 'u1', 'AGENT', 'INTERNAL')
+            ->willReturn(['outbox' => [], 'inApp' => [['id' => 'n1', 'user_id' => 'u2']]]);
+        $this->notifier->expects($this->once())->method('dispatch')->with(['outbox' => [], 'inApp' => [['id' => 'n1', 'user_id' => 'u2']]])
+            ->willReturnCallback(function (): void {
+                $this->events[] = 'dispatch';
+            });
+
+        $this->add(['body' => 'Catatan', 'visibility' => 'INTERNAL'], isAgent: true);
+
+        $this->assertSame(['commit', 'dispatch'], $this->events);
+    }
+
+    public function testAnotificationFailureDoesNotBreakTheComment(): void
+    {
+        $this->ticketIs('OPEN');
+        $this->notifier = $this->createMock(TicketNotifier::class);
+        $this->notifier->method('forComment')->willThrowException(new RuntimeException('lonceng rusak'));
+
+        $comment = $this->add(['body' => 'Halo']);
+
+        $this->assertSame('c1', $comment['id']);
+        $this->assertCount(1, $this->inserted);
+    }
+
+    public function testNothingIsDispatchedWhenTheCommentCannotBeSaved(): void
+    {
+        $this->ticketIs('OPEN');
+        $this->comments = $this->createMock(TicketCommentModel::class);
+        $this->comments->method('insert')->willReturn(false);
+        $this->comments->method('errors')->willReturn(['body' => 'x']);
+        $this->notifier = $this->createMock(TicketNotifier::class);
+        $this->notifier->expects($this->never())->method('dispatch');
+        $this->expectException(BusinessException::class);
+
+        $this->add(['body' => 'Halo']);
     }
 
     public function testAssignedPicReplyIsLabeledAgentAndNeverReopensTheTicket(): void
@@ -266,6 +326,27 @@ final class TicketCommentServiceTest extends CIUnitTestCase
         @unlink($tmp);
 
         $this->assertSame(['path' => $tmp, 'name' => 'log.txt', 'type' => 'text/plain'], $result);
+    }
+
+    public function testDownloadRejectsAnAttachmentThatWasPurgedByTheRetentionPolicy(): void
+    {
+        $tmp = tempnam(sys_get_temp_dir(), 'dl');
+        file_put_contents($tmp, 'x');
+        $this->attachments->method('findWithVisibility')->willReturn([
+            'id' => 'a1', 'ticket_id' => self::TICKET_ID, 'comment_visibility' => null, 'purged_at' => '2026-11-30 12:00:00',
+            'original_name' => 'log.txt', 'content_type' => 'text/plain',
+        ]);
+        $this->attachments->method('absolutePath')->willReturn($tmp);
+        $this->tickets->method('find')->willReturn(['id' => self::TICKET_ID, 'status' => 'CLOSED']);
+
+        try {
+            $this->service()->attachmentForDownload('a1', $this->viewer(), false, true);
+            $this->fail('BusinessException diharapkan');
+        } catch (BusinessException) {
+            $this->addToAssertionCount(1);
+        } finally {
+            @unlink($tmp);
+        }
     }
 
     public function testDownloadRejectsWhenTheFileIsMissingOnDisk(): void

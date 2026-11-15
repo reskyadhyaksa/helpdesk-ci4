@@ -31,9 +31,7 @@ if ($user === null) {
             <?php if ($user !== null): ?>
                 <!-- Layar sentuh: lonceng tetap terlihat di bar atas, tidak tersembunyi di menu burger -->
                 <div class="navbar-item brand-action is-hidden-desktop">
-                    <a class="button is-light is-rounded icon-button" href="#" aria-label="Notifikasi">
-                        <i class="fa-regular fa-bell" aria-hidden="true"></i>
-                    </a>
+                    <?= $this->include('partials/notification_bell') ?>
                 </div>
             <?php endif ?>
 
@@ -113,9 +111,7 @@ if ($user === null) {
                     <span class="vertical-divider is-hidden-touch" aria-hidden="true"></span>
 
                     <div class="navbar-item is-hidden-touch">
-                        <a class="button is-light is-rounded icon-button" href="#" aria-label="Notifikasi">
-                            <i class="fa-regular fa-bell" aria-hidden="true"></i>
-                        </a>
+                        <?= $this->include('partials/notification_bell') ?>
                     </div>
 
                     <div class="navbar-item is-hidden-touch">

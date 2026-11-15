@@ -19,6 +19,7 @@ class TicketCommentService
         private readonly TicketService $tickets,
         private readonly TicketCommentModel $comments,
         private readonly AttachmentService $attachments,
+        private readonly TicketNotifier $notifier,
         private readonly BaseConnection $db,
     ) {
     }
@@ -67,7 +68,7 @@ class TicketCommentService
 
         // Penulis berlabel pemohon hanya bila memang pihak pemohon; PIC yang membalas lewat portal tetap berlabel Helpdesk
         $asAgent = $isAgent || ($isPic && ! $requesterSide);
-        $comment = $this->save($ticketId, $viewer['id'], $asAgent, $visibility, $body, $files);
+        $comment = $this->save($ticket, $viewer['id'], $asAgent, $visibility, $body, $files);
 
         if ($requesterSide && ! $isAgent && $ticket['status'] === TicketStatus::Resolved->value) {
             $this->tickets->changeStatus($ticketId, TicketStatus::Reopened, $viewer['id']);
@@ -122,6 +123,11 @@ class TicketCommentService
             throw $notFound;
         }
 
+        // File sudah dihapus oleh kebijakan retensi
+        if (! empty($attachment['purged_at'])) {
+            throw $notFound;
+        }
+
         $path = $this->attachments->absolutePath($attachment);
 
         if (! is_file($path)) {
@@ -151,18 +157,20 @@ class TicketCommentService
      *
      * @param list<mixed> $files
      */
-    private function save(string $ticketId, string $authorId, bool $isAgent, string $visibility, string $body, array $files): array
+    private function save(array $ticket, string $authorId, bool $isAgent, string $visibility, string $body, array $files): array
     {
-        $stored = [];
-        $id     = null;
+        $stored  = [];
+        $id      = null;
+        $pending = ['outbox' => [], 'inApp' => []];
+        $type    = $isAgent ? TicketCommentModel::AUTHOR_AGENT : TicketCommentModel::AUTHOR_REQUESTER;
 
         $this->db->transBegin();
 
         try {
             $id = $this->comments->insert([
-                'ticket_id'   => $ticketId,
+                'ticket_id'   => $ticket['id'],
                 'author_id'   => $authorId,
-                'author_type' => $isAgent ? TicketCommentModel::AUTHOR_AGENT : TicketCommentModel::AUTHOR_REQUESTER,
+                'author_type' => $type,
                 'visibility'  => $visibility,
                 'body'        => $body,
             ], true);
@@ -172,8 +180,10 @@ class TicketCommentService
             }
 
             foreach ($files as $file) {
-                $stored[] = $this->attachments->store($ticketId, $id, $file);
+                $stored[] = $this->attachments->store($ticket['id'], $id, $file);
             }
+
+            $pending = $this->queueNotifications($ticket, $authorId, $type, $visibility);
 
             $this->db->transCommit();
         } catch (Throwable $e) {
@@ -183,6 +193,24 @@ class TicketCommentService
             throw $e;
         }
 
+        $this->notifier->dispatch($pending);
+
         return $this->comments->find($id);
+    }
+
+    /**
+     * Notifikasi lonceng ditulis di transaksi komentar. Gagal menyusunnya hanya dicatat: komentar tidak boleh batal karenanya.
+     *
+     * @return array{outbox: list<string>, inApp: list<array>}
+     */
+    private function queueNotifications(array $ticket, string $authorId, string $authorType, string $visibility): array
+    {
+        try {
+            return $this->notifier->forComment($ticket, $authorId, $authorType, $visibility);
+        } catch (Throwable $e) {
+            log_message('error', 'Notifikasi komentar gagal disusun: ' . $e->getMessage());
+
+            return ['outbox' => [], 'inApp' => []];
+        }
     }
 }

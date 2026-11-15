@@ -23,6 +23,7 @@ class TicketModel extends Model
         'ticket_number', 'channel', 'status', 'requester_id', 'requester_nip', 'requester_name', 'requester_phone',
         'requester_email', 'requester_organization', 'is_requester_verified', 'assignee_id', 'resolver_id',
         'request_category_id', 'sla_policy_id', 'priority', 'subject', 'description', 'response_due_at', 'resolution_due_at',
+        'response_warned_at', 'response_breached_at', 'resolution_warned_at', 'resolution_breached_at', 'closed_at',
     ];
 
     protected $validationRules = [
@@ -84,6 +85,57 @@ class TicketModel extends Model
         }
 
         return $this->groupEnd();
+    }
+
+    /**
+     * Konfigurasi tiap jenis peringatan SLA: kolom batas, kolom penanda, dan status yang masih menghitung.
+     * Respons dihitung selama tiket belum disentuh (OPEN); resolusi selama masih dikerjakan. NEED_RESPONSE dan ON_HOLD
+     * dianggap jeda SLA, jadi tidak diperingatkan.
+     */
+    private const SLA_ALERTS = [
+        'response_warning'    => ['due' => 'response_due_at', 'flag' => 'response_warned_at', 'blocking' => 'response_breached_at', 'statuses' => ['OPEN'], 'breach' => false],
+        'response_breached'   => ['due' => 'response_due_at', 'flag' => 'response_breached_at', 'blocking' => null, 'statuses' => ['OPEN'], 'breach' => true],
+        'resolution_warning'  => ['due' => 'resolution_due_at', 'flag' => 'resolution_warned_at', 'blocking' => 'resolution_breached_at', 'statuses' => ['OPEN', 'IN_PROGRESS', 'ESCALATED', 'REOPENED'], 'breach' => false],
+        'resolution_breached' => ['due' => 'resolution_due_at', 'flag' => 'resolution_breached_at', 'blocking' => null, 'statuses' => ['OPEN', 'IN_PROGRESS', 'ESCALATED', 'REOPENED'], 'breach' => true],
+    ];
+
+    /**
+     * Tiket yang perlu peringatan SLA jenis $kind dan belum pernah diperingatkan: peringatan = batas jatuh dalam jendela
+     * ($now, $windowEnd]; terlewat = batas lewat dalam rentang ($oldestDue, $now]. Batas yang lebih tua dari $oldestDue
+     * diabaikan, jadi tiket lama yang sudah lama terlewat tidak membanjiri notifikasi saat pertama dijalankan.
+     *
+     * @return list<array>
+     */
+    public function dueForSla(string $kind, string $now, string $windowEnd, string $oldestDue, int $limit = 200): array
+    {
+        $alert = self::SLA_ALERTS[$kind];
+
+        $this->whereIn('status', $alert['statuses'])->where($alert['flag'] . ' IS NULL', null, false);
+
+        if ($alert['blocking'] !== null) {
+            $this->where($alert['blocking'] . ' IS NULL', null, false);
+        }
+
+        if ($alert['breach']) {
+            $this->where($alert['due'] . ' <=', $now)->where($alert['due'] . ' >', $oldestDue);
+        } else {
+            $this->where($alert['due'] . ' >', $now)->where($alert['due'] . ' <=', $windowEnd);
+        }
+
+        return $this->orderBy($alert['due'], 'ASC')->findAll($limit);
+    }
+
+    /**
+     * Klaim atomik: hanya satu proses yang berhasil menandai peringatan sebuah tiket, jadi dua proses sla:check
+     * yang berjalan bersamaan tidak membuat notifikasi ganda.
+     */
+    public function claimSla(string $id, string $kind, string $now): bool
+    {
+        $flag = self::SLA_ALERTS[$kind]['flag'];
+
+        $this->builder()->where('id', $id)->where($flag . ' IS NULL', null, false)->update([$flag => $now]);
+
+        return $this->db->affectedRows() === 1;
     }
 
     public function onlyAssignedTo(string $userId): static
