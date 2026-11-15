@@ -7,6 +7,7 @@ use App\Models\PermissionModel;
  * @var array       $ticket
  * @var list<array> $activities
  * @var list<array> $pics kandidat PIC: id, name, employee_no
+ * @var array       $thread komentar dan lampiran (TicketCommentService::thread)
  */
 $status       = TicketStatus::from($ticket['status']);
 $canUpdate    = auth_can(PermissionModel::ADMIN_TICKETS_UPDATE);
@@ -36,6 +37,15 @@ $picForms = [
     <p class="mb-3"><a href="<?= url_to('admin.tickets.index') ?>"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Semua tiket</a></p>
 
     <?= view('tickets/_detail', ['ticket' => $ticket, 'activities' => $activities]) ?>
+
+    <?= view('tickets/_thread', [
+        'thread'          => $thread,
+        'attachmentRoute' => 'admin.tickets.attachment',
+        'commentRoute'    => 'admin.tickets.comment',
+        'ticketId'        => $ticket['id'],
+        'isAgent'         => true,
+        'canReply'        => auth_can(PermissionModel::ADMIN_TICKETS_COMMENT) && ! $status->isFinal(),
+    ]) ?>
 
     <?php if ($canUpdate || $canAssign): ?>
         <div class="box">

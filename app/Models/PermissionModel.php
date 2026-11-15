@@ -34,6 +34,7 @@ class PermissionModel extends Model
     public const ADMIN_TICKETS_VIEW_ALL = 'admin.tickets.view-all';
     public const ADMIN_TICKETS_UPDATE = 'admin.tickets.update';
     public const ADMIN_TICKETS_ASSIGN = 'admin.tickets.assign';
+    public const ADMIN_TICKETS_COMMENT = 'admin.tickets.comment';
 
     public const ADMIN_SLA_VIEW = 'admin.sla-policies.view';
     public const ADMIN_SLA_CREATE = 'admin.sla-policies.create';
@@ -94,6 +95,7 @@ class PermissionModel extends Model
                 self::ADMIN_TICKETS_VIEW_ALL => ['label' => 'Lihat semua tiket', 'description' => 'Melihat tiket semua kategori, tanpa batasan akses.'],
                 self::ADMIN_TICKETS_UPDATE => ['label' => 'Ubah status tiket', 'description' => 'Memindahkan tiket ke status berikutnya (diproses, ditunda, resolved, dst.).'],
                 self::ADMIN_TICKETS_ASSIGN => ['label' => 'Tetapkan PIC tiket', 'description' => 'Menetapkan PIC Helpdesk dan PIC Resolver pada tiket.'],
+                self::ADMIN_TICKETS_COMMENT => ['label' => 'Balas tiket', 'description' => 'Membalas pemohon dan menulis catatan internal pada tiket.'],
             ],
         ],
         'SLA' => [
