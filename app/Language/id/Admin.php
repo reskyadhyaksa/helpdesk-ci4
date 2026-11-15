@@ -27,6 +27,10 @@ return [
             'subtitle' => 'Kelola peran dan hak akses pengguna.',
             'action'   => 'Tambah Role',
         ],
+        'settings' => [
+            'title'    => 'System Parameters',
+            'subtitle' => 'Batas lampiran, masa retensi, kanal notifikasi, dan jendela peringatan SLA.',
+        ],
         'slaPolicies' => [
             'title'    => 'SLA Policies',
             'subtitle' => 'Atur batas waktu respons dan penyelesaian tiket.',
@@ -62,8 +66,17 @@ return [
         ],
     ],
 
+    'settings' => [
+        'saved'  => 'Pengaturan berhasil disimpan. Berlaku langsung tanpa perlu login ulang.',
+        'groups' => [
+            'attachment'   => 'Lampiran Tiket',
+            'notification' => 'Kanal Notifikasi',
+            'sla'          => 'Peringatan SLA',
+        ],
+    ],
+
     'users' => [
-        'roleUpdated'         => 'Role pengguna berhasil diubah. Berlaku setelah pengguna login ulang.',
+        'roleUpdated'        => 'Role pengguna berhasil diubah. Berlaku setelah pengguna login ulang.',
         'cannotChangeOwnRole' => 'Anda tidak bisa mengubah role akun sendiri.',
         'roleNotFound'        => 'Role yang dipilih tidak ditemukan.',
         'searchPlaceholder'   => 'Cari nama, NIK, atau email',
@@ -132,7 +145,8 @@ return [
         'emptyMessage'          => 'Tambahkan kategori pertama agar karyawan bisa memilihnya saat membuat tiket.',
         'searchPlaceholder'     => 'Cari nama atau deskripsi kategori',
         'parentInvalid'         => 'Pilihan tidak valid. Sub kategori hanya bisa berada di bawah kategori utama lain.',
-        'nameTaken'             => 'Nama kategori sudah dipakai pada tingkat yang sama.',
+        'slaRequired'           => 'Kebijakan SLA wajib dipilih. Sub kategori hanya boleh dikosongkan bila kategori utamanya sudah punya SLA.',
+        'nameTaken'           => 'Nama kategori sudah dipakai pada tingkat yang sama.',
         'jobTitlesOnlyTopLevel' => 'Job title hanya bisa diatur pada kategori utama. Sub kategori mengikuti kategori utamanya.',
         'unknownJobTitle'       => 'Ada job title yang tidak dikenali. Pilih dari daftar yang tersedia.',
         'hasSubCategories'      => 'Kategori ini masih punya sub kategori. Hapus atau pindahkan sub kategorinya lebih dulu.',

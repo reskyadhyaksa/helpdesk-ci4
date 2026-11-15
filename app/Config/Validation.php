@@ -95,6 +95,11 @@ class Validation extends BaseConfig
         'description' => ['label' => 'Deskripsi', 'rules' => 'required|max_length[2000]'],
     ];
 
+    public array $ticketComment = [
+        'body'       => ['label' => 'Pesan', 'rules' => 'required|max_length[5000]'],
+        'visibility' => ['label' => 'Jenis pesan', 'rules' => 'permit_empty|in_list[PUBLIC,INTERNAL]'],
+    ];
+
     public array $ticketStatus = [
         'status' => ['label' => 'Status', 'rules' => 'required|in_list[OPEN,IN_PROGRESS,NEED_RESPONSE,ON_HOLD,ESCALATED,RESOLVED,REOPENED,CLOSED,CANCELLED]'],
     ];

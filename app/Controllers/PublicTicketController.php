@@ -25,7 +25,7 @@ class PublicTicketController extends BaseController
         }
 
         try {
-            $ticket = service('tickets')->createPublic($this->validator->getValidated());
+            $ticket = service('tickets')->createPublic($this->validator->getValidated(), $this->request->getFileMultiple('attachments') ?? []);
         } catch (BusinessException $e) {
             return redirect()->back()->withInput()->with('danger', $e->getMessage());
         }

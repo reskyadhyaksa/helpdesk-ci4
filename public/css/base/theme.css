@@ -1,10 +1,10 @@
 /* Tema: font, token warna, dan skala dasar Bulma. Dimuat paling awal. */
 
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
 /* Tema: skala font, warna, dan radius Bulma disesuaikan dengan desain portal */
 :root {
-  --bulma-family-primary: "Montserrat", sans-serif;
+  --bulma-family-primary: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --bulma-body-size: 0.875em;
   --bulma-navbar-height: 5.4rem;
   --bulma-radius: 0.5rem;

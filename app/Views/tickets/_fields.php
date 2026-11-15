@@ -53,3 +53,11 @@ foreach ($categories as $category) {
         <p class="help is-danger" id="descriptionError"><?= esc($errors['description']) ?></p>
     <?php endif ?>
 </div>
+
+<div class="field">
+    <label class="label" for="attachments">Lampiran <span class="has-text-weight-normal has-text-grey-dark">(Opsional)</span></label>
+    <div class="control">
+        <input class="input" type="file" id="attachments" name="attachments[]" multiple>
+    </div>
+    <p class="help">Tangkapan layar atau dokumen pendukung. Jenis dan ukuran file dibatasi sesuai pengaturan sistem.</p>
+</div>

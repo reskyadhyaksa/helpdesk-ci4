@@ -14,7 +14,7 @@ $errors = session('errors') ?? [];
             'subtitle' => lang('Ticket.newSubtitle'),
         ]) ?>
 
-        <form class="box p-0" action="<?= url_to('user.tickets.create') ?>" method="post" novalidate>
+        <form class="box p-0" action="<?= url_to('user.tickets.create') ?>" method="post" enctype="multipart/form-data" novalidate>
             <?= csrf_field() ?>
 
             <div class="form-card-body">

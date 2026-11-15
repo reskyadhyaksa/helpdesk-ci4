@@ -8,6 +8,7 @@ use App\Exceptions\BusinessException;
 use App\Models\PermissionModel;
 use App\Services\TicketService;
 use CodeIgniter\Exceptions\PageNotFoundException;
+use CodeIgniter\HTTP\DownloadResponse;
 use CodeIgniter\HTTP\RedirectResponse;
 
 class TicketController extends BaseController
@@ -32,7 +33,34 @@ class TicketController extends BaseController
             'ticket'     => $ticket,
             'activities' => $service->activities($id),
             'pics'       => $service->pics(),
+            'thread'     => service('ticketComments')->thread($id, true),
         ]);
+    }
+
+    public function comment(string $id): RedirectResponse
+    {
+        if (! $this->validate('ticketComment')) {
+            return $this->back($id)->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        try {
+            service('ticketComments')->add($id, auth_user(), $this->canViewAll(), true, $this->validator->getValidated(), $this->request->getFileMultiple('attachments') ?? []);
+        } catch (BusinessException $e) {
+            return $this->back($id)->withInput()->with('danger', $e->getMessage());
+        }
+
+        return $this->back($id)->with('success', lang('Ticket.commentAdded'));
+    }
+
+    public function attachment(string $id): DownloadResponse
+    {
+        try {
+            $file = service('ticketComments')->attachmentForDownload($id, auth_user(), $this->canViewAll(), true);
+        } catch (BusinessException) {
+            throw PageNotFoundException::forPageNotFound();
+        }
+
+        return $this->response->download($file['path'], null)->setFileName($file['name'])->setHeader('X-Content-Type-Options', 'nosniff');
     }
 
     public function updateStatus(string $id): RedirectResponse

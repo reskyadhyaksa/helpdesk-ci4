@@ -124,3 +124,8 @@ _modules/*
 
 /results/
 /phpunit.xml
+
+# Berkas runtime server WebSocket (Workerman)
+/workerman.log
+/workerman.pid
+/workerman.status

@@ -22,6 +22,7 @@ final class RequestCategoryServiceTest extends CIUnitTestCase
 
     private const ROLE_ID = '01936b2a-1c2d-7e3f-8a4b-5c6d7e8f9a0d';
     private const USER_ID = '01936b2a-1c2d-7e3f-8a4b-5c6d7e8f9a0e';
+    private const SLA_ID  = '01936b2a-1c2d-7e3f-8a4b-5c6d7e8f9a0f';
 
     private RequestCategoryModel $categories;
     private RequestCategoryAccessJobTitleModel $jobTitleAccess;
@@ -62,11 +63,52 @@ final class RequestCategoryServiceTest extends CIUnitTestCase
             'parent_id'     => null,
             'name'          => 'Payroll',
             'description'   => '',
-            'sla_policy_id' => '',
+            'sla_policy_id' => self::SLA_ID,
             'is_active'     => '1',
             'job_titles'    => [],
             'role_ids'      => [],
         ];
+    }
+
+    public function testTopLevelCategoryWithoutSlaIsRejected(): void
+    {
+        $this->categories->expects($this->never())->method('insert');
+        $this->expectException(BusinessException::class);
+
+        $this->service()->create($this->data(['sla_policy_id' => '']), 'admin-1', false);
+    }
+
+    public function testEditingATopLevelCategoryCannotRemoveItsSla(): void
+    {
+        $this->categories->expects($this->never())->method('update');
+        $this->expectException(BusinessException::class);
+
+        $this->service()->update(['id' => self::CATEGORY_ID, 'parent_id' => null], $this->data(['sla_policy_id' => '']), 'admin-1', false);
+    }
+
+    public function testSubCategoryMayLeaveTheSlaEmptyAndInheritTheParents(): void
+    {
+        $this->categories->method('find')->willReturn(['id' => self::PARENT_ID, 'parent_id' => null, 'sla_policy_id' => self::SLA_ID]);
+        $this->categories->expects($this->once())->method('insert')->willReturn(self::CATEGORY_ID);
+
+        $this->service()->create($this->data(['parent_id' => self::PARENT_ID, 'sla_policy_id' => '']), 'admin-1', false);
+    }
+
+    public function testSubCategoryWithoutSlaIsRejectedWhenTheParentHasNoSlaEither(): void
+    {
+        $this->categories->method('find')->willReturn(['id' => self::PARENT_ID, 'parent_id' => null, 'sla_policy_id' => null]);
+        $this->categories->expects($this->never())->method('insert');
+        $this->expectException(BusinessException::class);
+
+        $this->service()->create($this->data(['parent_id' => self::PARENT_ID, 'sla_policy_id' => '']), 'admin-1', false);
+    }
+
+    public function testSubCategoryMayHaveItsOwnSla(): void
+    {
+        $this->categories->method('find')->willReturn(['id' => self::PARENT_ID, 'parent_id' => null, 'sla_policy_id' => null]);
+        $this->categories->expects($this->once())->method('insert')->willReturn(self::CATEGORY_ID);
+
+        $this->service()->create($this->data(['parent_id' => self::PARENT_ID, 'sla_policy_id' => self::SLA_ID]), 'admin-1', false);
     }
 
     public function testCreateTopLevelStoresJobTitleRules(): void

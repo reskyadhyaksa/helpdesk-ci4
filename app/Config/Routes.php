@@ -17,6 +17,14 @@ $routes->get('tiket/baru', 'PublicTicketController::new', ['as' => 'public.ticke
 // Dibatasi 5 pengajuan per 10 menit per IP: tiap pengajuan memanggil API kepegawaian
 $routes->post('tiket', 'PublicTicketController::create', ['as' => 'public.tickets.create', 'filter' => 'throttle:5,600']);
 
+// Lonceng notifikasi dalam aplikasi (API JSON, hanya untuk pengguna login)
+$routes->group('notifications', ['filter' => 'auth'], static function (RouteCollection $routes) {
+    $routes->get('/', 'NotificationController::index', ['as' => 'notifications.index']);
+    $routes->get('token', 'NotificationController::token', ['as' => 'notifications.token']);
+    $routes->post('read-all', 'NotificationController::readAll', ['as' => 'notifications.read-all']);
+    $routes->post('(:uuid)/read', 'NotificationController::read/$1', ['as' => 'notifications.read']);
+});
+
 // Tamu saja
 $routes->group('', ['filter' => 'guest'], static function (RouteCollection $routes) {
     $routes->get('login', 'AuthController::showLogin', ['as' => 'login']);
@@ -33,6 +41,8 @@ $routes->group('u', ['namespace' => 'App\Controllers\User', 'filter' => 'auth:us
     $routes->get('tickets', 'TicketController::index', ['as' => 'user.tickets.index', 'filter' => 'auth:user.tickets.view']);
     $routes->get('tickets/new', 'TicketController::new', ['as' => 'user.tickets.new', 'filter' => 'auth:user.tickets.create']);
     $routes->get('tickets/(:uuid)', 'TicketController::show/$1', ['as' => 'user.tickets.show', 'filter' => 'auth:user.tickets.view']);
+    $routes->post('tickets/(:uuid)/comments', 'TicketController::comment/$1', ['as' => 'user.tickets.comment', 'filter' => 'auth:user.tickets.view']);
+    $routes->get('tickets/attachments/(:uuid)', 'TicketController::attachment/$1', ['as' => 'user.tickets.attachment', 'filter' => 'auth:user.tickets.view']);
     $routes->post('tickets', 'TicketController::create', ['as' => 'user.tickets.create', 'filter' => 'auth:user.tickets.create']);
 });
 
@@ -44,6 +54,8 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'au
     $routes->get('tickets', 'TicketController::index', ['as' => 'admin.tickets.index']);
     $routes->get('tickets/mine', 'TicketController::mine', ['as' => 'admin.tickets.mine']);
     $routes->get('tickets/(:uuid)', 'TicketController::show/$1', ['as' => 'admin.tickets.show']);
+    $routes->post('tickets/(:uuid)/comments', 'TicketController::comment/$1', ['as' => 'admin.tickets.comment', 'filter' => 'auth:admin.tickets.comment']);
+    $routes->get('tickets/attachments/(:uuid)', 'TicketController::attachment/$1', ['as' => 'admin.tickets.attachment']);
     $routes->post('tickets/(:uuid)/status', 'TicketController::updateStatus/$1', ['as' => 'admin.tickets.status', 'filter' => 'auth:admin.tickets.update']);
     $routes->post('tickets/(:uuid)/assign', 'TicketController::assign/$1', ['as' => 'admin.tickets.assign', 'filter' => 'auth:admin.tickets.assign']);
     $routes->get('faqs', 'FaqController::index', ['as' => 'admin.faqs.index']);
@@ -66,6 +78,10 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'au
     $routes->get('users/(:uuid)/category-access', 'UserCategoryAccessController::show/$1', ['as' => 'admin.users.category-access', 'filter' => 'auth:admin.users.category-access']);
     $routes->post('users/(:uuid)/category-access', 'UserCategoryAccessController::store/$1', ['as' => 'admin.users.category-access.store', 'filter' => 'auth:admin.users.category-access']);
     $routes->post('users/(:uuid)/category-access/(:uuid)/delete', 'UserCategoryAccessController::delete/$1/$2', ['as' => 'admin.users.category-access.delete', 'filter' => 'auth:admin.users.category-access']);
+
+    // Pengaturan sistem
+    $routes->get('settings', 'SettingController::index', ['as' => 'admin.settings.index', 'filter' => 'auth:admin.settings.update']);
+    $routes->post('settings', 'SettingController::update', ['as' => 'admin.settings.update', 'filter' => 'auth:admin.settings.update']);
 
     // SLA Policies
     $routes->get('sla-policies', 'SlaPolicyController::index', ['as' => 'admin.sla-policies.index', 'filter' => 'auth:admin.sla-policies.view']);

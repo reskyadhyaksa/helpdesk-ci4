@@ -81,3 +81,17 @@ integration.helpdeskApiUser = ''
 integration.helpdeskApiPass = ''
 integration.whatsappApiUrl = ''
 integration.whatsappApiToken = ''
+
+# RabbitMQ untuk notifikasi tiket (php spark notifications:work)
+RABBITMQ_QUEUE = helpdesk.notifications
+RABBITMQ_HOST = localhost
+RABBITMQ_PORT = 5672
+RABBITMQ_USER = guest
+RABBITMQ_PASSWORD = guest
+RABBITMQ_VHOST = /
+
+# Server WebSocket notifikasi dalam aplikasi (php spark notifications:ws)
+WS_PORT = 8282
+WS_INTERNAL_PORT = 2207
+WS_PUBLIC_URL = ws://localhost:8282
+WS_SECRET = 

@@ -215,6 +215,7 @@ class RequestCategoryService
     private function ensureValid(array $data, ?array $category, array $savedJobTitles, bool $validateUsers): void
     {
         $this->ensureValidParent($data['parent_id'], $category);
+        $this->ensureHasSla($data);
 
         if ($this->categories->nameExists($data['name'], $data['parent_id'], $category['id'] ?? null)) {
             throw new BusinessException(lang('Admin.requestCategory.nameTaken'));
@@ -257,6 +258,25 @@ class RequestCategoryService
     private function allExist(RoleModel|UserModel $model, array $ids): bool
     {
         return count($model->find($ids)) === count($ids);
+    }
+
+    /**
+     * Setiap kategori harus punya SLA yang berlaku: kategori utama wajib memilihnya sendiri; sub kategori boleh
+     * mengosongkan (otomatis memakai SLA kategori utamanya) selama kategori utamanya punya SLA.
+     *
+     * @throws BusinessException
+     */
+    private function ensureHasSla(array $data): void
+    {
+        if ($data['sla_policy_id'] !== null) {
+            return;
+        }
+
+        $parent = $data['parent_id'] === null ? null : $this->categories->find($data['parent_id']);
+
+        if ($parent === null || empty($parent['sla_policy_id'])) {
+            throw new BusinessException(lang('Admin.requestCategory.slaRequired'));
+        }
     }
 
     private function ensureValidParent(?string $parentId, ?array $category): void

@@ -10,11 +10,14 @@ use App\Models\TicketActivityModel;
 use App\Models\TicketModel;
 use App\Models\UserModel;
 use App\Services\Auth\KeycloakAuthService;
+use App\Services\AttachmentService;
 use App\Services\CategoryAccessService;
+use App\Services\TicketNotifier;
 use App\Services\HolidayService;
 use App\Services\SlaCalculator;
 use App\Services\TicketService;
 use CodeIgniter\Database\BaseConnection;
+use CodeIgniter\HTTP\Files\UploadedFile;
 use CodeIgniter\Test\CIUnitTestCase;
 
 /**
@@ -33,6 +36,12 @@ final class TicketServiceTest extends CIUnitTestCase
     private CategoryAccessService $access;
     private UserModel $users;
     private KeycloakAuthService $hr;
+    private AttachmentService $attachmentService;
+    private TicketNotifier $notifications;
+    private BaseConnection $connection;
+
+    /** @var list<string> urutan kejadian penting (commit, publish) */
+    private array $events = [];
 
     /** @var list<array> baris yang di-insert ke tickets */
     private array $inserted = [];
@@ -49,6 +58,20 @@ final class TicketServiceTest extends CIUnitTestCase
         $this->access     = $this->createMock(CategoryAccessService::class);
         $this->users      = $this->createMock(UserModel::class);
         $this->hr         = $this->createMock(KeycloakAuthService::class);
+        $this->attachmentService = $this->createMock(AttachmentService::class);
+        $this->attachmentService->method('validateAll')->willReturnArgument(0);
+        $this->notifications = $this->createMock(TicketNotifier::class);
+        $this->notifications->method('forStatusChange')->willReturn(['outbox' => [], 'inApp' => []]);
+        $this->notifications->method('forAssignment')->willReturn(['outbox' => [], 'inApp' => []]);
+        $this->notifications->method('dispatch')->willReturnCallback(function (): void {
+            $this->events[] = 'publish';
+        });
+        $this->connection = $this->createMock(BaseConnection::class);
+        $this->connection->method('transCommit')->willReturnCallback(function (): bool {
+            $this->events[] = 'commit';
+
+            return true;
+        });
 
         $this->tickets->method('insert')->willReturnCallback(function (array $row) {
             $this->inserted[] = $row;
@@ -74,7 +97,9 @@ final class TicketServiceTest extends CIUnitTestCase
             $this->access,
             $this->users,
             $this->hr,
-            $this->createMock(BaseConnection::class),
+            $this->attachmentService,
+            $this->notifications,
+            $this->connection,
         );
     }
 
@@ -149,6 +174,39 @@ final class TicketServiceTest extends CIUnitTestCase
         $this->expectException(BusinessException::class);
 
         $this->createAsSelf();
+    }
+
+    public function testSubCategoryWithoutItsOwnSlaInheritsTheParentsSla(): void
+    {
+        $this->categories->method('find')->willReturnMap([
+            [self::CATEGORY_ID, $this->category(['parent_id' => 'p1', 'sla_policy_id' => null])],
+            ['p1', ['id' => 'p1', 'is_active' => '1', 'parent_id' => null, 'sla_policy_id' => self::POLICY_ID]],
+        ]);
+        $this->policies->method('find')->with(self::POLICY_ID)->willReturn($this->policy());
+        $this->calculator->method('dueAt')->willReturn(new DateTimeImmutable('2026-11-16 09:30:00'));
+
+        $this->createAsSelf();
+
+        $this->assertSame(self::POLICY_ID, $this->inserted[0]['sla_policy_id']);
+        $this->assertSame('2026-11-16 09:30:00', $this->inserted[0]['response_due_at']);
+        $this->assertSame(SlaPolicy::PRIORITY_URGENT, $this->inserted[0]['priority']);
+    }
+
+    public function testASubCategorysOwnSlaWinsOverTheParents(): void
+    {
+        $ownId = '01936b2a-1c2d-7e3f-8a4b-5c6d7e8f9a99';
+        $this->categories->method('find')->willReturnMap([
+            [self::CATEGORY_ID, $this->category(['parent_id' => 'p1', 'sla_policy_id' => $ownId])],
+            ['p1', ['id' => 'p1', 'is_active' => '1', 'parent_id' => null, 'sla_policy_id' => self::POLICY_ID]],
+        ]);
+        $this->policies->method('find')->with($ownId)->willReturn(new SlaPolicy([
+            'id' => $ownId, 'priority' => SlaPolicy::PRIORITY_LOW, 'response_minutes' => 60, 'resolution_minutes' => 240, 'is_active' => true,
+        ]));
+        $this->calculator->method('dueAt')->willReturn(new DateTimeImmutable('2026-11-16 09:30:00'));
+
+        $this->createAsSelf();
+
+        $this->assertSame($ownId, $this->inserted[0]['sla_policy_id']);
     }
 
     public function testCreateWithoutSlaStoresNullDueDates(): void
@@ -331,6 +389,67 @@ final class TicketServiceTest extends CIUnitTestCase
         $this->assertSame(0, $this->inserted[0]['is_requester_verified']);
     }
 
+    // --- Lampiran saat tiket dibuat ---------------------------------------
+
+    public function testCreateValidatesFilesBeforeInsertAndStoresThemAfterwards(): void
+    {
+        $file = $this->createMock(UploadedFile::class);
+        $this->categories->method('find')->willReturn($this->category());
+        $this->users->method('find')->willReturn($this->actorUser());
+        $this->attachmentService = $this->createMock(AttachmentService::class);
+        $this->attachmentService->expects($this->once())->method('validateAll')->with([$file])->willReturn([$file]);
+        $this->attachmentService->expects($this->once())->method('store')->with('t1', null, $file)->willReturn(['id' => 'a1', 'storage_key' => 'k']);
+
+        $this->service()->create($this->data(), $this->actor(), [$file]);
+
+        $this->assertCount(1, $this->inserted);
+    }
+
+    public function testCreateRejectsInvalidFilesBeforeAnythingIsSaved(): void
+    {
+        $this->categories->method('find')->willReturn($this->category());
+        $this->users->method('find')->willReturn($this->actorUser());
+        $this->attachmentService = $this->createMock(AttachmentService::class);
+        $this->attachmentService->method('validateAll')->willThrowException(new BusinessException('terlalu besar'));
+
+        try {
+            $this->service()->create($this->data(), $this->actor(), [$this->createMock(UploadedFile::class)]);
+            $this->fail('BusinessException diharapkan');
+        } catch (BusinessException) {
+            $this->assertSame([], $this->inserted);
+        }
+    }
+
+    public function testCreatePublicAcceptsFiles(): void
+    {
+        $file = $this->createMock(UploadedFile::class);
+        $this->categories->method('find')->willReturn($this->category());
+        $this->hr->method('getHelpdeskUserData')->willReturn(null);
+        $this->attachmentService = $this->createMock(AttachmentService::class);
+        $this->attachmentService->method('validateAll')->willReturn([$file]);
+        $this->attachmentService->expects($this->once())->method('store')->with('t1', null, $file)->willReturn(['id' => 'a1', 'storage_key' => 'k']);
+
+        $this->service()->createPublic($this->publicData(), [$file]);
+    }
+
+    public function testStoredFilesAreDiscardedWhenALaterFileFails(): void
+    {
+        $first  = $this->createMock(UploadedFile::class);
+        $second = $this->createMock(UploadedFile::class);
+        $this->categories->method('find')->willReturn($this->category());
+        $this->users->method('find')->willReturn($this->actorUser());
+        $this->attachmentService = $this->createMock(AttachmentService::class);
+        $this->attachmentService->method('validateAll')->willReturn([$first, $second]);
+        $this->attachmentService->method('store')->willReturnOnConsecutiveCalls(
+            ['id' => 'a1', 'storage_key' => 'k1'],
+            $this->throwException(new BusinessException('gagal')),
+        );
+        $this->attachmentService->expects($this->once())->method('discard')->with([['id' => 'a1', 'storage_key' => 'k1']]);
+        $this->expectException(BusinessException::class);
+
+        $this->service()->create($this->data(), $this->actor(), [$first, $second]);
+    }
+
     // --- Status dan PIC ----------------------------------------------------
 
     public function testChangeStatusRejectsIllegalTransition(): void
@@ -365,6 +484,91 @@ final class TicketServiceTest extends CIUnitTestCase
         $this->activities->expects($this->once())->method('record')->with('t1', 'u1', 'resolver_changed', null, 'Siti');
 
         $this->service()->assign('t1', 'resolver', 'u9', 'u1');
+    }
+
+    // --- Notifikasi --------------------------------------------------------
+
+    public function testStatusChangeQueuesNotificationsAndPublishesOnlyAfterCommit(): void
+    {
+        $this->notifications = $this->createMock(TicketNotifier::class);
+        $this->notifications->expects($this->once())
+            ->method('forStatusChange')
+            ->with($this->callback(static fn (array $t) => $t['status'] === 'OPEN'), TicketStatus::Open, TicketStatus::InProgress, 'u1')
+            ->willReturn(['outbox' => ['o1'], 'inApp' => []]);
+        $this->notifications->expects($this->once())->method('dispatch')->with(['outbox' => ['o1'], 'inApp' => []])->willReturnCallback(function (): void {
+            $this->events[] = 'publish';
+        });
+        $this->tickets->method('update')->willReturn(true);
+
+        $this->service()->changeStatus('t1', TicketStatus::InProgress, 'u1');
+
+        $this->assertSame(['commit', 'publish'], $this->events);
+    }
+
+    public function testClosingATicketStampsClosedAtForTheRetentionPolicy(): void
+    {
+        $this->tickets = $this->createMock(TicketModel::class);
+        $this->tickets->method('find')->willReturn(['id' => 't1', 'status' => 'RESOLVED']);
+        $this->tickets->expects($this->once())
+            ->method('update')
+            ->with('t1', $this->callback(static fn (array $row) => $row['status'] === 'CLOSED'
+                && preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $row['closed_at']) === 1))
+            ->willReturn(true);
+
+        $this->service()->changeStatus('t1', TicketStatus::Closed, 'u1');
+    }
+
+    public function testOtherStatusChangesDoNotTouchClosedAt(): void
+    {
+        $this->tickets->expects($this->once())->method('update')->with('t1', ['status' => 'IN_PROGRESS'])->willReturn(true);
+
+        $this->service()->changeStatus('t1', TicketStatus::InProgress, 'u1');
+    }
+
+    public function testNothingIsPublishedWhenTheStatusChangeFails(): void
+    {
+        $this->notifications = $this->createMock(TicketNotifier::class);
+        $this->notifications->expects($this->never())->method('dispatch');
+        $this->tickets->method('update')->willThrowException(new RuntimeException('db'));
+        $this->expectException(RuntimeException::class);
+
+        $this->service()->changeStatus('t1', TicketStatus::InProgress, 'u1');
+    }
+
+    public function testAQueueingFailureDoesNotBlockTheStatusChange(): void
+    {
+        $this->notifications = $this->createMock(TicketNotifier::class);
+        $this->notifications->method('forStatusChange')->willThrowException(new RuntimeException('outbox rusak'));
+        $this->tickets->expects($this->once())->method('update')->willReturn(true);
+
+        $this->service()->changeStatus('t1', TicketStatus::InProgress, 'u1');
+
+        $this->assertSame(['commit'], $this->events);
+    }
+
+    public function testAssigningANewPicQueuesANotificationForThatPic(): void
+    {
+        $this->users->method('withPermission')->willReturn([['id' => 'u9', 'name' => 'Siti', 'employee_no' => '9']]);
+        $this->tickets->method('update')->willReturn(true);
+        $this->notifications = $this->createMock(TicketNotifier::class);
+        $this->notifications->expects($this->once())->method('forAssignment')->with($this->anything(), 'assignee', 'u9', 'u1')->willReturn(['outbox' => ['o1'], 'inApp' => []]);
+        $this->notifications->expects($this->once())->method('dispatch')->with(['outbox' => ['o1'], 'inApp' => []]);
+
+        $this->service()->assign('t1', 'assignee', 'u9', 'u1');
+    }
+
+    public function testReassigningTheSamePicOrClearingThePicSendsNothing(): void
+    {
+        $this->tickets = $this->createMock(TicketModel::class);
+        $this->tickets->method('find')->willReturn(['id' => 't1', 'status' => 'OPEN', 'assignee_id' => 'u9']);
+        $this->tickets->method('update')->willReturn(true);
+        $this->users->method('withPermission')->willReturn([['id' => 'u9', 'name' => 'Siti', 'employee_no' => '9']]);
+        $this->users->method('find')->willReturn(new User(['id' => 'u9', 'name' => 'Siti']));
+        $this->notifications = $this->createMock(TicketNotifier::class);
+        $this->notifications->expects($this->never())->method('forAssignment');
+
+        $this->service()->assign('t1', 'assignee', 'u9', 'u1');
+        $this->service()->assign('t1', 'assignee', null, 'u1');
     }
 
     public function testAssignNullClearsPic(): void

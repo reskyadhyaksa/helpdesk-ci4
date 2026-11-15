@@ -78,7 +78,9 @@ class Filters extends BaseFilters
     public array $globals = [
         'before' => [
             // 'honeypot',
-            'csrf',
+            // Endpoint JSON lonceng dikecualikan: aksinya hanya menandai notifikasi milik pengguna sendiri, dan verifikasi
+            // CSRF yang mengganti token (Security::$regenerate) akan membuat form lain yang sedang terbuka ditolak.
+            'csrf' => ['except' => ['notifications/*']],
             // 'invalidchars',
         ],
         'after' => [

@@ -1,0 +1,118 @@
+/* Lonceng notifikasi dalam aplikasi (partials/notification_bell.php + js/components/notifications.js). */
+
+.notif {
+  position: relative;
+  display: inline-block;
+}
+
+.notif-toggle {
+  position: relative;
+}
+
+.notif-badge {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.35rem;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background-color: hsl(348deg 86% 50%);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1.15rem;
+  text-align: center;
+}
+
+.notif-panel {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: 26rem;
+  overflow-y: auto;
+  border: 1px solid #e5e9f0;
+  border-radius: 0.9rem;
+  background-color: #fff;
+  box-shadow: 0 12px 32px rgb(15 23 42 / 14%);
+}
+
+.notif-head {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid #eef0f4;
+  background-color: #fff;
+}
+
+.notif-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notif-item {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-bottom: 1px solid #f1f5f9;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notif-item:hover,
+.notif-item:focus-visible {
+  background-color: #f8fafc;
+}
+
+.notif-item.is-unread {
+  background-color: hsl(222deg 75% 22% / 0.05);
+}
+
+.notif-item-title {
+  display: block;
+  font-size: 0.857rem;
+  font-weight: 700;
+}
+
+.notif-item.is-unread .notif-item-title::before {
+  content: "";
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.4rem;
+  border-radius: 50%;
+  background-color: var(--bulma-primary);
+}
+
+.notif-item-body,
+.notif-item-time {
+  display: block;
+  font-size: 0.786rem;
+}
+
+.notif-item-time {
+  margin-top: 0.15rem;
+  color: #64748b;
+}
+
+.notif-empty {
+  padding: 1.25rem 1rem;
+  text-align: center;
+}
+
+/* Admin tidak punya bar atas, jadi lonceng melayang di pojok kanan atas */
+.notif-floating {
+  position: fixed;
+  z-index: 30;
+  top: 1rem;
+  right: 1.5rem;
+}
