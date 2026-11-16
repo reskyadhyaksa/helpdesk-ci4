@@ -23,6 +23,10 @@ class TicketService
     public const SCOPE_MINE = 'mine';
     public const SCOPE_ASSIGNED = 'assigned';
 
+    // Dashboard user: jumlah tiket terbaru dan kartu standar SLA yang ditampilkan
+    public const DASHBOARD_TICKET_LIMIT = 5;
+    private const DASHBOARD_SLA_LIMIT = 3;
+
     // Tab cepat di daftar tiket; "expiring" = tiket berjalan yang urgent atau batas penyelesaiannya habis dalam jendela ini
     public const TABS = ['all', 'open', 'progress', 'expiring'];
 
@@ -326,7 +330,7 @@ class TicketService
     {
         $this->applyScope($viewer, $canViewAll, $scope);
 
-        return ['tickets' => $this->tickets->paginateList(), 'pager' => $this->tickets->pager];
+        return $this->tickets;
     }
 
     /**
@@ -393,8 +397,6 @@ class TicketService
         if ($scope === self::SCOPE_ASSIGNED) {
             $this->tickets->onlyAssignedTo($viewer['id']);
         }
-
-        return $this->tickets;
     }
 
     /**

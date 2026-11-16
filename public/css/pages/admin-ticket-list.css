@@ -1,12 +1,5 @@
-/* Daftar tiket admin (All Ticket / My Ticket): judul + tab, baris filter, dan tabel atau papan Kanban dalam satu kartu
-   putih (admin/tickets/_list_controls + index/mine). Di dalam kartu, kontrol memakai isian abu-abu muda tanpa bingkai. */
-
-.list-panel {
-  overflow: hidden;
-  border-radius: 1.25rem;
-  background-color: #fff;
-  box-shadow: 0 1px 3px rgb(15 23 42 / 0.06), 0 8px 24px rgb(15 23 42 / 0.05);
-}
+/* Daftar tiket admin (All Ticket / My Ticket): hanya judul + tab + pilihan tampilan yang berada dalam kartu
+   (admin/tickets/_list_controls). Baris filter dan tabel/papan di bawahnya berdiri sendiri di atas latar halaman. */
 
 .list-panel-head {
   display: flex;
@@ -14,86 +7,78 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.5rem 1.5rem 0;
-}
-
-.list-panel .quick-tabs {
-  align-items: center;
-  margin: 0 0 0 auto;
-}
-
-.list-panel .admin-toolbar {
-  margin: 0;
-  padding: 1.1rem 1.5rem 1.25rem;
-}
-
-/* Tabel dan footernya selebar kartu; sudut bawah dipotong oleh kartu */
-.list-panel .admin-table-card {
-  margin: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.list-panel .board {
-  padding: 0 1.5rem 1.5rem;
-}
-
-/* Isian abu-abu muda: di atas kartu putih kontrasnya cukup, dan tampil lebih ringan daripada kotak berbingkai */
-.list-panel .admin-toolbar .input,
-.list-panel .admin-toolbar .select-trigger,
-.list-panel .admin-toolbar .button.is-light,
-.list-panel .filter-toggle span {
-  border-color: transparent;
-  background-color: #f1f4f8;
-  box-shadow: none;
-}
-
-.list-panel .admin-toolbar .input:hover,
-.list-panel .admin-toolbar .select-trigger:hover,
-.list-panel .filter-toggle span:hover {
-  border-color: #cbd5e1;
-}
-
-.list-panel .admin-toolbar .input:focus,
-.list-panel .admin-toolbar .select-trigger:focus-visible {
-  border-color: var(--bulma-link);
+  margin-bottom: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 1.25rem;
   background-color: #fff;
-  box-shadow: 0 0 0 3px hsl(224deg 76% 48% / 0.15);
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.06), 0 8px 24px rgb(15 23 42 / 0.05);
 }
 
-.list-panel .filter-toggle input:checked + span {
-  border-color: #93c5fd;
-  background-color: #dbeafe;
+/* Layar sedang (laptop 13-14"): tab di baris sendiri di bawah judul, tab di kiri dan pilihan tampilan di kanan */
+.list-panel-head .quick-tabs {
+  flex: 1 1 100%;
+  align-items: center;
+  margin: 0;
 }
 
-.list-panel .quick-tab {
+/* Layar lebar: judul di kiri, tab dan pilihan tampilan rata kanan pada baris yang sama */
+@media (min-width: 1500px) {
+  .list-panel-head .quick-tabs {
+    flex: 0 1 auto;
+    justify-content: flex-end;
+    margin-left: auto;
+  }
+}
+
+/* Di atas kartu putih, tab dan toggle memakai isian abu-abu muda tanpa bingkai */
+.list-panel-head .quick-tab {
   border-color: transparent;
   background-color: #f1f4f8;
 }
 
-.list-panel .quick-tab:hover {
+.list-panel-head .quick-tab:hover {
   background-color: #e5e9f0;
 }
 
-.list-panel .quick-tab.is-active {
+.list-panel-head .quick-tab.is-active {
   background-color: var(--bulma-link);
 }
 
-.list-panel .quick-tab.is-alert {
+.list-panel-head .quick-tab.is-alert {
   background-color: #fef2f2;
 }
 
-.list-panel .quick-tab.is-alert.is-active {
+.list-panel-head .quick-tab.is-alert.is-active {
   background-color: #c81e1e;
 }
 
-.list-panel .view-toggle {
+.list-panel-head .view-toggle {
   border-color: transparent;
   background-color: #f1f4f8;
 }
 
-.list-panel .view-toggle button[aria-pressed="true"] {
+.list-panel-head .view-toggle button[aria-pressed="true"] {
   background-color: #fff;
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.1);
   color: var(--bulma-text-strong);
+}
+
+/* Tombol "Buat Tiket": di kartu judul pada layar di bawah 1500px, di baris filter pada layar lebar (tidak dobel) */
+.list-panel-head .list-create-head {
+  align-self: flex-start;
+  margin-left: auto;
+}
+
+.list-create-bar {
+  display: none;
+}
+
+@media (min-width: 1500px) {
+  .list-panel-head .list-create-head {
+    display: none;
+  }
+
+  .list-create-bar {
+    display: inline-flex;
+  }
 }

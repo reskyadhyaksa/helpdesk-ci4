@@ -28,13 +28,13 @@ $canAssign = auth_can(PermissionModel::ADMIN_TICKETS_ASSIGN);
         <td>
             <div class="ticket-head">
                 <a href="<?= $detail ?>" data-ticket-modal><strong><?= esc($ticket['ticket_number']) ?></strong></a>
-                <span class="table-chip"><?= esc($categoryName($ticket)) ?></span>
                 <?php if ($ticket['channel'] === 'PUBLIC_FORM'): ?>
                     <span class="table-chip is-warning"><?= esc(lang('Ticket.channelPublic')) ?></span>
                 <?php endif ?>
             </div>
             <p class="has-text-weight-semibold has-text-grey-dark table-clamp"><?= esc($ticket['subject']) ?></p>
             <small class="table-clamp"><?= esc($ticket['description']) ?></small>
+            <?php // Kategori di baris terakhir sel, tidak berebut ruang dengan nomor tiket ?>
         </td>
         <td>
             <div class="table-person">
@@ -61,6 +61,10 @@ $canAssign = auth_can(PermissionModel::ADMIN_TICKETS_ASSIGN);
             <small class="has-text-danger has-text-weight-semibold">
                 <?= esc(lang('Ticket.due')) ?>: <?= esc($ticket['resolution_due_at'] === null ? lang('Ticket.noSla') : format_datetime($ticket['resolution_due_at'])) ?>
             </small>
+        </td>
+        <?php // Kolom Kategori tepat di depan Status SLA: kategori menentukan kebijakan SLA ?>
+        <td class="has-text-centered">
+            <p class="ticket-category"><span class="table-chip" title="<?= esc($categoryName($ticket), 'attr') ?>"><?= esc($categoryName($ticket)) ?></span></p>
         </td>
         <td class="has-text-centered"><?= view('tickets/_sla_badge', ['ticket' => $ticket]) ?></td>
         <td>

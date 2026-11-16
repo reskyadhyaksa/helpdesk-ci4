@@ -8,8 +8,6 @@
 
 <?= $this->section('content') ?>
 <section class="section">
-    <?php // Judul, tab, filter, dan tabel/papan dibungkus satu kartu (css/pages/admin-ticket-list.css) ?>
-    <div class="list-panel">
     <?= view('admin/tickets/_list_controls', [
         'action'    => url_to('admin.tickets.index'),
         'title'     => lang('Admin.pages.tickets.title'),
@@ -26,11 +24,12 @@
     <?php else: ?>
     <?php component_start('data_table', [
         'columns'      => [
-            ['label' => 'Tiket & Detail Permohonan', 'width' => 19],
+            ['label' => 'Tiket & Detail Permohonan', 'width' => 19, 'flex' => true],
             ['label' => 'Pemohon', 'width' => 17],
             ['label' => 'Prioritas', 'width' => 8.5],
             ['label' => 'Status', 'width' => 8],
             ['label' => 'Dibuat & Jatuh Tempo', 'width' => 12],
+            ['label' => 'Kategori', 'width' => 11],
             ['label' => 'Status SLA', 'width' => 12.5],
             ['label' => 'PIC Petugas', 'width' => 11.5],
             ['label' => 'Aksi', 'width' => 12],
@@ -45,7 +44,6 @@
     <?= component_end() ?>
     <?php endif ?>
     </div>
-    </div>
 </section>
 
 <?= view('admin/tickets/_modal') ?>
@@ -54,4 +52,5 @@
 <?= $this->section('scripts') ?>
 <script src="<?= base_url('js/pages/admin/ticket-detail.js') ?>"></script>
 <script src="<?= base_url('js/pages/admin/ticket-modal.js') ?>"></script>
+<script src="<?= base_url('js/pages/admin/ticket-board.js') ?>"></script>
 <?= $this->endSection() ?>

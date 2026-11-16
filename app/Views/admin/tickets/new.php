@@ -32,7 +32,7 @@ $errors = session('errors') ?? [];
                 <?php endif ?>
             </div>
 
-            <?= view('tickets/_fields', ['categories' => $categories, 'errors' => $errors]) ?>
+            <?= view('admin/tickets/_fields', ['categories' => $categories, 'errors' => $errors]) ?>
         </div>
 
         <div class="form-card-footer">

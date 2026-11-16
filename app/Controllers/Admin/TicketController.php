@@ -11,6 +11,7 @@ use App\Services\TicketService;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\DownloadResponse;
 use CodeIgniter\HTTP\RedirectResponse;
+use CodeIgniter\HTTP\ResponseInterface;
 
 class TicketController extends BaseController
 {
@@ -90,6 +91,31 @@ class TicketController extends BaseController
     public function preview(string $id): DownloadResponse
     {
         return $this->fileResponse($id, inline: true);
+    }
+
+    /**
+     * Pindah status lewat seret-dan-lepas di papan Kanban (js/pages/admin/ticket-board.js). Aturan transisi dan hak lihat
+     * tetap diperiksa di service; hasilnya JSON {message}, 422 bila ditolak.
+     */
+    public function move(string $id): ResponseInterface
+    {
+        if (! $this->validate('ticketStatus')) {
+            return $this->response->setStatusCode(422)->setJSON(['message' => implode(' ', $this->validator->getErrors())]);
+        }
+
+        $service = service('tickets');
+
+        if ($service->find($id, auth_user(), $this->canViewAll()) === null) {
+            throw PageNotFoundException::forPageNotFound();
+        }
+
+        try {
+            $service->changeStatus($id, TicketStatus::from($this->validator->getValidated()['status']), auth_user()['id']);
+        } catch (BusinessException $e) {
+            return $this->response->setStatusCode(422)->setJSON(['message' => $e->getMessage()]);
+        }
+
+        return $this->response->setJSON(['message' => lang('Ticket.statusUpdated')]);
     }
 
     public function updateStatus(string $id): RedirectResponse

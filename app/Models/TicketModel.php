@@ -357,7 +357,7 @@ class TicketModel extends Model
     private function selectWithNames(): static
     {
         return $this->select('tickets.*, category.name AS category_name, parent.name AS parent_name, '
-            . 'assignee.name AS assignee_name, resolver.name AS resolver_name, '
+            . 'assignee.name AS assignee_name, assignee.job_title AS assignee_job_title, resolver.name AS resolver_name, '
             . 'sla.resolution_minutes AS sla_limit_minutes, sla.is_holiday AS sla_is_holiday, '
             . 'sla.is_off_day AS sla_is_off_day, sla.is_work_hours AS sla_is_work_hours')
             ->join('request_categories category', 'category.id = tickets.request_category_id')

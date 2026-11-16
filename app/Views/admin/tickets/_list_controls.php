@@ -25,10 +25,10 @@ $isFiltered = $filters['keyword'] !== '' || $filters['statuses'] !== [] || $filt
     || $filters['priorities'] !== [] || $filters['pics'] !== [] || $filters['unassigned'] || $filters['tab'] !== 'all';
 
 $dropdowns = [
-    'status'   => ['placeholder' => lang('Ticket.allStatuses'), 'selected' => $filters['statuses'], 'searchable' => false],
-    'category' => ['placeholder' => 'Semua kategori', 'selected' => $filters['categories']],
-    'priority' => ['placeholder' => 'Semua prioritas', 'selected' => $filters['priorities'], 'searchable' => false],
-    'pic'      => ['placeholder' => 'Semua PIC', 'selected' => $filters['pics']],
+    'status'   => ['icon' => 'fa-circle-dot', 'placeholder' => lang('Ticket.allStatuses'), 'selected' => $filters['statuses'], 'searchable' => false],
+    'category' => ['icon' => 'fa-folder-open', 'placeholder' => 'Semua kategori', 'selected' => $filters['categories']],
+    'priority' => ['icon' => 'fa-flag', 'placeholder' => 'Semua prioritas', 'selected' => $filters['priorities'], 'searchable' => false],
+    'pic'      => ['icon' => 'fa-user', 'placeholder' => 'Semua PIC', 'selected' => $filters['pics']],
 ];
 
 foreach ($dropdowns as $name => $dropdown) {
@@ -40,6 +40,14 @@ foreach ($dropdowns as $name => $dropdown) {
         <h1 class="title is-4 mb-1"><?= esc($title) ?></h1>
         <p class="has-text-grey-dark"><?= esc($subtitle) ?></p>
     </div>
+
+    <?php if ($createUrl !== null): ?>
+        <?php // Layar di bawah ~1500px: tombol ada di kartu judul (di baris filter ia jatuh sendirian). Layar lebar: di baris filter. ?>
+        <a class="button is-primary list-create-head" href="<?= esc($createUrl, 'attr') ?>">
+            <span class="icon"><i class="fa-solid fa-plus" aria-hidden="true"></i></span>
+            <span><?= esc(lang('Ticket.adminNewAction')) ?></span>
+        </a>
+    <?php endif ?>
 
 <?php // [data-quick-filters] diganti utuh saat daftar diperbarui lewat fetch, supaya angka dan tab aktif ikut berubah ?>
     <div class="quick-tabs" data-quick-filters role="group" aria-label="Pintasan filter tiket">
@@ -78,7 +86,7 @@ foreach ($dropdowns as $name => $dropdown) {
     </label>
     <?php if ($createUrl !== null): ?>
         <?php component_slot('actions') ?>
-        <a class="button is-primary" href="<?= esc($createUrl, 'attr') ?>">
+        <a class="button is-primary list-create-bar" href="<?= esc($createUrl, 'attr') ?>">
             <span class="icon"><i class="fa-solid fa-plus" aria-hidden="true"></i></span>
             <span><?= esc(lang('Ticket.adminNewAction')) ?></span>
         </a>

@@ -60,6 +60,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'au
     $routes->get('tickets/attachments/(:uuid)', 'TicketController::attachment/$1', ['as' => 'admin.tickets.attachment']);
     $routes->get('tickets/attachments/(:uuid)/preview', 'TicketController::preview/$1', ['as' => 'admin.tickets.attachment.preview']);
     $routes->post('tickets/(:uuid)/status', 'TicketController::updateStatus/$1', ['as' => 'admin.tickets.status', 'filter' => 'auth:admin.tickets.update']);
+    $routes->post('tickets/(:uuid)/move', 'TicketController::move/$1', ['as' => 'admin.tickets.move', 'filter' => 'auth:admin.tickets.update']);
     $routes->post('tickets/(:uuid)/assign', 'TicketController::assign/$1', ['as' => 'admin.tickets.assign', 'filter' => 'auth:admin.tickets.assign']);
     $routes->get('faqs', 'FaqController::index', ['as' => 'admin.faqs.index']);
     $routes->get('forms', 'FormController::index', ['as' => 'admin.forms.index']);

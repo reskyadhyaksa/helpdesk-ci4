@@ -62,6 +62,21 @@ enum TicketStatus: string
     }
 
     /**
+     * Pengelompokan status untuk kartu ringkasan dashboard user. CANCELLED tidak dihitung.
+     *
+     * @return array<string, list<self>>
+     */
+    public static function dashboardGroups(): array
+    {
+        return [
+            'open'          => [self::Open],
+            'progress'      => [self::InProgress, self::OnHold, self::Escalated, self::Reopened],
+            'need_response' => [self::NeedResponse],
+            'done'          => [self::Resolved, self::Closed],
+        ];
+    }
+
+    /**
      * Kolom papan Kanban di daftar tiket: beberapa status berdekatan digabung supaya papan tidak terlalu lebar.
      * tone = warna Bulma untuk titik penanda kolom.
      *
