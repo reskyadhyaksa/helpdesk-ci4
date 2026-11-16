@@ -22,10 +22,12 @@ use Config\Pager as PagerConfig;
  * Dengan 'flat' => true kartunya dilepas, untuk tabel yang sudah berada di dalam kartu lain (dashboard).
  *
  * @var list<string|array{label: string, width?: int|float}> $columns
- *                                 Teks kepala kolom selalu rata tengah; perataan isi sel ditulis di <td> halamannya.
+ *                                 Teks kepala kolom rata tengah, kecuali kolom pertama yang rata kiri (dengan inden, lihat table.css); perataan isi sel ditulis di <td> halamannya.
  *                                 width (rem): bila SEMUA kolom punya width, lebar kolom dikunci (table-layout: fixed)
  *                                 dan lebar minimum tabel = jumlahnya; layar yang lebih sempit menggeser tabel
- *                                 horizontal, kolom tidak dijepit.
+ *                                 horizontal, kolom tidak dijepit. Satu kolom boleh diberi 'flex' => true: tanpa lebar tetap,
+ *                                 jadi kolom itu yang menyerap sisa ruang saat wadah lebih lebar dari jumlah lebar kolom
+ *                                 (lebar kolom lain tidak berubah, dan tidak ada ruang kosong di kanan tabel).
  * @var string      $slot          baris <tr>
  * @var string      $emptyIcon     ikon Font Awesome keadaan kosong
  * @var string|null $emptyTitle    default: "Halaman ini sedang dikembangkan"
@@ -42,7 +44,8 @@ $emptyMessage ??= null;
 $pager ??= null;
 $totalLabel ??= 'data';
 
-$isEmpty = trim($slot) === '';
+// Komentar HTML (mis. penanda DEBUG-VIEW milik CodeIgniter di mode development) bukan baris data
+$isEmpty = trim(preg_replace('/<!--.*?-->/s', '', $slot)) === '';
 
 $widths = array_map(static fn($column): float => is_array($column) ? (float) ($column['width'] ?? 0) : 0.0, $columns);
 $isFixed = !in_array(0.0, $widths, true);
@@ -55,7 +58,7 @@ $isFixed = !in_array(0.0, $widths, true);
                         <thead>
                             <tr>
                                 <?php foreach ($columns as $i => $column): ?>
-                                    <th scope="col" class="has-text-centered" <?= $isFixed ? ' style="width: ' . $widths[$i] . 'rem"' : '' ?>>
+                                    <th scope="col" class="<?= $i === 0 ? 'has-text-left' : 'has-text-centered' ?>" <?= $isFixed && empty(is_array($column) ? $column['flex'] ?? null : null) ? ' style="width: ' . $widths[$i] . 'rem"' : '' ?>>
                                         <?= esc(is_array($column) ? $column['label'] : $column) ?>
                                     </th>
                                 <?php endforeach ?>

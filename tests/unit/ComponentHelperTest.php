@@ -24,8 +24,9 @@ final class ComponentHelperTest extends CIUnitTestCase
         echo '<tr><td>Budi</td><td>-</td></tr>';
         $html = component_end();
 
-        $this->assertStringContainsString('<th scope="col" class="has-text-centered">Nama</th>', $html);
-        $this->assertStringContainsString('class="has-text-centered">Aksi</th>', $html);
+        // Spasi/baris baru di dalam <th> tidak dipersoalkan (template sudah diformat ulang)
+        $this->assertMatchesRegularExpression('/<th scope="col" class="has-text-left"[^>]*>\s*Nama\s*<\/th>/', $html);
+        $this->assertMatchesRegularExpression('/class="has-text-centered"[^>]*>\s*Aksi\s*<\/th>/', $html);
         $this->assertStringNotContainsString('is-fixed', $html);
         $this->assertStringContainsString('<tr><td>Budi</td>', $html);
         $this->assertStringContainsString('is-hoverable', $html);
@@ -41,12 +42,22 @@ final class ComponentHelperTest extends CIUnitTestCase
         $this->assertStringContainsString('style="width: 10rem"', $html);
     }
 
+    public function testDataTableFlexColumnHasNoFixedWidthButStillCountsInMinWidth(): void
+    {
+        $html = component('data_table', ['columns' => [['label' => 'A', 'width' => 10, 'flex' => true], ['label' => 'B', 'width' => 6]]]);
+
+        $this->assertStringContainsString('min-width: 16rem', $html);
+        $this->assertStringNotContainsString('style="width: 10rem"', $html);
+        $this->assertStringContainsString('style="width: 6rem"', $html);
+    }
+
     public function testDataTableWithoutRowsShowsEmptyState(): void
     {
         $html = component('data_table', ['columns' => ['A', 'B', 'C'], 'emptyIcon' => 'fa-users', 'emptyTitle' => 'Kosong']);
 
         $this->assertStringContainsString('colspan="3"', $html);
-        $this->assertStringContainsString('fa-users', $html);
+        // Keadaan kosong tabel memakai ilustrasi robot, bukan ikon
+        $this->assertStringContainsString('empty-state-illustration', $html);
         $this->assertStringContainsString('Kosong', $html);
     }
 

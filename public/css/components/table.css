@@ -131,7 +131,21 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem 0.6rem;
+  min-width: 0;
   margin-bottom: 0.15rem;
+}
+
+/* Kategori: baris terakhir sel tiket; lebih panjang dari kolom → dipotong dengan "…" (isi lengkap di title) */
+.ticket-category {
+  margin-top: 0.35rem;
+}
+
+.ticket-category .table-chip {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .table-chip {
@@ -434,28 +448,27 @@
 }
 
 /* Baris filter di atas tabel (components/filter_bar): filter + cari di kiri, tombol aksi di kanan */
+/*
+ * Baris filter: form memakai display: contents, jadi dropdown, kolom cari, dan tombol aksi adalah anak langsung satu
+ * flex yang membungkus. Layar lebar: semuanya satu baris. Layar sedang: dropdown di baris pertama; kolom cari dan
+ * tombol aksi (mis. "Buat Tiket") turun bersama di baris kedua, rata kanan, tidak lagi terpisah.
+ */
 .admin-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.6rem 0.75rem;
   margin-bottom: 1rem;
 }
 
 .admin-toolbar-filters {
-  display: flex;
-  flex: 1;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem 0.75rem;
-  min-width: 0;
+  display: contents;
 }
 
-/* Kiri: dropdown filter + Reset */
+/* Kiri: dropdown filter + Reset; mengisi sisa baris sehingga kolom cari terdorong ke kanan atau turun ke baris berikutnya */
 .admin-toolbar-selects {
   display: flex;
+  flex: 1 1 auto;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
@@ -470,6 +483,27 @@
 
 .admin-toolbar-select {
   min-width: 8.1rem;
+}
+
+/* Ikon di kiri dropdown filter (opsi icon pada components/filter_bar) */
+.admin-toolbar-select.has-icon {
+  position: relative;
+  min-width: 9.5rem;
+}
+
+.admin-toolbar-icon {
+  position: absolute;
+  top: 50%;
+  left: 0.85rem;
+  z-index: 1;
+  color: #64748b;
+  font-size: 0.78rem;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.admin-toolbar-select.has-icon .select-trigger {
+  padding-left: 2.15rem;
 }
 
 /* Kontrol di filter bar: kontainer 10% lebih kecil (2.75rem → 2.475rem), teks 20% lebih kecil (1rem → 0.8rem) */
@@ -531,7 +565,6 @@
   display: flex;
   flex-shrink: 0;
   gap: 0.5rem;
-  margin-left: auto;
 }
 
 @media (max-width: 768px) {
@@ -698,5 +731,43 @@
 @media (prefers-reduced-motion: reduce) {
   .admin-table-card .table tbody tr {
     transition: none;
+  }
+}
+
+/* Kolom pertama: teks rata kiri dengan inden 1.5rem dari tepi kartu (header dan isi sejajar) */
+.admin-table-card .table th:first-child,
+.admin-table-card .table td:first-child {
+  padding-left: 1.5rem;
+  text-align: left;
+}
+
+/* Padat: baris tabel dan tombol aksi (Ubah, Hapus, Detail) dibuat lebih rendah supaya baris tidak menjulang */
+.admin-table-card .table td {
+  padding-block: 0.6rem;
+}
+
+.admin-table-card .table td .button.is-small {
+  height: 1.7rem;
+  min-height: 0;
+  padding: 0 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.72rem;
+}
+
+.admin-table-card .table td .button.is-small .icon {
+  width: 1em;
+  height: 1em;
+  font-size: 0.72rem;
+}
+
+.admin-table-card .table td .buttons {
+  gap: 0.3rem;
+}
+
+/* Layar sentuh: target 44px tetap dipertahankan untuk tombol aksi */
+@media (pointer: coarse) {
+  .admin-table-card .table td .button.is-small {
+    height: 2.5rem;
+    padding: 0 0.8rem;
   }
 }

@@ -24,7 +24,8 @@
  * @var string|null $placeholder  teks bantuan kolom cari
  * @var string|null $searchName   nama parameter cari, default "q"
  * @var bool|null   $isFiltered   ada filter aktif? default: hanya jika $keyword terisi
- * @var array<string, array{placeholder: string, options: array<string, string>, selected?: list<string>, searchable?: bool, emptyLabel?: string}> $filters
+ * @var array<string, array{placeholder: string, options: array<string, string>, selected?: list<string>, searchable?: bool, emptyLabel?: string, icon?: string}> $filters
+ *                                icon = kelas Font Awesome (mis. "fa-filter") yang tampil di kiri dropdown
  *                                kunci = nama parameter; placeholder = teks saat tidak ada yang dipilih
  * @var string      $slot         field filter tambahan (dropdown dengan pengaturan lain)
  * @var string      $actions      tombol di kanan
@@ -53,7 +54,10 @@ $resetLink  = '<a class="button is-light' . ($isFiltered ? '' : ' is-hidden') . 
         <?php if ($hasFilters): ?>
             <div class="admin-toolbar-selects">
                 <?php foreach ($filters as $name => $filter): ?>
-                    <div class="admin-toolbar-select">
+                    <div class="admin-toolbar-select <?= ! empty($filter['icon']) ? 'has-icon' : '' ?>">
+                        <?php if (! empty($filter['icon'])): ?>
+                            <span class="admin-toolbar-icon" aria-hidden="true"><i class="fa-solid <?= esc($filter['icon'], 'attr') ?>"></i></span>
+                        <?php endif ?>
                         <?= component('select', [
                             'name'        => $name,
                             'label'       => $filter['placeholder'],
