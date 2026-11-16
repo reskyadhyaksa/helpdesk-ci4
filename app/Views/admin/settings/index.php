@@ -1,6 +1,6 @@
 <?php
 /**
- * Pengaturan sistem: bar tab kelompok di atas, satu kartu per kelompok di bawahnya (tiap parameter satu baris:
+ * Pengaturan sistem: tab kelompok di header (satu kartu tampil per tab), satu kartu per kelompok di bawahnya (tiap parameter satu baris:
  * label + bantuan di kiri, isian di kanan), dan bilah simpan melekat di bawah yang menunjukkan ada tidaknya perubahan.
  * Definisi (label, satuan, rentang, subbagian) dari SystemParameterModel::DEFAULTS; perilaku di js/pages/admin/settings.js.
  *
@@ -13,35 +13,32 @@ $groupIcons = ['attachment' => 'fa-paperclip', 'notification' => 'fa-bell', 'sla
 
 <?= $this->section('content') ?>
 <section class="section">
-    <?= component('page_header', [
+    <?php component_start('page_header', [
         'title'    => lang('Admin.pages.settings.title'),
         'subtitle' => lang('Admin.pages.settings.subtitle'),
     ]) ?>
+        <?php component_slot('tabs') ?>
+        <div class="admin-page-header-tab-list" role="tablist" aria-label="Kelompok pengaturan" data-header-tabs data-storage-key="settings.tab" data-default="<?= esc((string) array_key_first($groups), 'attr') ?>">
+            <?php foreach ($groups as $group => $items): ?>
+                <button type="button" class="admin-page-header-tab" role="tab" id="tab-<?= esc($group, 'attr') ?>" aria-controls="group-<?= esc($group, 'attr') ?>" data-tab="<?= esc($group, 'attr') ?>">
+                    <i class="fa-solid <?= esc($groupIcons[$group] ?? 'fa-gear', 'attr') ?>" aria-hidden="true"></i>
+                    <?= esc(lang('Admin.settings.groups.' . $group)) ?>
+                    <span class="admin-page-header-tab-count"><?= count($items) ?></span>
+                </button>
+            <?php endforeach ?>
+        </div>
+    <?= component_end() ?>
 
     <form class="settings-layout" action="<?= url_to('admin.settings.update') ?>" method="post" novalidate data-settings-form>
         <?= csrf_field() ?>
 
-        <nav class="settings-nav" aria-label="Kelompok pengaturan">
-            <ul>
-                <?php foreach ($groups as $group => $items): ?>
-                    <li>
-                        <a href="#group-<?= esc($group, 'attr') ?>" data-settings-link>
-                            <span class="settings-nav-icon"><i class="fa-solid <?= esc($groupIcons[$group] ?? 'fa-gear', 'attr') ?>" aria-hidden="true"></i></span>
-                            <span><?= esc(lang('Admin.settings.groups.' . $group)) ?></span>
-                            <span class="settings-nav-count"><?= count($items) ?></span>
-                        </a>
-                    </li>
-                <?php endforeach ?>
-            </ul>
-        </nav>
-
         <div class="settings-main">
             <?php foreach ($groups as $group => $items): ?>
-                <section class="box p-0 settings-card" id="group-<?= esc($group, 'attr') ?>" aria-labelledby="title-<?= esc($group, 'attr') ?>">
+                <section class="box p-0 settings-card" id="group-<?= esc($group, 'attr') ?>" role="tabpanel" aria-labelledby="tab-<?= esc($group, 'attr') ?>" data-tab-panel="<?= esc($group, 'attr') ?>">
                     <header class="settings-card-head">
                         <span class="settings-card-icon"><i class="fa-solid <?= esc($groupIcons[$group] ?? 'fa-gear', 'attr') ?>" aria-hidden="true"></i></span>
                         <div>
-                            <h2 class="settings-card-title" id="title-<?= esc($group, 'attr') ?>"><?= esc(lang('Admin.settings.groups.' . $group)) ?></h2>
+                            <h2 class="settings-card-title"><?= esc(lang('Admin.settings.groups.' . $group)) ?></h2>
                             <p><?= esc(lang('Admin.settings.groupHints.' . $group)) ?></p>
                         </div>
                     </header>
@@ -143,5 +140,6 @@ $groupIcons = ['attachment' => 'fa-paperclip', 'notification' => 'fa-bell', 'sla
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('js/components/header-tabs.js') ?>"></script>
 <script src="<?= base_url('js/pages/admin/settings.js') ?>"></script>
 <?= $this->endSection() ?>

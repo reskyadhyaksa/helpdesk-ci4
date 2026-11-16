@@ -1,83 +1,12 @@
 /*
  * Halaman System Parameters (views/admin/settings/index.php, js/pages/admin/settings.js):
- * bar tab kelompok di atas, kartu per kelompok, baris pengaturan (teks di kiri, isian di kanan), dan bilah simpan.
+ * tab kelompok ada di header halaman (page-header.css), kartu per kelompok, baris pengaturan (teks di kiri, isian di kanan), dan bilah simpan.
  */
 
 /* Padat: jarak antarbagian dan padding kartu dirapatkan; pada layar lebar parameter tersusun dua kolom (.settings-grid) */
 .settings-layout {
   display: grid;
   gap: 0.85rem;
-}
-
-/* Bar tab horizontal di atas kartu: lompat ke kelompok; menempel di atas saat halaman digulir */
-.settings-nav {
-  position: sticky;
-  top: 0.5rem;
-  z-index: 6;
-  padding: 0.25rem;
-  overflow-x: auto;
-  border: 1px solid #e2e8f0;
-  border-radius: 1rem;
-  background-color: #fff;
-  box-shadow: 0 6px 18px -10px rgb(15 23 42 / 0.2);
-}
-
-.settings-nav ul {
-  display: flex;
-  gap: 0.25rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.settings-nav a {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-height: 2.25rem;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.7rem;
-  color: #475569;
-  font-size: 0.875rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.settings-nav a:hover,
-.settings-nav a:focus-visible {
-  background-color: #f1f5f9;
-  color: var(--bulma-text-strong);
-}
-
-.settings-nav a.is-active {
-  background-color: var(--app-fill-blue);
-  color: var(--bulma-primary);
-  box-shadow: inset 0 0 0 1px var(--app-stroke-blue);
-}
-
-.settings-nav-icon {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 0.45rem;
-  background-color: #fff;
-  box-shadow: inset 0 0 0 1px #e2e8f0;
-  font-size: 0.72rem;
-}
-
-.settings-nav-count {
-  margin-left: auto;
-  min-width: 1.4rem;
-  padding: 0 0.4rem;
-  border-radius: 999px;
-  background-color: #e2e8f0;
-  color: #334155;
-  font-size: 0.7rem;
-  line-height: 1.4rem;
-  text-align: center;
 }
 
 .settings-main {
@@ -89,7 +18,6 @@
 .settings-card {
   margin-bottom: 0;
   overflow: hidden;
-  scroll-margin-top: 4rem;
 }
 
 .settings-card-head {
@@ -230,8 +158,7 @@
 @media (pointer: coarse) {
   .settings-input-group .input,
   .settings-row-control .input,
-  .settings-switch,
-  .settings-nav a {
+  .settings-switch {
     min-height: 2.75rem;
   }
 }

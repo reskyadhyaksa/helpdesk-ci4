@@ -121,6 +121,32 @@
   color: var(--bulma-link);
 }
 
+/* Jumlah item di tab; tab berisi isian tidak sah ditandai merah */
+.admin-page-header-tab-count {
+  min-width: 1.35rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background-color: #e2e8f0;
+  color: #334155;
+  font-size: 0.7rem;
+  line-height: 1.35rem;
+  text-align: center;
+}
+
+.admin-page-header-tab.is-active .admin-page-header-tab-count {
+  background-color: var(--app-fill-blue);
+  color: var(--bulma-link);
+}
+
+.admin-page-header-tab.has-error {
+  color: var(--app-danger-ink);
+}
+
+.admin-page-header-tab.has-error .admin-page-header-tab-count {
+  background-color: #fee2e2;
+  color: var(--app-danger-ink);
+}
+
 /* Layar sempit: judul di atas, aksi di bawahnya rata kiri */
 @media (max-width: 768px) {
   .admin-page-header-actions {

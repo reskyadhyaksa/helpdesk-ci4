@@ -27,7 +27,7 @@ $columns    = [
 ];
 
 if ($hasActions) {
-    $columns[] = ['label' => 'Aksi', 'width' => 12];
+    $columns[] = ['label' => 'Aksi', 'align' => 'end', 'width' => 12];
 }
 
 $isFiltered = $keyword !== '' || $selectedMonths !== [] || $selectedYears !== [(int) date('Y')];
@@ -50,8 +50,8 @@ $isFiltered = $keyword !== '' || $selectedMonths !== [] || $selectedYears !== [(
             </form>
         <?php endif ?>
         <?php component_slot('tabs') ?>
-        <?php // Dua tab di dalam header agar halaman tidak panjang: jadwal mingguan dan daftar hari libur (js/pages/admin/holidays.js) ?>
-        <div class="admin-page-header-tab-list" role="tablist" aria-label="Pengaturan hari kerja dan libur" data-holiday-tabs data-default="<?= $isFiltered ? 'holidays' : 'schedule' ?>">
+        <?php // Dua tab di dalam header agar halaman tidak panjang: jadwal mingguan dan daftar hari libur (js/components/header-tabs.js) ?>
+        <div class="admin-page-header-tab-list" role="tablist" aria-label="Pengaturan hari kerja dan libur" data-header-tabs data-storage-key="holidays.tab" data-default="schedule" data-query-tab="holidays">
             <button type="button" class="admin-page-header-tab" role="tab" id="tab-schedule" aria-controls="panel-schedule" data-tab="schedule">
                 <i class="fa-regular fa-clock" aria-hidden="true"></i> Jadwal Kerja
             </button>
@@ -291,5 +291,6 @@ $isFiltered = $keyword !== '' || $selectedMonths !== [] || $selectedYears !== [(
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('js/components/header-tabs.js') ?>"></script>
 <script src="<?= base_url('js/pages/admin/holidays.js') ?>"></script>
 <?= $this->endSection() ?>

@@ -1,6 +1,6 @@
 // Halaman System Parameters (views/admin/settings/index.php): bilah simpan menunjukkan ada tidaknya perubahan,
 // tombol Simpan baru aktif bila ada perubahan dan semua isian sah, Batalkan mengembalikan nilai tersimpan,
-// dan navigasi kelompok di kiri menyorot kartu yang sedang terlihat.
+// dan tab kelompok yang berisi isian tidak sah diberi tanda merah (tabnya diatur js/components/header-tabs.js).
 // Nilai "tersimpan" dibaca dari data-saved (bukan dari value), jadi isian lama yang gagal disimpan tetap terhitung berubah.
 (function () {
     var form = document.querySelector('[data-settings-form]');
@@ -50,6 +50,14 @@
             }
         });
 
+        form.querySelectorAll('[data-tab-panel]').forEach(function (panel) {
+            var tab = document.querySelector('[data-tab="' + panel.dataset.tabPanel + '"]');
+
+            if (tab) {
+                tab.classList.toggle('has-error', panel.querySelector('.is-danger') !== null);
+            }
+        });
+
         bar.classList.toggle('is-dirty', changed > 0 && invalid === 0);
         bar.classList.toggle('is-invalid', invalid > 0);
         save.disabled = changed === 0 || invalid > 0;
@@ -82,33 +90,4 @@
     });
 
     update();
-
-    // Sorot tautan kelompok yang kartunya sedang terlihat
-    var links = Array.prototype.slice.call(form.querySelectorAll('[data-settings-link]'));
-
-    if ('IntersectionObserver' in window) {
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (! entry.isIntersecting) {
-                    return;
-                }
-
-                links.forEach(function (link) {
-                    var isCurrent = link.getAttribute('href') === '#' + entry.target.id;
-
-                    link.classList.toggle('is-active', isCurrent);
-
-                    if (isCurrent) {
-                        link.setAttribute('aria-current', 'true');
-                    } else {
-                        link.removeAttribute('aria-current');
-                    }
-                });
-            });
-        }, { rootMargin: '-25% 0px -60% 0px' });
-
-        form.querySelectorAll('.settings-card').forEach(function (card) {
-            observer.observe(card);
-        });
-    }
 })();
