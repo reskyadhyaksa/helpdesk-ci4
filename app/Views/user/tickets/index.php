@@ -8,7 +8,7 @@
 
 <?= $this->section('content') ?>
 <section class="section">
-    <div class="container">
+    <div class="container page-zoom">
         <?= component('page_header', [
             'title'      => lang('Ticket.mineTitle'),
             'subtitle'   => lang('Ticket.mineSubtitle'),
@@ -17,7 +17,15 @@
         ]) ?>
 
         <?php component_start('data_table', [
-            'columns'      => ['No. Tiket', 'Judul', 'Kategori', 'Status', 'Respons Sebelum', 'Selesai Sebelum', 'Dibuat'],
+            'columns'      => [
+                ['label' => 'No. Tiket', 'width' => 12],
+                ['label' => 'Judul', 'width' => 18],
+                ['label' => 'Kategori', 'width' => 14],
+                ['label' => 'Status', 'width' => 9],
+                ['label' => 'Respons Sebelum', 'width' => 12],
+                ['label' => 'Selesai Sebelum', 'width' => 12],
+                ['label' => 'Dibuat', 'width' => 12],
+            ],
             'emptyIcon'    => 'fa-ticket',
             'emptyTitle'   => lang('Ticket.emptyTitle'),
             'emptyMessage' => lang('Ticket.emptyMessage'),

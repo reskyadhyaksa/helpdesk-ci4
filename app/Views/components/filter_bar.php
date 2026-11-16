@@ -39,9 +39,8 @@ $actions     ??= '';
 
 $hasFilters = $filters !== [] || trim($slot) !== '';
 $perPage    = config(\Config\Pager::class)->perPage;
-$resetLink  = $isFiltered
-    ? '<a class="button is-light" href="' . esc($action, 'attr') . '">Reset</a>'
-    : '';
+// Selalu ada di halaman; js/app.js menampilkan/menyembunyikannya saat tabel diperbarui lewat fetch
+$resetLink  = '<a class="button is-light' . ($isFiltered ? '' : ' is-hidden') . '" href="' . esc($action, 'attr') . '" data-filter-reset>Reset</a>';
 ?>
 <div class="admin-toolbar">
     <form class="admin-toolbar-filters" action="<?= esc($action, 'attr') ?>" method="get" role="search" data-autosubmit>

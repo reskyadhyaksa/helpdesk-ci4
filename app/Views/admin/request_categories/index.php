@@ -34,10 +34,16 @@ foreach ($filterLabels as $name => $allLabel) {
     ];
 }
 
-$columns = ['Nama Kategori', 'Deskripsi', 'SLA', 'Access Group', 'Status'];
+$columns = [
+    ['label' => 'Nama Kategori', 'width' => 18],
+    ['label' => 'Deskripsi', 'width' => 22],
+    ['label' => 'SLA', 'width' => 11],
+    ['label' => 'Access Group', 'width' => 15],
+    ['label' => 'Status', 'width' => 8],
+];
 
 if ($hasActions) {
-    $columns[] = ['label' => 'Aksi', 'align' => 'right'];
+    $columns[] = ['label' => 'Aksi', 'width' => 12];
 }
 ?>
 <?= $this->extend('layouts/admin') ?>

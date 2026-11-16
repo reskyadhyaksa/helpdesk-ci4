@@ -21,7 +21,6 @@
         var label = document.querySelector('label[for="' + select.id + '"]');
         var listId = select.id + '-listbox';
         var activeIndex = NONE;
-        var changedSinceOpen = false;
         var typed = '';
         var typedTimer = null;
 
@@ -172,7 +171,6 @@
                 Array.prototype.forEach.call(select.options, function (option) {
                     option.selected = false;
                 });
-                changedSinceOpen = true;
                 select.dispatchEvent(new Event('change', { bubbles: true }));
                 syncFromSelect();
             });
@@ -322,16 +320,20 @@
         function position() {
             var rect = trigger.getBoundingClientRect();
 
+            // Dropdown di dalam elemen ber-zoom (mis. halaman detail tiket): koordinat layar (rect) dibagi skala
+            // supaya menu yang position: fixed tetap jatuh tepat di bawah tombol. Tanpa zoom, scale = 1.
+            var scale = trigger.offsetWidth > 0 ? rect.width / trigger.offsetWidth : 1;
+
             // Lebar minimum menu = lebar tombol; harus diset sebelum menu diukur
-            menu.style.setProperty('--select-trigger-width', rect.width + 'px');
+            menu.style.setProperty('--select-trigger-width', rect.width / scale + 'px');
 
             var spaceBelow = window.innerHeight - rect.bottom;
-            var openUp = spaceBelow < menu.offsetHeight + GAP && rect.top > spaceBelow;
-            var left = Math.min(rect.left, window.innerWidth - menu.offsetWidth - VIEWPORT_MARGIN);
+            var openUp = spaceBelow < menu.offsetHeight * scale + GAP && rect.top > spaceBelow;
+            var left = Math.min(rect.left, window.innerWidth - menu.offsetWidth * scale - VIEWPORT_MARGIN);
 
-            menu.style.left = Math.max(VIEWPORT_MARGIN, left) + 'px';
-            menu.style.top = openUp ? 'auto' : rect.bottom + GAP + 'px';
-            menu.style.bottom = openUp ? window.innerHeight - rect.top + GAP + 'px' : 'auto';
+            menu.style.left = Math.max(VIEWPORT_MARGIN, left) / scale + 'px';
+            menu.style.top = openUp ? 'auto' : (rect.bottom + GAP) / scale + 'px';
+            menu.style.bottom = openUp ? (window.innerHeight - rect.top + GAP) / scale + 'px' : 'auto';
             menu.classList.toggle('is-up', openUp);
         }
 
@@ -372,7 +374,6 @@
                 openDropdown.close(false);
             }
 
-            changedSinceOpen = false;
             menu.hidden = false;
             trigger.setAttribute('aria-expanded', 'true');
             wrapper.classList.add('is-open');
@@ -401,12 +402,6 @@
                 openDropdown = null;
             }
 
-            // Multi-pilih: perubahan "dikomit" saat menu ditutup (form[data-autosubmit] baru dikirim di sini)
-            if (isMultiple && changedSinceOpen) {
-                changedSinceOpen = false;
-                select.dispatchEvent(new Event('commit', { bubbles: true }));
-            }
-
             if (returnFocus) {
                 trigger.focus();
             }
@@ -422,7 +417,6 @@
             shown.forEach(function (i) {
                 select.options[i].selected = shouldSelect;
             });
-            changedSinceOpen = true;
             select.dispatchEvent(new Event('change', { bubbles: true }));
             syncFromSelect();
         }
@@ -440,7 +434,6 @@
 
             if (isMultiple) {
                 select.options[index].selected = ! select.options[index].selected;
-                changedSinceOpen = true;
                 select.dispatchEvent(new Event('change', { bubbles: true }));
                 syncFromSelect();
 
@@ -555,7 +548,12 @@
         return api;
     }
 
-    document.querySelectorAll('[data-select]').forEach(createDropdown);
+    // Juga dipanggil app.js setelah kartu tabel diganti lewat fetch (pilihan "baris per halaman" ikut diganti)
+    window.enhanceSelects = function (root) {
+        root.querySelectorAll('[data-select]:not(.is-enhanced)').forEach(createDropdown);
+    };
+
+    window.enhanceSelects(document);
 
     // Klik di luar, gulir halaman, atau ubah ukuran jendela menutup menu yang terbuka
     document.addEventListener('mousedown', function (event) {

@@ -20,15 +20,25 @@ final class ComponentHelperTest extends CIUnitTestCase
 
     public function testDataTableRendersRowsFromSlot(): void
     {
-        component_start('data_table', ['columns' => ['Nama', ['label' => 'Aksi', 'align' => 'right']]]);
+        component_start('data_table', ['columns' => ['Nama', ['label' => 'Aksi']]]);
         echo '<tr><td>Budi</td><td>-</td></tr>';
         $html = component_end();
 
-        $this->assertStringContainsString('<th scope="col" class="">Nama</th>', $html);
-        $this->assertStringContainsString('class="has-text-right">Aksi</th>', $html);
+        $this->assertStringContainsString('<th scope="col" class="has-text-centered">Nama</th>', $html);
+        $this->assertStringContainsString('class="has-text-centered">Aksi</th>', $html);
+        $this->assertStringNotContainsString('is-fixed', $html);
         $this->assertStringContainsString('<tr><td>Budi</td>', $html);
         $this->assertStringContainsString('is-hoverable', $html);
         $this->assertStringNotContainsString('empty-state', $html);
+    }
+
+    public function testDataTableWithWidthsOnAllColumnsLocksLayoutAndSumsMinWidth(): void
+    {
+        $html = component('data_table', ['columns' => [['label' => 'A', 'width' => 10], ['label' => 'B', 'width' => 6.5]]]);
+
+        $this->assertStringContainsString('is-fixed', $html);
+        $this->assertStringContainsString('min-width: 16.5rem', $html);
+        $this->assertStringContainsString('style="width: 10rem"', $html);
     }
 
     public function testDataTableWithoutRowsShowsEmptyState(): void

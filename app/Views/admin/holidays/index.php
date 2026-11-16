@@ -19,10 +19,15 @@ $canSync       = auth_can(PermissionModel::ADMIN_HOLIDAYS_SYNC);
 $canEditOffDay = auth_can(PermissionModel::ADMIN_OFF_DAYS_UPDATE);
 
 $hasActions = $canUpdate || $canDelete;
-$columns    = ['Tanggal', 'Nama Hari Libur', 'Jenis', 'Diperbarui'];
+$columns    = [
+    ['label' => 'Tanggal', 'width' => 13],
+    ['label' => 'Nama Hari Libur', 'width' => 22],
+    ['label' => 'Jenis', 'width' => 11],
+    ['label' => 'Diperbarui', 'width' => 13],
+];
 
 if ($hasActions) {
-    $columns[] = ['label' => 'Aksi', 'align' => 'right'];
+    $columns[] = ['label' => 'Aksi', 'width' => 12];
 }
 
 $isFiltered = $keyword !== '' || $selectedMonths !== [] || $selectedYears !== [(int) date('Y')];

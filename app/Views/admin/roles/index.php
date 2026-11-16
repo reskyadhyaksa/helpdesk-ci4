@@ -10,10 +10,14 @@ $canDelete = auth_can(PermissionModel::ADMIN_ROLES_DELETE);
 
 // Tanpa izin aksi apa pun: kolom Aksi disembunyikan, diganti satu keterangan di atas tabel
 $hasActions = $canUpdate || $canDelete;
-$columns    = ['Role', 'Pengguna', 'Permission'];
+$columns    = [
+    ['label' => 'Role', 'width' => 16],
+    ['label' => 'Pengguna', 'width' => 10],
+    ['label' => 'Permission', 'width' => 11],
+];
 
 if ($hasActions) {
-    $columns[] = ['label' => 'Aksi', 'align' => 'right'];
+    $columns[] = ['label' => 'Aksi', 'width' => 12];
 }
 ?>
 <?= $this->extend('layouts/admin') ?>

@@ -56,7 +56,7 @@ $effectOptions = [
 
     <h2 class="title is-5"><?= esc(lang('Admin.categoryAccess.effectiveTitle')) ?></h2>
     <?php component_start('data_table', [
-        'columns'      => ['Kategori', 'Akses', 'Alasan'],
+        'columns'      => [['label' => 'Kategori', 'width' => 20], ['label' => 'Akses', 'width' => 11], ['label' => 'Alasan', 'width' => 22]],
         'emptyIcon'    => 'fa-folder-open',
         'emptyTitle'   => lang('Admin.requestCategory.emptyTitle'),
         'emptyMessage' => lang('Admin.requestCategory.emptyMessage'),
@@ -86,7 +86,7 @@ $effectOptions = [
 
     <h2 class="title is-5 mt-5"><?= esc(lang('Admin.categoryAccess.exceptionsTitle')) ?></h2>
     <?php component_start('data_table', [
-        'columns'      => ['Kategori', 'Efek', ['label' => 'Aksi', 'align' => 'right']],
+        'columns'      => [['label' => 'Kategori', 'width' => 20], ['label' => 'Efek', 'width' => 11], ['label' => 'Aksi', 'width' => 12]],
         'emptyIcon'    => 'fa-user-lock',
         'emptyTitle'   => 'Belum ada pengecualian',
         'emptyMessage' => 'Pengguna ini hanya mengikuti aturan job title.',

@@ -6,7 +6,8 @@
  */
 .admin-table-card {
   overflow: hidden;
-  border-radius: 1rem;
+  border-radius: 1.25rem;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.06), 0 8px 24px rgb(15 23 42 / 0.05);
 }
 
 .admin-table-card .table-container {
@@ -22,21 +23,22 @@
 
 .admin-table-card .table th,
 .admin-table-card .table td {
-  padding: 0.6rem 1rem;
+  padding: 0.85rem 1.25rem;
   border-width: 0 0 1px;
   border-color: #eef0f4;
   vertical-align: middle;
   line-height: 1.5;
 }
 
+/* Kepala tabel: pita abu-abu penuh, huruf kapital tegas */
 .admin-table-card .table thead th {
-  padding-block: 0.55rem;
-  border-bottom-color: #e5e9f0;
-  background-color: #f8fafc;
-  color: #64748b;
-  font-size: 0.72rem;
+  padding-block: 1rem;
+  border-bottom-width: 0;
+  background-color: #f1f4f8;
+  color: #0f172a;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -59,6 +61,28 @@
   white-space: nowrap;
 }
 
+/* Lebar kolom dikunci (data_table dengan 'width' di semua kolom): isi tidak menjepit kolom, teks panjang dipotong 2 baris */
+.admin-table-card .table.is-fixed {
+  table-layout: fixed;
+}
+
+.admin-table-card .table.is-fixed th,
+.admin-table-card .table.is-fixed td {
+  padding-inline: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.table-person > div {
+  min-width: 0;
+}
+
+.admin-table-card .table .table-clamp {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 /* Kolom pertama = identitas baris: lebih tegas, teks keterangan di bawahnya lebih redup */
 .admin-table-card .table td:first-child strong {
   color: var(--bulma-text-strong);
@@ -69,6 +93,156 @@
   margin-top: 0.15rem;
   color: #64748b;
   font-size: 0.917em; /* 11px: batas bawah agar keterangan tetap terbaca */
+}
+
+/* Orang di sel tabel (pemohon, PIC): avatar inisial + nama dan keterangan */
+.table-person {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.table-avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.table-avatar.is-primary {
+  background-color: var(--bulma-primary);
+  color: #fff;
+}
+
+.table-person small.is-mono {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+/* Baris atas sel tiket: nomor tiket + chip kategori */
+.ticket-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+  margin-bottom: 0.15rem;
+}
+
+.table-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.7rem;
+  border-radius: 0.35rem;
+  background-color: #eef0f4;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.table-chip.is-pill {
+  border-radius: 999px;
+}
+
+.table-chip.is-warning {
+  background-color: var(--app-secondary-soft);
+  color: var(--app-secondary-ink);
+}
+
+/* Prioritas: pil berwarna; P1 merah muda, lainnya abu-abu dengan titik warna */
+.priority-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.85rem;
+  border-radius: 999px;
+  background-color: #eef0f4;
+  color: #1e293b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.priority-pill::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: #1d4ed8;
+}
+
+.priority-pill.is-urgent {
+  background-color: #fde4e4;
+  color: #c81e1e;
+}
+
+.priority-pill.is-urgent::before {
+  display: none;
+}
+
+.priority-pill.is-medium::before {
+  background-color: #f59e0b;
+}
+
+.priority-pill.is-low::before {
+  background-color: #16a34a;
+}
+
+/* Status SLA: biru = masih ada sisa, merah penuh = terlambat */
+.sla-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sla-badge.is-left {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.sla-badge.is-late {
+  background-color: #b91c1c;
+  color: #fff;
+}
+
+.sla-badge.is-done {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.sla-badge.is-none {
+  background-color: #eef0f4;
+  color: #64748b;
+}
+
+/* Aksi: tombol utama + tombol panah */
+.table-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.table-actions .button {
+  background-color: #eef0f4;
+  font-weight: 600;
+}
+
+.table-actions .button.is-primary {
+  background-color: var(--bulma-primary);
 }
 
 /* Angka sejajar rapi antar baris */
@@ -105,6 +279,158 @@
 
 .readonly-notice > i {
   color: #64748b;
+}
+
+/* Tab cepat di atas filter bar daftar tiket (admin/tickets/_list_controls): pil dengan jumlah; "Expiring" berwarna merah */
+.quick-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.quick-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.4rem;
+  padding: 0 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.7rem;
+  background-color: #fff;
+  color: #334155;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.quick-tab:hover {
+  border-color: #94a3b8;
+  background-color: #f1f5f9;
+}
+
+.quick-tab:focus-visible {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: 2px;
+}
+
+.quick-tab.is-active {
+  border-color: var(--bulma-link);
+  background-color: var(--bulma-link);
+  color: #fff;
+}
+
+.quick-tab.is-alert {
+  border-color: #fecaca;
+  background-color: #fef2f2;
+  color: #c81e1e;
+}
+
+.quick-tab.is-alert:hover {
+  background-color: #fee2e2;
+}
+
+.quick-tab.is-alert.is-active {
+  border-color: #c81e1e;
+  background-color: #c81e1e;
+  color: #fff;
+}
+
+/* Pilihan tampilan Tabel / Kanban di ujung kanan baris tab */
+.view-toggle {
+  display: inline-flex;
+  gap: 0.2rem;
+  margin-left: auto;
+  padding: 0.2rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.8rem;
+  background-color: #fff;
+}
+
+.view-toggle button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2rem;
+  padding: 0 0.85rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.view-toggle button:hover {
+  background-color: #f1f5f9;
+}
+
+.view-toggle button[aria-pressed="true"] {
+  background-color: #e8eefc;
+  color: #1e3a8a;
+}
+
+.view-toggle button:focus-visible {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: 1px;
+}
+
+.quick-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.quick-count {
+  font-weight: 500;
+}
+
+/* "Belum ditugaskan": kotak centang yang tampil seperti tombol pil di baris filter */
+.filter-toggle {
+  display: inline-flex;
+  position: relative;
+}
+
+.filter-toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.filter-toggle span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.filter-toggle span:hover {
+  border-color: #94a3b8;
+}
+
+.filter-toggle input:checked + span {
+  border-color: #93c5fd;
+  background-color: #dbeafe;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.filter-toggle input:focus-visible + span {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: 2px;
 }
 
 /* Baris filter di atas tabel (components/filter_bar): filter + cari di kiri, tombol aksi di kanan */
@@ -147,6 +473,7 @@
 }
 
 /* Kontrol di filter bar: kontainer 10% lebih kecil (2.75rem → 2.475rem), teks 20% lebih kecil (1rem → 0.8rem) */
+/* (tinggi dinaikkan ke 2.75rem di bawah agar kontrol berisi, seperti desain) */
 .admin-toolbar .input,
 .admin-toolbar .select-trigger,
 .admin-toolbar .select select,
@@ -162,14 +489,38 @@
 .admin-toolbar .input,
 .admin-toolbar .select-trigger,
 .admin-toolbar .button {
-  min-height: 2.475rem;
+  min-height: 2.75rem;
 }
 
-/* Latar putih + garis lebih tegas agar kontrol terpisah dari latar halaman; ikon cari ikut gelap */
+/* Kontrol putih berbingkai: latar halaman (#f8fafc) hampir sama dengan abu-abu muda, jadi kontrol abu-abu "nyaru";
+   bingkai #cbd5e1 (kontras 1.6:1+ terhadap latar halaman) dan bayangan tipis membuatnya jelas sebagai kolom isian. */
 .admin-toolbar .input,
 .admin-toolbar .select-trigger {
   border-color: #cbd5e1;
+  border-radius: 0.75rem;
   background-color: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+}
+
+.admin-toolbar .input:hover,
+.admin-toolbar .select-trigger:hover {
+  border-color: #94a3b8;
+}
+
+.admin-toolbar .input:focus,
+.admin-toolbar .select-trigger:focus-visible {
+  border-color: var(--bulma-link);
+  box-shadow: 0 0 0 3px hsl(224deg 76% 48% / 0.15);
+}
+
+.admin-toolbar .button {
+  border-radius: 0.75rem;
+}
+
+.admin-toolbar .button.is-light {
+  border: 1px solid #cbd5e1;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
 }
 
 .admin-toolbar .control.has-icons-left .icon {
@@ -207,9 +558,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem 1rem;
-  padding: 0.5rem 1rem;
-  border-top: 1px solid #eef0f4;
-  background-color: #fcfdfe;
+  padding: 0.85rem 1.25rem;
+  background-color: #f1f4f8;
 }
 
 /* Kiri footer: pilihan baris per halaman + keterangan jumlah data */
@@ -271,9 +621,9 @@
   height: 2.25rem;
   margin: 0;
   padding: 0 0.5rem;
-  border: 1px solid #e5e9f0;
+  border: 1px solid transparent;
   border-radius: 0.6rem;
-  background-color: #fff;
+  background-color: transparent;
   color: #334155;
   font-size: 0.8125rem;
   font-weight: 600;
@@ -284,7 +634,7 @@
 .app-pagination a.pagination-previous:hover,
 .app-pagination a.pagination-next:hover {
   border-color: #cbd5e1;
-  background-color: #f1f5f9;
+  background-color: #fff;
   color: var(--bulma-primary);
 }
 
@@ -302,7 +652,7 @@
 }
 
 .app-pagination .is-disabled {
-  background-color: #f8fafc;
+  background-color: transparent;
   color: #94a3b8;
   cursor: not-allowed;
   opacity: 0.7;

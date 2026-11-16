@@ -8,7 +8,7 @@ use Config\Pager as PagerConfig;
  * Baris <tr> ditulis di halaman lewat slot, jadi logika tiap baris tetap di halamannya.
  *
  *   <?php component_start('data_table', [
- *       'columns'    => ['Nama', 'Status', ['label' => 'Aksi', 'align' => 'right']],
+ *       'columns'    => ['Nama', 'Status', ['label' => 'Aksi', 'width' => 12]],
  *       'emptyIcon'  => 'fa-users',
  *       'pager'      => $pager,
  *       'totalLabel' => 'pengguna',
@@ -20,7 +20,11 @@ use Config\Pager as PagerConfig;
  *
  * Tanpa baris (slot kosong) → keadaan kosong tampil di dalam tabel.
  *
- * @var list<string|array{label: string, align?: 'left'|'center'|'right'}> $columns
+ * @var list<string|array{label: string, width?: int|float}> $columns
+ *                                 Teks kepala kolom selalu rata tengah; perataan isi sel ditulis di <td> halamannya.
+ *                                 width (rem): bila SEMUA kolom punya width, lebar kolom dikunci (table-layout: fixed)
+ *                                 dan lebar minimum tabel = jumlahnya; layar yang lebih sempit menggeser tabel
+ *                                 horizontal, kolom tidak dijepit.
  * @var string      $slot          baris <tr>
  * @var string      $emptyIcon     ikon Font Awesome keadaan kosong
  * @var string|null $emptyTitle    default: "Halaman ini sedang dikembangkan"
@@ -36,18 +40,17 @@ $pager ??= null;
 $totalLabel ??= 'data';
 
 $isEmpty = trim($slot) === '';
+
+$widths  = array_map(static fn ($column): float => is_array($column) ? (float) ($column['width'] ?? 0) : 0.0, $columns);
+$isFixed = ! in_array(0.0, $widths, true);
 ?>
 <div class="box p-0 admin-table-card">
     <div class="table-container">
-        <table class="table is-fullwidth <?= $isEmpty ? '' : 'is-hoverable' ?>">
+        <table class="table is-fullwidth <?= $isEmpty ? '' : 'is-hoverable' ?> <?= $isFixed ? 'is-fixed' : '' ?>"<?= $isFixed ? ' style="min-width: ' . array_sum($widths) . 'rem"' : '' ?>>
             <thead>
                 <tr>
-                    <?php foreach ($columns as $column): ?>
-                        <?php
-                        $label = is_array($column) ? $column['label'] : $column;
-                        $align = is_array($column) ? ($column['align'] ?? 'left') : 'left';
-                        ?>
-                        <th scope="col" class="<?= $align === 'left' ? '' : 'has-text-' . esc($align) ?>"><?= esc($label) ?></th>
+                    <?php foreach ($columns as $i => $column): ?>
+                        <th scope="col" class="has-text-centered"<?= $isFixed ? ' style="width: ' . $widths[$i] . 'rem"' : '' ?>><?= esc(is_array($column) ? $column['label'] : $column) ?></th>
                     <?php endforeach ?>
                 </tr>
             </thead>

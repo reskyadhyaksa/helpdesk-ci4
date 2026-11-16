@@ -10,7 +10,7 @@
 
     <?= component('data_table', [
         'emptyIcon' => 'fa-file-pen',
-        'columns' => ['Nama Form', 'Kategori Permintaan', 'Jumlah Field', 'Status'],
+        'columns' => [['label' => 'Nama Form', 'width' => 24], ['label' => 'Kategori Permintaan', 'width' => 20], ['label' => 'Jumlah Field', 'width' => 12], ['label' => 'Status', 'width' => 9]],
     ]) ?>
 </section>
 <?= $this->endSection() ?>

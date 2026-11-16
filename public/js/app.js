@@ -41,24 +41,113 @@ document.addEventListener('submit', function (event) {
     }
 });
 
-// Form filter (components/filter_bar): memilih dropdown langsung mengirim form.
-// Dropdown multi-pilih baru mengirim saat menunya ditutup (event "commit" dari js/components/select.js),
-// supaya mencentang beberapa pilihan tidak memuat ulang halaman di tiap centang.
-function submitAutosubmitForm(event) {
-    var form = event.target.closest('form[data-autosubmit]');
+// Form filter (components/filter_bar): memilih dropdown (tunggal maupun multi-pilih) atau menekan Cari
+// mengambil halaman dengan filter baru lewat fetch, lalu hanya kartu tabelnya yang diganti. Dropdown filter
+// tidak ikut diganti, jadi menunya tetap terbuka saat mencentang beberapa pilihan. Gagal → muat halaman biasa.
+var latestFilterRequest = 0;
 
-    if (form) {
-        form.requestSubmit();
-    }
+function refreshTable(form) {
+    var params = new URLSearchParams(new FormData(form));
+    var empty = [];
+
+    params.forEach(function (value, key) {
+        if (value === '') {
+            empty.push(key);
+        }
+    });
+    empty.forEach(function (key) {
+        params.delete(key);
+    });
+
+    var query = params.toString();
+    var url = form.getAttribute('action') + (query ? '?' + query : '');
+    var request = ++latestFilterRequest;
+
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function (response) {
+            return response.ok ? response.text() : Promise.reject(new Error(response.status));
+        })
+        .then(function (html) {
+            if (request !== latestFilterRequest) {
+                return; // jawaban lama, sudah ada permintaan yang lebih baru
+            }
+
+            var page = new DOMParser().parseFromString(html, 'text/html');
+            // Daftar tiket punya wilayah [data-list-region] (tabel atau papan Kanban); halaman lain hanya kartu tabel
+            var card = document.querySelector('[data-list-region]') || document.querySelector('.admin-table-card');
+            var freshCard = page.querySelector('[data-list-region]') || page.querySelector('.admin-table-card');
+
+            if (! card || ! freshCard) {
+                window.location.href = url;
+
+                return;
+            }
+
+            card.replaceWith(freshCard);
+            window.enhanceSelects(freshCard);
+
+            // Tab cepat (components di atas filter bar): angka dan tab aktif ikut diperbarui
+            var quick = document.querySelector('[data-quick-filters]');
+            var freshQuick = page.querySelector('[data-quick-filters]');
+
+            if (quick && freshQuick) {
+                quick.replaceWith(freshQuick);
+            }
+
+            var reset = document.querySelector('[data-filter-reset]');
+            var freshReset = page.querySelector('[data-filter-reset]');
+
+            if (reset && freshReset) {
+                reset.classList.toggle('is-hidden', freshReset.classList.contains('is-hidden'));
+            }
+
+            window.history.pushState(null, '', url);
+        })
+        .catch(function () {
+            window.location.href = url;
+        });
 }
 
 document.addEventListener('change', function (event) {
-    if (event.target.tagName === 'SELECT' && ! event.target.multiple) {
-        submitAutosubmitForm(event);
+    var isControl = event.target.tagName === 'SELECT' || event.target.type === 'checkbox';
+    var form = isControl ? event.target.closest('form[data-autosubmit]') : null;
+
+    if (form) {
+        refreshTable(form);
     }
 });
 
-document.addEventListener('commit', submitAutosubmitForm);
+// Tab cepat dan pilihan tampilan di atas filter bar (admin/tickets/_list_controls): mengisi input tersembunyi
+// "tab" / "view" pada form filter lalu memperbaruinya. Nilai bawaan (all / table) dikirim kosong agar URL tetap pendek.
+document.addEventListener('click', function (event) {
+    var tab = event.target.closest('[data-quick-tab]');
+    var view = event.target.closest('[data-view-toggle]');
+    var form = tab || view ? document.querySelector('form[data-autosubmit]') : null;
+
+    if (! form) {
+        return;
+    }
+
+    if (tab) {
+        form.elements.tab.value = tab.dataset.quickTab === 'all' ? '' : tab.dataset.quickTab;
+    } else {
+        form.elements.view.value = view.dataset.viewToggle === 'kanban' ? 'kanban' : '';
+    }
+
+    refreshTable(form);
+});
+
+document.addEventListener('submit', function (event) {
+    if (event.target.matches('form[data-autosubmit]')) {
+        event.preventDefault();
+        refreshTable(event.target);
+    }
+});
+
+// Tombol Back/Forward setelah filter berubah lewat fetch: muat ulang sesuai URL
+window.addEventListener('popstate', function () {
+    window.location.reload();
+});
 
 // Pilihan "baris per halaman" di footer tabel (components/data_table): filter lain tetap, kembali ke halaman 1
 document.addEventListener('change', function (event) {

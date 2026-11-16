@@ -108,6 +108,16 @@
   width: 100%;
 }
 
+/* Dropdown + tombol dalam .field.has-addons: sisi yang bertemu rata, sisi luar memakai radius yang sama (0.65rem) */
+.field.has-addons .control:first-child .select-trigger {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.field.has-addons .control:last-child .button {
+  border-radius: 0 0.65rem 0.65rem 0;
+}
+
 .select.is-small .select-trigger {
   min-height: 2rem;
   padding: 0.3rem 0.65rem;

@@ -9,10 +9,17 @@ $canDelete = auth_can(PermissionModel::ADMIN_SLA_DELETE);
 
 // Tanpa izin aksi apa pun: kolom Aksi disembunyikan, diganti satu keterangan di atas tabel
 $hasActions = $canUpdate || $canDelete;
-$columns    = ['Nama Kebijakan', 'Prioritas', 'Respons Pertama', 'Penyelesaian', 'Waktu Tidak Dihitung', 'Status'];
+$columns    = [
+    ['label' => 'Nama Kebijakan', 'width' => 18],
+    ['label' => 'Prioritas', 'width' => 9],
+    ['label' => 'Respons Pertama', 'width' => 11],
+    ['label' => 'Penyelesaian', 'width' => 11],
+    ['label' => 'Waktu Tidak Dihitung', 'width' => 17],
+    ['label' => 'Status', 'width' => 8],
+];
 
 if ($hasActions) {
-    $columns[] = ['label' => 'Aksi', 'align' => 'right'];
+    $columns[] = ['label' => 'Aksi', 'width' => 12];
 }
 ?>
 <?= $this->extend('layouts/admin') ?>
