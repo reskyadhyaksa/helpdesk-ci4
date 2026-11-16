@@ -62,8 +62,8 @@ $slaText = [
     'resolution' => lang('Ticket.form.slaResolution'),
 ];
 ?>
-<section class="section">
-    <div class="container page-container ticket-form-page">
+<section class="section px-0 user-page">
+    <div class="container page-container page-zoom ticket-form-page">
         <?php if ($breadcrumb !== []): ?>
             <?= component('breadcrumb', ['items' => $breadcrumb]) ?>
         <?php endif ?>

@@ -99,10 +99,12 @@ html {
 
 /*
  * Halaman portal (beranda, dashboard user) tampil sedikit lebih kecil: teks, kartu, jarak, ikon. Navbar ikut,
- * tapi hanya di halaman yang punya .page-zoom (:has), supaya halaman lain tidak berubah. Footer tidak ikut.
+ * tapi hanya di halaman yang punya .page-zoom (:has), supaya halaman lain tidak berubah. Footer ikut diskala
+ * agar margin kiri-kanannya sama dengan isi halaman (max-width container dihitung di ruang yang sudah di-zoom).
  */
 .page-zoom,
-body:has(.page-zoom) .navbar {
+body:has(.page-zoom) .navbar,
+body:has(.page-zoom) > footer.container {
   zoom: 0.9;
 }
 
@@ -136,6 +138,12 @@ body:has(.page-zoom) .navbar {
   :is(.navbar .container, main .container, body > footer.container):not(.is-max-tablet):not(.is-max-desktop):not(.is-max-widescreen) {
     max-width: min(calc(100% - 4rem), 1760px);
   }
+}
+
+/* Halaman portal user (/u: dashboard, riwayat, detail, buat tiket) dan form tanpa login: header di posisi yang sama,
+   lebih dekat ke navbar daripada padding atas .section Bulma (3rem) */
+.user-page {
+  padding-top: 1.25rem;
 }
 
 /* Footer menempel di dasar layar walau isi halaman pendek */

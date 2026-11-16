@@ -8,8 +8,8 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<section class="section">
-    <div class="container">
+<section class="section px-0 user-page">
+    <div class="container page-container page-zoom">
         <?= component('breadcrumb', [
             'items' => [
                 ['label' => lang('Ticket.dashboard.title'), 'href' => url_to('user.dashboard'), 'icon' => 'home.svg'],

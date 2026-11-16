@@ -30,8 +30,8 @@ $isFiltered = $filters['keyword'] !== '' || $filters['status'] !== [] || $filter
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<section class="section user-dashboard">
-    <div class="container page-container">
+<section class="section px-0 user-page user-dashboard">
+    <div class="container page-container page-zoom">
         <header class="user-dashboard-greeting">
             <div>
                 <h1 class="title is-3"><?= esc(lang('Ticket.dashboard.greeting')) ?> <span
@@ -81,24 +81,25 @@ $isFiltered = $filters['keyword'] !== '' || $filters['status'] !== [] || $filter
                                 <?= esc(lang('Ticket.dashboard.summaryNote', [TicketService::DASHBOARD_TICKET_LIMIT])) ?>
                             </p>
                         </div>
-                        <a class="button is-primary"
-                            href="<?= url_to('user.tickets.index') ?>"><?= esc(lang('Ticket.dashboard.viewAll')) ?></a>
                         <p class="is-size-7 user-dashboard-updated">
                             <i class="fa-solid fa-rotate" aria-hidden="true"></i>
                             <?= esc(lang('Ticket.dashboard.updatedAt', [$now])) ?>
                         </p>
                     </header>
 
-                    <?= component('filter_bar', [
+                    <?php // Tombol "Lihat Semua Tiket" lewat slot filter_bar: ada di baris yang sama, di sebelah kiri kolom cari ?>
+                    <?php component_start('filter_bar', [
                         'action' => url_to('user.dashboard'),
                         'keyword' => $filters['keyword'],
                         'isFiltered' => $isFiltered,
                         'placeholder' => lang('Ticket.dashboard.searchHint'),
                         'filters' => [
-                            'status' => ['placeholder' => lang('Ticket.dashboard.allStatus'), 'options' => $statusOptions, 'selected' => $filters['status'], 'searchable' => false],
-                            'category' => ['placeholder' => lang('Ticket.dashboard.allCategory'), 'options' => $categoryOptions, 'selected' => $filters['category']],
+                            'status' => ['icon' => 'fa-circle-dot', 'placeholder' => lang('Ticket.dashboard.allStatus'), 'options' => $statusOptions, 'selected' => $filters['status'], 'searchable' => false],
+                            'category' => ['icon' => 'fa-folder-open', 'placeholder' => lang('Ticket.dashboard.allCategory'), 'options' => $categoryOptions, 'selected' => $filters['category']],
                         ],
                     ]) ?>
+                        <a class="button is-primary" href="<?= url_to('user.tickets.index') ?>"><?= esc(lang('Ticket.dashboard.viewAll')) ?></a>
+                    <?= component_end() ?>
 
                     <?php component_start('data_table', [
                         'flat' => true,
