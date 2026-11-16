@@ -17,18 +17,24 @@ class TicketCommentModel extends Model
     public const VISIBILITY_PUBLIC   = 'PUBLIC';
     public const VISIBILITY_INTERNAL = 'INTERNAL';
 
+    // TEXT = teks biasa (komentar lama dan form tanpa JS); HTML = hasil editor yang sudah disaring CommentSanitizer
+    public const FORMAT_TEXT = 'TEXT';
+    public const FORMAT_HTML = 'HTML';
+
     protected $table            = 'ticket_comments';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = false;
     protected $returnType       = 'array';
     protected $beforeInsert     = ['generateUuid'];
-    protected $allowedFields    = ['ticket_id', 'author_id', 'author_type', 'visibility', 'body', 'source'];
+    protected $allowedFields    = ['ticket_id', 'author_id', 'author_type', 'visibility', 'body', 'body_format', 'source'];
 
+    // Batas 20000 karena HTML memuat tag; panjang teks sebenarnya dibatasi TicketCommentService
     protected $validationRules = [
         'ticket_id'   => 'required|exact_length[36]',
         'author_type' => 'required|in_list[REQUESTER,AGENT]',
         'visibility'  => 'required|in_list[PUBLIC,INTERNAL]',
-        'body'        => 'required|max_length[5000]',
+        'body'        => 'required|max_length[20000]',
+        'body_format' => 'required|in_list[TEXT,HTML]',
     ];
 
     /**

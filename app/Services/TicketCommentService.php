@@ -15,20 +15,25 @@ class TicketCommentService
 {
     private const MAX_BODY_LENGTH = 5000;
 
+    private readonly CommentSanitizer $sanitizer;
+
     public function __construct(
         private readonly TicketService $tickets,
         private readonly TicketCommentModel $comments,
         private readonly AttachmentService $attachments,
         private readonly TicketNotifier $notifier,
         private readonly BaseConnection $db,
+        ?CommentSanitizer $sanitizer = null,
     ) {
+        $this->sanitizer = $sanitizer ?? new CommentSanitizer();
     }
 
     /**
      * Pemohon hanya bisa membalas ke publik. Balasan pemohon pada tiket RESOLVED membuka kembali tiketnya.
      *
      * @param array{id: string, employee_no?: string}   $viewer
-     * @param array{body?: string, visibility?: string} $input
+     * @param array{body?: string, visibility?: string, format?: string} $input format "html" = body dari editor (disaring di sini);
+     *                                                                         mention dibaca dari penanda di HTML-nya, hanya untuk agen
      * @param array<int, mixed>                         $files
      *
      * @return array baris komentar yang tersimpan
@@ -51,13 +56,17 @@ class TicketCommentService
             throw new BusinessException(lang('Ticket.commentClosed'));
         }
 
-        $body = trim((string) ($input['body'] ?? ''));
+        // Editor (JS) mengirim HTML yang disaring di sini; form tanpa JS mengirim teks biasa
+        $isHtml = ($input['format'] ?? null) === 'html';
+        $body   = trim((string) ($input['body'] ?? ''));
+        $body   = $isHtml ? $this->sanitizer->clean($body) : $body;
+        $text   = $isHtml ? $this->sanitizer->plainText($body) : $body;
 
-        if ($body === '') {
+        if ($text === '') {
             throw new BusinessException(lang('Ticket.commentEmpty'));
         }
 
-        if (mb_strlen($body) > self::MAX_BODY_LENGTH) {
+        if (mb_strlen($text) > self::MAX_BODY_LENGTH) {
             throw new BusinessException(lang('Ticket.commentTooLong', [self::MAX_BODY_LENGTH]));
         }
 
@@ -67,8 +76,9 @@ class TicketCommentService
             : TicketCommentModel::VISIBILITY_PUBLIC;
 
         // Penulis berlabel pemohon hanya bila memang pihak pemohon; PIC yang membalas lewat portal tetap berlabel Helpdesk
-        $asAgent = $isAgent || ($isPic && ! $requesterSide);
-        $comment = $this->save($ticket, $viewer['id'], $asAgent, $visibility, $body, $files);
+        $asAgent  = $isAgent || ($isPic && ! $requesterSide);
+        $mentions = $isAgent && $isHtml ? $this->mentionableIds($ticket, $this->sanitizer->mentionIds($body)) : [];
+        $comment  = $this->save($ticket, $viewer['id'], $asAgent, $visibility, $body, $isHtml, $files, $mentions);
 
         if ($requesterSide && ! $isAgent && $ticket['status'] === TicketStatus::Resolved->value) {
             $this->tickets->changeStatus($ticketId, TicketStatus::Reopened, $viewer['id']);
@@ -155,9 +165,10 @@ class TicketCommentService
     /**
      * Komentar dan lampirannya ditulis di dua tabel (plus file), jadi keduanya berhasil atau batal bersama.
      *
-     * @param list<mixed> $files
+     * @param list<mixed>  $files
+     * @param list<string> $mentions id user yang disebut dan boleh mengakses tiket
      */
-    private function save(array $ticket, string $authorId, bool $isAgent, string $visibility, string $body, array $files): array
+    private function save(array $ticket, string $authorId, bool $isAgent, string $visibility, string $body, bool $isHtml, array $files, array $mentions): array
     {
         $stored  = [];
         $id      = null;
@@ -173,6 +184,7 @@ class TicketCommentService
                 'author_type' => $type,
                 'visibility'  => $visibility,
                 'body'        => $body,
+                'body_format' => $isHtml ? TicketCommentModel::FORMAT_HTML : TicketCommentModel::FORMAT_TEXT,
             ], true);
 
             if ($id === false) {
@@ -183,7 +195,7 @@ class TicketCommentService
                 $stored[] = $this->attachments->store($ticket['id'], $id, $file);
             }
 
-            $pending = $this->queueNotifications($ticket, $authorId, $type, $visibility);
+            $pending = $this->queueNotifications($ticket, $authorId, $type, $visibility, $mentions);
 
             $this->db->transCommit();
         } catch (Throwable $e) {
@@ -199,14 +211,32 @@ class TicketCommentService
     }
 
     /**
+     * Hanya orang yang boleh mengakses tiket (kandidat PIC) yang bisa disebut; id lain dibuang diam-diam.
+     *
+     * @param array<int, mixed> $requested
+     *
+     * @return list<string>
+     */
+    private function mentionableIds(array $ticket, array $requested): array
+    {
+        if ($requested === []) {
+            return [];
+        }
+
+        $allowed = array_column($this->tickets->picCandidates($ticket), 'id');
+
+        return array_values(array_intersect(array_unique(array_map('strval', $requested)), $allowed));
+    }
+
+    /**
      * Notifikasi lonceng ditulis di transaksi komentar. Gagal menyusunnya hanya dicatat: komentar tidak boleh batal karenanya.
      *
      * @return array{outbox: list<string>, inApp: list<array>}
      */
-    private function queueNotifications(array $ticket, string $authorId, string $authorType, string $visibility): array
+    private function queueNotifications(array $ticket, string $authorId, string $authorType, string $visibility, array $mentions): array
     {
         try {
-            return $this->notifier->forComment($ticket, $authorId, $authorType, $visibility);
+            return $this->notifier->forComment($ticket, $authorId, $authorType, $visibility, $mentions);
         } catch (Throwable $e) {
             log_message('error', 'Notifikasi komentar gagal disusun: ' . $e->getMessage());
 

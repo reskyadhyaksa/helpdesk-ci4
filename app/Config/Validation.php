@@ -95,9 +95,21 @@ class Validation extends BaseConfig
         'description' => ['label' => 'Deskripsi', 'rules' => 'required|max_length[2000]'],
     ];
 
+    // Tiket yang dibuat admin untuk karyawan lain: sama dengan $ticket, tetapi NIK pemohon wajib (diisi di constructor)
+    public array $adminTicket = [];
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->adminTicket = ['for_nip' => ['label' => 'NIK pemohon', 'rules' => 'required|max_length[50]']] + $this->ticket;
+    }
+
     public array $ticketComment = [
-        'body'       => ['label' => 'Pesan', 'rules' => 'required|max_length[5000]'],
+        // 20000: isi dari editor berupa HTML; panjang teks sebenarnya (5000) diperiksa TicketCommentService
+        'body'       => ['label' => 'Pesan', 'rules' => 'required|max_length[20000]'],
         'visibility' => ['label' => 'Jenis pesan', 'rules' => 'permit_empty|in_list[PUBLIC,INTERNAL]'],
+        'format'     => ['label' => 'Format pesan', 'rules' => 'permit_empty|in_list[html]'],
     ];
 
     public array $ticketStatus = [

@@ -57,6 +57,14 @@ final class InAppNotificationServiceTest extends CIUnitTestCase
         return $ids;
     }
 
+    public function testMentionedUsersGetAMentionInsteadOfTheRegularCommentNotification(): void
+    {
+        $this->service()->forComment($this->ticket(), 'pic1', 'AGENT', 'PUBLIC', ['pic2']);
+
+        // req = pemohon (balasan biasa); pic2 disebut (notifikasi "disebut"); pic1 = penulis (dikecualikan)
+        $this->assertSame(['req' => 'comment_added', 'pic2' => 'comment_mention'], array_column($this->rows, 'event_type', 'user_id'));
+    }
+
     public function testListForReturnsTheUnreadCountAndTheLatestItems(): void
     {
         $this->notifications->method('unreadCount')->with('u1')->willReturn(3);

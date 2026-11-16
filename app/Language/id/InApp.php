@@ -16,6 +16,10 @@ return [
         'internal' => 'Catatan internal baru',
         'body'     => '{0}: pesan baru dari {1}',
     ],
+    'mention' => [
+        'title' => 'Anda disebut dalam tiket',
+        'body'  => '{0}: {1} menyebut Anda dalam sebuah pesan',
+    ],
     'sla' => [
         'response_warning'    => 'Batas respons hampir tercapai',
         'response_breached'   => 'Batas respons terlewat',

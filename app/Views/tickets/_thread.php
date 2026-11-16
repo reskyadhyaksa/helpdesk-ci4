@@ -63,7 +63,7 @@ $renderAttachments = static function (array $attachments) use ($attachmentRoute)
                 <?php endif ?>
                 <span class="has-text-grey is-size-7">· <?= esc(format_datetime($comment['created_at'])) ?></span>
             </p>
-            <div style="white-space: pre-wrap"><?= esc($comment['body']) ?></div>
+            <div class="content" <?= ($comment['body_format'] ?? 'TEXT') === 'HTML' ? '' : 'style="white-space: pre-wrap"' ?>><?= render_comment($comment) ?></div>
             <?= $renderAttachments($comment['attachments']) ?>
         </article>
     <?php endforeach ?>
