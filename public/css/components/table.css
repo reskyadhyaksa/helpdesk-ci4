@@ -246,7 +246,7 @@
 .table-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 0.35rem;
 }
 
@@ -776,6 +776,16 @@
 
 .admin-table-card .table td .buttons {
   gap: 0.3rem;
+}
+
+/* Kolom aksi (data_table 'align' => 'end'): kepala rata kanan, dan sel terakhir diberi jarak dari tepi kanan kartu */
+.admin-table-card .table th.is-end {
+  padding-right: 1.5rem;
+  text-align: right;
+}
+
+.admin-table-card .table:has(th.is-end:last-child) td:last-child {
+  padding-right: 1.5rem;
 }
 
 /* Layar sentuh: target 44px tetap dipertahankan untuk tombol aksi */

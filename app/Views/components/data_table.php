@@ -21,7 +21,8 @@ use Config\Pager as PagerConfig;
  * Tanpa baris (slot kosong) → keadaan kosong tampil di dalam tabel.
  * Dengan 'flat' => true kartunya dilepas, untuk tabel yang sudah berada di dalam kartu lain (dashboard).
  *
- * @var list<string|array{label: string, width?: int|float}> $columns
+ * @var list<string|array{label: string, width?: int|float, align?: 'end'}> $columns
+ *                                 align 'end': kolom aksi, kepala dan isi rata kanan dengan jarak dari tepi kartu (table.css).
  *                                 Teks kepala kolom rata tengah, kecuali kolom pertama yang rata kiri (dengan inden, lihat table.css); perataan isi sel ditulis di <td> halamannya.
  *                                 width (rem): bila SEMUA kolom punya width, lebar kolom dikunci (table-layout: fixed)
  *                                 dan lebar minimum tabel = jumlahnya; layar yang lebih sempit menggeser tabel
@@ -58,7 +59,7 @@ $isFixed = !in_array(0.0, $widths, true);
                         <thead>
                             <tr>
                                 <?php foreach ($columns as $i => $column): ?>
-                                    <th scope="col" class="<?= $i === 0 ? 'has-text-left' : 'has-text-centered' ?>" <?= $isFixed && empty(is_array($column) ? $column['flex'] ?? null : null) ? ' style="width: ' . $widths[$i] . 'rem"' : '' ?>>
+                                    <th scope="col" class="<?= $i === 0 ? 'has-text-left' : (is_array($column) && ($column['align'] ?? null) === 'end' ? 'is-end' : 'has-text-centered') ?>" <?= $isFixed && empty(is_array($column) ? $column['flex'] ?? null : null) ? ' style="width: ' . $widths[$i] . 'rem"' : '' ?>>
                                         <?= esc(is_array($column) ? $column['label'] : $column) ?>
                                     </th>
                                 <?php endforeach ?>

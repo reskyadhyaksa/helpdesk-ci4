@@ -32,7 +32,7 @@
             ['label' => 'Kategori', 'width' => 11],
             ['label' => 'Status SLA', 'width' => 12.5],
             ['label' => 'PIC Petugas', 'width' => 11.5],
-            ['label' => 'Aksi', 'width' => 12],
+            ['label' => 'Aksi', 'align' => 'end', 'width' => 12],
         ],
         'emptyIcon'    => 'fa-ticket',
         'emptyTitle'   => lang('Ticket.emptyTitle'),

@@ -86,7 +86,7 @@ $effectOptions = [
 
     <h2 class="title is-5 mt-5"><?= esc(lang('Admin.categoryAccess.exceptionsTitle')) ?></h2>
     <?php component_start('data_table', [
-        'columns'      => [['label' => 'Kategori', 'width' => 20], ['label' => 'Efek', 'width' => 11], ['label' => 'Aksi', 'width' => 12]],
+        'columns'      => [['label' => 'Kategori', 'width' => 20], ['label' => 'Efek', 'width' => 11], ['label' => 'Aksi', 'align' => 'end', 'width' => 12]],
         'emptyIcon'    => 'fa-user-lock',
         'emptyTitle'   => 'Belum ada pengecualian',
         'emptyMessage' => 'Pengguna ini hanya mengikuti aturan job title.',

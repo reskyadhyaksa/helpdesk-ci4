@@ -45,7 +45,7 @@ $columns = [
 ];
 
 if ($hasActions) {
-    $columns[] = ['label' => 'Aksi', 'width' => 11];
+    $columns[] = ['label' => 'Aksi', 'align' => 'end', 'width' => 11];
 }
 ?>
 <?= $this->extend('layouts/admin') ?>
