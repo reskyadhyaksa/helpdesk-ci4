@@ -12,7 +12,9 @@ use App\Models\PermissionModel;
  * @var list<array> $activities
  * @var list<array> $pics     kandidat PIC: id, name, employee_no
  * @var array       $thread   komentar dan lampiran (TicketCommentService::thread)
+ * @var bool|null   $userView  true = dipakai portal user (user/tickets/show.php): tampilan sama, tapi hanya baca; pemohon hanya bisa membalas
  */
+$userView ??= false;
 $status = TicketStatus::from($ticket['status']);
 
 $statusOptions = [];
@@ -38,8 +40,9 @@ foreach ($pics as $pic) {
             'mentionables'  => array_values(array_filter($pics, static fn (array $pic): bool => $pic['id'] !== auth_user()['id'])),
             'status'        => $status,
             'statusOptions' => $statusOptions,
-            'canUpdate'     => auth_can(PermissionModel::ADMIN_TICKETS_UPDATE),
-            'canReply'      => auth_can(PermissionModel::ADMIN_TICKETS_COMMENT) && ! $status->isFinal(),
+            'isAgent'       => ! $userView,
+            'canUpdate'     => ! $userView && auth_can(PermissionModel::ADMIN_TICKETS_UPDATE),
+            'canReply'      => ! $status->isFinal() && ($userView || auth_can(PermissionModel::ADMIN_TICKETS_COMMENT)),
         ]) ?>
       </div>
     </div>
@@ -50,7 +53,7 @@ foreach ($pics as $pic) {
             'ticket'     => $ticket,
             'status'     => $status,
             'picOptions' => $picOptions,
-            'canAssign'  => auth_can(PermissionModel::ADMIN_TICKETS_ASSIGN),
+            'canAssign'  => ! $userView && auth_can(PermissionModel::ADMIN_TICKETS_ASSIGN),
         ]) ?>
       </div>
     </aside>

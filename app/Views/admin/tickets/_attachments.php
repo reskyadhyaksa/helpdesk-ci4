@@ -4,8 +4,13 @@
  *
  * @var list<array> $attachments
  * @var bool        $cards       true = kartu besar (deskripsi), false = daftar ringkas (di bawah komentar)
+ * @var string      $routePrefix awalan route unduh/pratinjau; default 'admin.tickets' (portal user: 'user.tickets')
+ * @var bool        $previewable tampilkan tombol pratinjau (hanya ada rutenya di area admin)
  */
 use App\Services\AttachmentService;
+
+$routePrefix ??= 'admin.tickets';
+$previewable ??= true;
 
 if ($attachments === []) {
     return;
@@ -26,10 +31,10 @@ if ($attachments === []) {
                     • <?= esc(format_datetime($file['created_at'])) ?>
                 </p>
             </div>
-            <?php if (! $purged && AttachmentService::canPreview((string) $file['content_type'])): ?>
+            <?php if ($previewable && ! $purged && AttachmentService::canPreview((string) $file['content_type'])): ?>
                 <button type="button" class="ticket-file-action" data-modal-open="attachmentPreview"
-                    data-preview-url="<?= esc(url_to('admin.tickets.attachment.preview', $file['id']), 'attr') ?>"
-                    data-preview-download="<?= esc(url_to('admin.tickets.attachment', $file['id']), 'attr') ?>"
+                    data-preview-url="<?= esc(url_to($routePrefix . '.attachment.preview', $file['id']), 'attr') ?>"
+                    data-preview-download="<?= esc(url_to($routePrefix . '.attachment', $file['id']), 'attr') ?>"
                     data-preview-type="<?= esc($file['content_type'] === AttachmentService::TYPE_PDF ? 'pdf' : (str_starts_with($file['content_type'], 'image/') ? 'image' : 'text'), 'attr') ?>"
                     data-preview-name="<?= esc($file['original_name'], 'attr') ?>"
                     aria-label="Lihat <?= esc($file['original_name'], 'attr') ?>" title="Lihat">
@@ -37,7 +42,7 @@ if ($attachments === []) {
                 </button>
             <?php endif ?>
             <?php if (! $purged): ?>
-                <a class="ticket-file-action" href="<?= esc(url_to('admin.tickets.attachment', $file['id']), 'attr') ?>"
+                <a class="ticket-file-action" href="<?= esc(url_to($routePrefix . '.attachment', $file['id']), 'attr') ?>"
                     aria-label="Unduh <?= esc($file['original_name'], 'attr') ?>" title="Unduh">
                     <i class="fa-solid fa-download" aria-hidden="true"></i>
                 </a>

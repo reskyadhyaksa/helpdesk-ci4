@@ -29,7 +29,7 @@ class TicketController extends BaseController
 
         return view('user/tickets/show', [
             'title'      => $ticket['ticket_number'],
-            'ticket'     => $ticket,
+            'ticket'     => $service->withSlaRemaining([$ticket])[0],
             'activities' => $service->activities($id),
             'thread'     => service('ticketComments')->thread($id, false),
         ]);

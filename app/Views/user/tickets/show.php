@@ -3,6 +3,7 @@
  * @var array       $ticket
  * @var list<array> $activities
  * @var array       $thread komentar dan lampiran (TicketCommentService::thread)
+ * Isi memakai admin/tickets/_content dengan userView = true.
  */
 ?>
 <?= $this->extend('layouts/main') ?>
@@ -18,16 +19,12 @@
             ]
         ]) ?>
 
-        <?= view('tickets/_detail', ['ticket' => $ticket, 'activities' => $activities]) ?>
-
-        <?= view('tickets/_thread', [
-            'thread' => $thread,
-            'attachmentRoute' => 'user.tickets.attachment',
-            'commentRoute' => 'user.tickets.comment',
-            'ticketId' => $ticket['id'],
-            'isAgent' => false,
-            'canReply' => !\App\Entities\TicketStatus::from($ticket['status'])->isFinal(),
-        ]) ?>
+        <?php // Tampilan yang sama dengan detail tiket admin (dua kolom + lini masa), hanya baca dan pemohon cukup membalas ?>
+        <?= view('admin/tickets/_content', ['ticket' => $ticket, 'activities' => $activities, 'pics' => [], 'thread' => $thread, 'userView' => true]) ?>
     </div>
 </section>
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script src="<?= base_url('js/pages/admin/ticket-detail.js') ?>"></script>
 <?= $this->endSection() ?>

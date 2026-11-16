@@ -14,7 +14,10 @@ use App\Entities\TicketStatus;
  * @var array<string, string>       $statusOptions transisi status yang diizinkan: nilai => label
  * @var bool                        $canUpdate
  * @var bool                        $canReply
+ * @var bool                        $isAgent     false = tampilan pemohon: tanpa pilihan catatan internal, rute balas dan unduh milik portal user
  */
+$isAgent ??= true;
+$routePrefix = $isAgent ? 'admin.tickets' : 'user.tickets';
 $errors = session('errors') ?? [];
 
 // Komentar dan aktivitas digabung satu lini masa (terlama dulu); tab di atasnya menyaring per jenis
@@ -82,7 +85,7 @@ $statusLabel = static fn (?string $value): string => TicketStatus::tryFrom((stri
 
     <?php if ($thread['ticketAttachments'] !== []): ?>
         <h3 class="ticket-subtitle"><i class="fa-solid fa-paperclip" aria-hidden="true"></i> Lampiran Berkas (<?= count($thread['ticketAttachments']) ?>)</h3>
-        <?= view('admin/tickets/_attachments', ['attachments' => $thread['ticketAttachments'], 'cards' => true]) ?>
+        <?= view('admin/tickets/_attachments', ['attachments' => $thread['ticketAttachments'], 'cards' => true, 'routePrefix' => $routePrefix, 'previewable' => $isAgent]) ?>
     <?php endif ?>
 </section>
 
@@ -118,7 +121,7 @@ $statusLabel = static fn (?string $value): string => TicketStatus::tryFrom((stri
                         </time>
                     </header>
                     <div class="ticket-comment-text <?= ($row['body_format'] ?? 'TEXT') === 'HTML' ? 'is-rich' : '' ?>"><?= render_comment($row, $mentionNames) ?></div>
-                    <?= view('admin/tickets/_attachments', ['attachments' => $row['attachments'], 'cards' => false]) ?>
+                    <?= view('admin/tickets/_attachments', ['attachments' => $row['attachments'], 'cards' => false, 'routePrefix' => $routePrefix, 'previewable' => $isAgent]) ?>
                 </div>
             </article>
         <?php else: ?>
@@ -147,10 +150,11 @@ $statusLabel = static fn (?string $value): string => TicketStatus::tryFrom((stri
 
 <?php // ---- Form balas ---- ?>
 <?php if ($canReply): ?>
-    <form class="ticket-reply mt-5" action="<?= url_to('admin.tickets.comment', $ticket['id']) ?>" method="post" enctype="multipart/form-data" novalidate data-reply-form
+    <form class="ticket-reply mt-5" action="<?= url_to($routePrefix . '.comment', $ticket['id']) ?>" method="post" enctype="multipart/form-data" novalidate data-reply-form
         data-mentionables="<?= esc(json_encode(array_map(static fn (array $pic): array => ['id' => $pic['id'], 'name' => $pic['name'], 'nip' => $pic['employee_no']], $mentionables), JSON_UNESCAPED_UNICODE), 'attr') ?>">
         <?= csrf_field() ?>
 
+        <?php if ($isAgent): ?>
         <div class="ticket-reply-head">
             <div class="ticket-modes" role="radiogroup" aria-label="Jenis balasan">
                 <label class="ticket-mode">
@@ -164,6 +168,7 @@ $statusLabel = static fn (?string $value): string => TicketStatus::tryFrom((stri
             </div>
             <span class="ticket-reply-hint" data-reply-hint>Pemohon akan menerima notifikasi</span>
         </div>
+        <?php endif ?>
 
         <?php // Editor visual (contenteditable) diaktifkan js/pages/admin/ticket-detail.js; tanpa JS yang tampil hanya textarea teks biasa ?>
         <div class="ticket-toolbar" role="toolbar" aria-label="Format pesan" aria-controls="replyEditor" data-toolbar hidden>
@@ -183,7 +188,7 @@ $statusLabel = static fn (?string $value): string => TicketStatus::tryFrom((stri
             <label class="is-sr-only" for="body">Pesan</label>
             <ul class="mention-list" id="mentionList" role="listbox" aria-label="Rekan tim" data-mention-list hidden></ul>
             <input type="hidden" name="format" value="" data-format>
-            <?php $placeholder = $mentionables !== [] ? 'Tulis komentar atau gunakan @ untuk menyebut rekan tim…' : 'Tulis komentar kepada pemohon…' ?>
+            <?php $placeholder = $mentionables !== [] ? 'Tulis komentar atau gunakan @ untuk menyebut rekan tim…' : ($isAgent ? 'Tulis komentar kepada pemohon…' : 'Tulis pesan untuk tim Helpdesk…') ?>
             <div class="textarea ticket-editor-area content" id="replyEditor" contenteditable="true" role="textbox" aria-multiline="true"
                 aria-label="Pesan" data-editor data-placeholder="<?= esc($placeholder, 'attr') ?>" hidden></div>
             <textarea class="textarea <?= isset($errors['body']) ? 'is-danger' : '' ?>" id="body" name="body" rows="5"
@@ -203,7 +208,7 @@ $statusLabel = static fn (?string $value): string => TicketStatus::tryFrom((stri
             <div class="buttons ml-auto">
                 <button type="reset" class="button is-white">Batal</button>
                 <button type="submit" class="button is-link">
-                    <span>Simpan Tanggapan</span>
+                    <span><?= $isAgent ? 'Simpan Tanggapan' : 'Kirim Pesan' ?></span>
                     <span class="icon"><i class="fa-regular fa-paper-plane" aria-hidden="true"></i></span>
                 </button>
             </div>
