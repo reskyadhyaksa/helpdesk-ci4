@@ -51,6 +51,17 @@ $isFiltered = $keyword !== '' || $selectedMonths !== [] || $selectedYears !== [(
         <?php endif ?>
     <?= component_end() ?>
 
+    <?php // Dua tab agar halaman tidak panjang: jadwal mingguan dan daftar hari libur (js/pages/admin/holidays.js). Tab awal: Hari Libur bila sedang memfilter/berhalaman. ?>
+    <div class="quick-tabs" role="tablist" aria-label="Pengaturan hari kerja dan libur" data-holiday-tabs data-default="<?= $isFiltered ? 'holidays' : 'schedule' ?>">
+        <button type="button" class="quick-tab" role="tab" id="tab-schedule" aria-controls="panel-schedule" data-tab="schedule">
+            <i class="fa-regular fa-clock" aria-hidden="true"></i> Jadwal Kerja
+        </button>
+        <button type="button" class="quick-tab" role="tab" id="tab-holidays" aria-controls="panel-holidays" data-tab="holidays">
+            <i class="fa-solid fa-calendar-days" aria-hidden="true"></i> Hari Libur
+        </button>
+    </div>
+
+    <div id="panel-schedule" role="tabpanel" aria-labelledby="tab-schedule" data-tab-panel="schedule">
     <!-- Jadwal kerja mingguan: satu baris per hari berisi status (Kerja/Libur) dan jam kerjanya. Nilai = nomor hari ISO
          (Senin = 1). Kotak centang off_days[] = hari libur; baris libur tidak mengirim jam. Terkunci sampai tombol Edit
          ditekan (js/pages/admin/holidays.js). -->
@@ -58,10 +69,26 @@ $isFiltered = $keyword !== '' || $selectedMonths !== [] || $selectedYears !== [(
         <?= csrf_field() ?>
 
         <div class="form-card-body">
-            <h2 class="form-section-label mb-1">Jadwal Kerja Mingguan</h2>
-            <p class="is-size-7 has-text-grey-dark mb-4">
-                Tentukan hari kantor beroperasi dan jam kerjanya. Perubahan berlaku untuk perhitungan SLA berikutnya.
-            </p>
+            <div class="week-top">
+                <div>
+                    <h2 class="form-section-label mb-1">Jadwal Kerja Mingguan</h2>
+                    <p class="is-size-7 has-text-grey-dark">
+                        Tentukan hari kantor beroperasi dan jam kerjanya. Berlaku untuk perhitungan SLA berikutnya.
+                    </p>
+                </div>
+
+                <?php // Status mode: terkunci / sedang mengedit / ada perubahan belum disimpan (diatur js/pages/admin/holidays.js) ?>
+                <p class="week-mode" data-mode-note role="status">
+                    <i class="fa-solid <?= $canEditOffDay ? 'fa-lock' : 'fa-eye' ?>" aria-hidden="true" data-mode-icon></i>
+                    <span data-mode-text>
+                        <?php if ($canEditOffDay): ?>
+                            Terkunci. Tekan <strong>Edit</strong> untuk mengubah.
+                        <?php else: ?>
+                            Hanya bisa dilihat.
+                        <?php endif ?>
+                    </span>
+                </p>
+            </div>
 
             <dl class="week-summary" aria-label="Ringkasan jadwal">
                 <div>
@@ -82,36 +109,14 @@ $isFiltered = $keyword !== '' || $selectedMonths !== [] || $selectedYears !== [(
                 </div>
             </dl>
 
-            <ul class="week-legend">
-                <li>
-                    <span class="week-legend-icon is-off"><i class="fa-solid fa-mug-hot" aria-hidden="true"></i></span>
-                    <span><strong>Hari libur</strong> dilewati pada perhitungan SLA yang mengaktifkan opsi <strong>Lewati hari off</strong>.</span>
-                </li>
-                <li>
-                    <span class="week-legend-icon is-work"><i class="fa-regular fa-clock" aria-hidden="true"></i></span>
-                    <span><strong>Jam kerja</strong> menentukan kapan SLA berjalan pada kebijakan yang mengaktifkan opsi <strong>Hanya jam kerja</strong>. Di luar jam ini waktu SLA berhenti.</span>
-                </li>
-            </ul>
-
-            <?php // Status mode: terkunci / sedang mengedit / ada perubahan belum disimpan (diatur js/pages/admin/holidays.js) ?>
-            <p class="week-mode" data-mode-note role="status">
-                <i class="fa-solid <?= $canEditOffDay ? 'fa-lock' : 'fa-eye' ?>" aria-hidden="true" data-mode-icon></i>
-                <span data-mode-text>
-                    <?php if ($canEditOffDay): ?>
-                        Jadwal terkunci. Tekan <strong>Edit</strong> di bawah untuk mengubahnya.
-                    <?php else: ?>
-                        Anda hanya bisa melihat jadwal ini.
-                    <?php endif ?>
-                </span>
+            <p class="week-hint">
+                <strong>Hari libur</strong> dilewati pada opsi <strong>Lewati hari off</strong>; <strong>jam kerja</strong> menentukan SLA berjalan
+                pada opsi <strong>Hanya jam kerja</strong> (di luar jam itu SLA berhenti).
             </p>
 
             <fieldset class="week-fieldset" disabled>
                 <legend class="is-sr-only">Atur status dan jam kerja tiap hari</legend>
 
-                <p class="week-key">
-                    <span class="week-key-item"><span class="week-key-dot is-run"></span> Hijau: jam SLA berjalan</span>
-                    <span class="week-key-item"><span class="week-key-dot is-stop"></span> Abu-abu: SLA berhenti (pada kebijakan <strong>Hanya jam kerja</strong>)</span>
-                </p>
 
                 <div class="week-head" aria-hidden="true">
                     <span>Hari</span>
@@ -180,7 +185,9 @@ $isFiltered = $keyword !== '' || $selectedMonths !== [] || $selectedYears !== [(
             </div>
         <?php endif ?>
     </form>
+    </div>
 
+    <div id="panel-holidays" role="tabpanel" aria-labelledby="tab-holidays" data-tab-panel="holidays" hidden>
     <p class="is-size-7 has-text-grey-dark mb-4">
         Tanggal merah dan cuti bersama, tidak dihitung pada kebijakan SLA yang mengaktifkan opsi <strong>Lewati hari libur</strong>.
     </p>
@@ -280,6 +287,7 @@ $isFiltered = $keyword !== '' || $selectedMonths !== [] || $selectedYears !== [(
             </tr>
         <?php endforeach ?>
     <?= component_end() ?>
+    </div>
 </section>
 <?= $this->endSection() ?>
 
