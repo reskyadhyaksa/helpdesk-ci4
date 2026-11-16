@@ -221,4 +221,15 @@ final class AttachmentServiceTest extends CIUnitTestCase
             $this->assertSame($service->moved[0], $service->deleted[0]);
         }
     }
+
+    public function testCanPreviewOnlyAllowsSafeTypes(): void
+    {
+        foreach (['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'application/pdf', 'text/plain', 'IMAGE/PNG'] as $type) {
+            $this->assertTrue(AttachmentService::canPreview($type), $type);
+        }
+
+        foreach (['image/svg+xml', 'text/html', 'application/zip', 'application/x-msdownload', ''] as $type) {
+            $this->assertFalse(AttachmentService::canPreview($type), $type);
+        }
+    }
 }

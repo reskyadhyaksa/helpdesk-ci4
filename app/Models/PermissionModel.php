@@ -32,6 +32,7 @@ class PermissionModel extends Model
     public const ADMIN_REQUEST_CATEGORIES_DELETE = 'admin.request-categories.delete';
 
     public const ADMIN_TICKETS_VIEW_ALL = 'admin.tickets.view-all';
+    public const ADMIN_TICKETS_CREATE = 'admin.tickets.create';
     public const ADMIN_TICKETS_UPDATE = 'admin.tickets.update';
     public const ADMIN_TICKETS_ASSIGN = 'admin.tickets.assign';
     public const ADMIN_TICKETS_COMMENT = 'admin.tickets.comment';
@@ -96,6 +97,7 @@ class PermissionModel extends Model
             'description' => 'Siapa yang boleh melihat tiket.',
             'permissions' => [
                 self::ADMIN_TICKETS_VIEW_ALL => ['label' => 'Lihat semua tiket', 'description' => 'Melihat tiket semua kategori, tanpa batasan akses.'],
+                self::ADMIN_TICKETS_CREATE => ['label' => 'Buat tiket untuk karyawan', 'description' => 'Membuatkan tiket atas nama karyawan lain dari panel admin.'],
                 self::ADMIN_TICKETS_UPDATE => ['label' => 'Ubah status tiket', 'description' => 'Memindahkan tiket ke status berikutnya (diproses, ditunda, resolved, dst.).'],
                 self::ADMIN_TICKETS_ASSIGN => ['label' => 'Tetapkan PIC tiket', 'description' => 'Menetapkan PIC Helpdesk dan PIC Resolver pada tiket.'],
                 self::ADMIN_TICKETS_COMMENT => ['label' => 'Balas tiket', 'description' => 'Membalas pemohon dan menulis catatan internal pada tiket.'],

@@ -14,6 +14,16 @@ use CodeIgniter\HTTP\Files\UploadedFile;
  */
 class AttachmentService
 {
+    public const TYPE_PDF = 'application/pdf';
+
+    // Jenis yang aman ditampilkan langsung di browser. SVG dan HTML sengaja tidak ada: keduanya bisa memuat skrip.
+    private const PREVIEWABLE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', self::TYPE_PDF, 'text/plain'];
+
+    public static function canPreview(string $contentType): bool
+    {
+        return in_array(strtolower($contentType), self::PREVIEWABLE_TYPES, true);
+    }
+
     public function __construct(
         private readonly TicketAttachmentModel $attachments,
         private readonly SystemParameterModel $parameters,
