@@ -19,7 +19,7 @@ $values = ['Kepercayaan', 'Kewirausahaan', 'Inovatif', 'Kegembiraan'];
 ?>
 
 <?= $this->section('content') ?>
-<div class="container page-container home-page py-5">
+<div class="container page-container page-zoom home-page py-5">
 
     <div class="columns is-desktop is-3 is-7-desktop">
         <!-- Kiri: banner dan aksi cepat -->

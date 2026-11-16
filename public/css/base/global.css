@@ -97,6 +97,15 @@ html {
   border-radius: 1rem;
 }
 
+/*
+ * Halaman portal (beranda, dashboard user) tampil sedikit lebih kecil: teks, kartu, jarak, ikon. Navbar ikut,
+ * tapi hanya di halaman yang punya .page-zoom (:has), supaya halaman lain tidak berubah. Footer tidak ikut.
+ */
+.page-zoom,
+body:has(.page-zoom) .navbar {
+  zoom: 0.9;
+}
+
 /* Isi halaman sejajar dengan navbar di desktop; di mobile diberi gutter */
 .page-container {
   padding-left: 1rem;

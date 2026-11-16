@@ -8,7 +8,7 @@ $errors = session('errors') ?? [];
 
 <?= $this->section('content') ?>
 <section class="section">
-    <div class="container" style="max-width: 48rem">
+    <div class="container page-zoom" style="max-width: 48rem">
         <?= component('page_header', [
             'title'    => lang('Ticket.newTitle'),
             'subtitle' => lang('Ticket.newSubtitle'),
