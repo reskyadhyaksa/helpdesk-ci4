@@ -340,3 +340,69 @@
     transition: none;
   }
 }
+
+/* Kolom Access Group di tabel: satu grup + "+N"; daftar lengkap muncul saat "+N" disorot (hover-card) */
+.access-group {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+/* inline-block agar teks bisa dipotong dengan ellipsis; line-height = tinggi tag (2em) menjaga teks tepat di tengah */
+.access-group .access-tag {
+  display: inline-block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  line-height: 2em;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.access-more {
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  line-height: 1;
+  background-color: #e8edf3;
+  color: #334155;
+  font-weight: 700;
+  cursor: help;
+}
+
+.access-more:hover,
+.access-more:focus-visible {
+  background-color: #dbe3ee;
+}
+
+.hover-card {
+  position: fixed;
+  z-index: 70;
+  max-width: 20rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 0.8rem;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgb(15 23 42 / 0.08), 0 16px 36px -12px rgb(15 23 42 / 0.3);
+}
+
+.hover-card[hidden] {
+  display: none;
+}
+
+.hover-card-title {
+  margin-bottom: 0.4rem;
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hover-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}

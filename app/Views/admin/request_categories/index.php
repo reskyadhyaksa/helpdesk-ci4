@@ -108,14 +108,36 @@ if ($hasActions) {
                 <?php elseif ($titles === [] && $roleNames === []): ?>
                     <span class="has-text-grey">—</span>
                 <?php else: ?>
-                    <div class="tags">
-                        <?php foreach ($titles as $title): ?>
-                            <span class="tag is-light is-rounded access-tag is-job_title"><?= esc($title) ?></span>
-                        <?php endforeach ?>
-                        <?php foreach ($roleNames as $roleName): ?>
-                            <span class="tag is-light is-rounded access-tag is-role"><?= esc($roleName) ?></span>
-                        <?php endforeach ?>
-                    </div>
+                    <?php
+                    // Satu grup tampil, sisanya jadi "+N" yang menampilkan seluruh daftar saat disorot (js/components/popover.js),
+                    // supaya kolom tidak memanjang ke bawah
+                    $groups = [];
+
+                    foreach ($titles as $title) {
+                        $groups[] = ['class' => 'is-job_title', 'label' => $title];
+                    }
+
+                    foreach ($roleNames as $roleName) {
+                        $groups[] = ['class' => 'is-role', 'label' => $roleName];
+                    }
+
+                    $cardId = 'groups-' . $category['id'];
+                    ?>
+                    <span class="access-group">
+                        <span class="tag is-light is-rounded access-tag <?= $groups[0]['class'] ?>" title="<?= esc($groups[0]['label'], 'attr') ?>"><?= esc($groups[0]['label']) ?></span>
+                        <?php if (count($groups) > 1): ?>
+                            <button type="button" class="tag is-light is-rounded access-more" data-popover="<?= esc($cardId, 'attr') ?>"
+                                aria-describedby="<?= esc($cardId, 'attr') ?>" aria-label="<?= count($groups) - 1 ?> grup akses lainnya">+<?= count($groups) - 1 ?></button>
+                            <div class="hover-card" id="<?= esc($cardId, 'attr') ?>" role="tooltip" hidden>
+                                <p class="hover-card-title">Access Group (<?= count($groups) ?>)</p>
+                                <div class="hover-card-tags">
+                                    <?php foreach ($groups as $group): ?>
+                                        <span class="tag is-light is-rounded access-tag <?= $group['class'] ?>"><?= esc($group['label']) ?></span>
+                                    <?php endforeach ?>
+                                </div>
+                            </div>
+                        <?php endif ?>
+                    </span>
                 <?php endif ?>
             </td>
             <td>

@@ -20,6 +20,7 @@
     <script src="<?= base_url('js/app.js') ?>"></script>
     <script src="<?= base_url('js/components/select.js') ?>"></script>
     <script src="<?= base_url('js/components/toast.js') ?>"></script>
+    <script src="<?= base_url('js/components/popover.js') ?>"></script>
     <script src="<?= base_url('js/components/notifications.js') ?>"></script>
     <?= $this->renderSection('scripts') ?>
 </body>
