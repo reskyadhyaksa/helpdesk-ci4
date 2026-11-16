@@ -19,7 +19,8 @@ class HolidayModel extends Model
     protected $allowedFields = ['holiday_date', 'name', 'description', 'is_mass_leave'];
 
     protected $validationRules = [
-        'id' => 'permit_empty|is_natural_no_zero',
+        // CodeIgniter 4.7 mewajibkan aturan untuk field placeholder {id} di bawah. Id berupa UUID, bukan angka.
+        'id' => 'permit_empty|exact_length[36]',
         'holiday_date' => 'required|valid_date[Y-m-d]|is_unique[holidays.holiday_date,id,{id}]',
         'name' => 'required|max_length[150]',
         'description' => 'permit_empty|max_length[255]',
