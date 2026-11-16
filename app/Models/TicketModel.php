@@ -12,30 +12,50 @@ class TicketModel extends Model
     use Auditable;
     use UsesUuidV7;
 
-    public const CHANNEL_PORTAL      = 'PORTAL';
+    public const CHANNEL_PORTAL = 'PORTAL';
     public const CHANNEL_PUBLIC_FORM = 'PUBLIC_FORM';
 
     public const NUMBER_PREFIX = 'HC';
     public const NUMBER_DIGITS = 6;
 
-    protected $table            = 'tickets';
-    protected $primaryKey       = 'id';
+    protected $table = 'tickets';
+    protected $primaryKey = 'id';
     protected $useAutoIncrement = false;
-    protected $returnType       = 'array';
-    protected $beforeInsert     = ['generateUuid'];
-    protected $allowedFields    = [
-        'ticket_number', 'channel', 'status', 'requester_id', 'requester_nip', 'requester_name', 'requester_phone',
-        'requester_email', 'requester_organization', 'is_requester_verified', 'assignee_id', 'resolver_id',
-        'request_category_id', 'sla_policy_id', 'priority', 'subject', 'description', 'response_due_at', 'resolution_due_at',
-        'response_warned_at', 'response_breached_at', 'resolution_warned_at', 'resolution_breached_at', 'closed_at',
+    protected $returnType = 'array';
+    protected $beforeInsert = ['generateUuid'];
+    protected $allowedFields = [
+        'ticket_number',
+        'channel',
+        'status',
+        'requester_id',
+        'requester_nip',
+        'requester_name',
+        'requester_phone',
+        'requester_email',
+        'requester_organization',
+        'is_requester_verified',
+        'assignee_id',
+        'resolver_id',
+        'request_category_id',
+        'sla_policy_id',
+        'priority',
+        'subject',
+        'description',
+        'response_due_at',
+        'resolution_due_at',
+        'response_warned_at',
+        'response_breached_at',
+        'resolution_warned_at',
+        'resolution_breached_at',
+        'closed_at',
     ];
 
     protected $validationRules = [
-        'ticket_number'       => 'required|max_length[20]|is_unique[tickets.ticket_number,id,{id}]',
-        'requester_id'        => 'permit_empty|exact_length[36]',
+        'ticket_number' => 'required|max_length[20]|is_unique[tickets.ticket_number,id,{id}]',
+        'requester_id' => 'permit_empty|exact_length[36]',
         'request_category_id' => 'required|exact_length[36]',
-        'subject'             => 'required|max_length[150]',
-        'description'         => 'required',
+        'subject' => 'required|max_length[150]',
+        'description' => 'required',
     ];
 
     /**
@@ -112,9 +132,9 @@ class TicketModel extends Model
      * dianggap jeda SLA, jadi tidak diperingatkan.
      */
     private const SLA_ALERTS = [
-        'response_warning'    => ['due' => 'response_due_at', 'flag' => 'response_warned_at', 'blocking' => 'response_breached_at', 'statuses' => ['OPEN'], 'breach' => false],
-        'response_breached'   => ['due' => 'response_due_at', 'flag' => 'response_breached_at', 'blocking' => null, 'statuses' => ['OPEN'], 'breach' => true],
-        'resolution_warning'  => ['due' => 'resolution_due_at', 'flag' => 'resolution_warned_at', 'blocking' => 'resolution_breached_at', 'statuses' => ['OPEN', 'IN_PROGRESS', 'ESCALATED', 'REOPENED'], 'breach' => false],
+        'response_warning' => ['due' => 'response_due_at', 'flag' => 'response_warned_at', 'blocking' => 'response_breached_at', 'statuses' => ['OPEN'], 'breach' => false],
+        'response_breached' => ['due' => 'response_due_at', 'flag' => 'response_breached_at', 'blocking' => null, 'statuses' => ['OPEN'], 'breach' => true],
+        'resolution_warning' => ['due' => 'resolution_due_at', 'flag' => 'resolution_warned_at', 'blocking' => 'resolution_breached_at', 'statuses' => ['OPEN', 'IN_PROGRESS', 'ESCALATED', 'REOPENED'], 'breach' => false],
         'resolution_breached' => ['due' => 'resolution_due_at', 'flag' => 'resolution_breached_at', 'blocking' => null, 'statuses' => ['OPEN', 'IN_PROGRESS', 'ESCALATED', 'REOPENED'], 'breach' => true],
     ];
 
@@ -190,31 +210,31 @@ class TicketModel extends Model
                 ->groupEnd();
         }
 
-        if (! empty($filters['statuses'])) {
+        if (!empty($filters['statuses'])) {
             $this->whereIn('tickets.status', $filters['statuses']);
         }
 
-        if (! empty($filters['priorities'])) {
+        if (!empty($filters['priorities'])) {
             $this->whereIn('tickets.priority', $filters['priorities']);
         }
 
-        if (! empty($filters['categories'])) {
+        if (!empty($filters['categories'])) {
             $ids = $filters['categories'];
 
             $this->groupStart()
                 ->whereIn('tickets.request_category_id', $ids)
-                ->orWhereIn('tickets.request_category_id', static fn (BaseBuilder $sub) => $sub->select('id')->from('request_categories')->whereIn('parent_id', $ids))
+                ->orWhereIn('tickets.request_category_id', static fn(BaseBuilder $sub) => $sub->select('id')->from('request_categories')->whereIn('parent_id', $ids))
                 ->groupEnd();
         }
 
-        if (! empty($filters['pics'])) {
+        if (!empty($filters['pics'])) {
             $this->groupStart()
                 ->whereIn('tickets.assignee_id', $filters['pics'])
                 ->orWhereIn('tickets.resolver_id', $filters['pics'])
                 ->groupEnd();
         }
 
-        if (! empty($filters['unassigned'])) {
+        if (!empty($filters['unassigned'])) {
             $this->where('tickets.assignee_id IS NULL', null, false);
         }
 
@@ -271,6 +291,58 @@ class TicketModel extends Model
     }
 
     /**
+     * Beberapa tiket terbaru dengan kategori dan PIC, tanpa paginasi.
+     *
+     * @return list<array>
+     */
+    public function latest(int $limit): array
+    {
+        return $this->selectWithNames()->orderBy('tickets.created_at', 'DESC')->findAll($limit);
+    }
+
+    /**
+     * Jumlah tiket per status. Pasang scope (visibleTo) sebelum memanggil ini.
+     *
+     * @return array<string, int> status => jumlah
+     */
+    public function statusCounts(): array
+    {
+        $rows = $this->select('tickets.status, COUNT(*) AS total')->groupBy('tickets.status')->findAll();
+
+        return array_map('intval', array_column($rows, 'total', 'status'));
+    }
+
+    /**
+     * Pencarian dan filter daftar tiket; nilai kosong diabaikan. Pasang sebelum latest()/paginateList().
+     *
+     * @param list<string> $statuses
+     * @param list<string> $categoryIds kategori utama; tiket di sub kategorinya ikut tercakup
+     */
+    public function filterBy(string $keyword, array $statuses, array $categoryIds): static
+    {
+        if ($keyword !== '') {
+            $this->groupStart()
+                ->like('tickets.ticket_number', $keyword)
+                ->orLike('tickets.subject', $keyword)
+                ->orLike('assignee.name', $keyword)
+                ->groupEnd();
+        }
+
+        if ($statuses !== []) {
+            $this->whereIn('tickets.status', $statuses);
+        }
+
+        if ($categoryIds !== []) {
+            $this->groupStart()
+                ->whereIn('tickets.request_category_id', $categoryIds)
+                ->orWhereIn('category.parent_id', $categoryIds)
+                ->groupEnd();
+        }
+
+        return $this;
+    }
+
+    /**
      * Satu tiket lengkap dengan nama kategori, PIC, dan pengaju. Pasang scope (visibleTo) sebelum memanggil ini.
      */
     public function findDetail(string $id): ?array
@@ -285,9 +357,9 @@ class TicketModel extends Model
     private function selectWithNames(): static
     {
         return $this->select('tickets.*, category.name AS category_name, parent.name AS parent_name, '
-                . 'assignee.name AS assignee_name, resolver.name AS resolver_name, '
-                . 'sla.resolution_minutes AS sla_limit_minutes, sla.is_holiday AS sla_is_holiday, '
-                . 'sla.is_off_day AS sla_is_off_day, sla.is_work_hours AS sla_is_work_hours')
+            . 'assignee.name AS assignee_name, resolver.name AS resolver_name, '
+            . 'sla.resolution_minutes AS sla_limit_minutes, sla.is_holiday AS sla_is_holiday, '
+            . 'sla.is_off_day AS sla_is_off_day, sla.is_work_hours AS sla_is_work_hours')
             ->join('request_categories category', 'category.id = tickets.request_category_id')
             ->join('sla_policies sla', 'sla.id = tickets.sla_policy_id', 'left')
             ->join('request_categories parent', 'parent.id = category.parent_id', 'left')

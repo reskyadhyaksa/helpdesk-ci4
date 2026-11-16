@@ -23,48 +23,55 @@ class SystemParameterModel extends Model
     // Kanal notifikasi di luar aplikasi (email/WhatsApp) dan jendela peringatan SLA
     public const NOTIFY_EMAIL_ENABLED    = 'NOTIFY_EMAIL_ENABLED';
     public const NOTIFY_WHATSAPP_ENABLED = 'NOTIFY_WHATSAPP_ENABLED';
+    public const NOTIFICATION_RETENTION_DAYS = 'NOTIFICATION_RETENTION_DAYS';
     public const SLA_WARNING_MINUTES     = 'SLA_WARNING_MINUTES';
     public const SLA_ALERT_MAX_AGE_HOURS = 'SLA_ALERT_MAX_AGE_HOURS';
 
     /**
      * Satu-satunya definisi parameter: nilai bawaan, tipe, dan metadata halaman pengaturan admin
-     * (grup, label, bantuan, rentang untuk INT). Urutan = urutan tampil.
+     * (grup, subbagian opsional, label, bantuan, rentang dan satuan untuk INT). Urutan = urutan tampil.
      */
     public const DEFAULTS = [
         self::ATTACHMENT_MAX_SIZE_MB => [
-            'value' => '2', 'type' => 'INT', 'group' => 'attachment', 'min' => 1, 'max' => 100,
-            'label' => 'Ukuran maksimal per file (MB)', 'help' => 'Tidak boleh melebihi batas upload PHP server.',
+            'value' => '2', 'type' => 'INT', 'group' => 'attachment', 'min' => 1, 'max' => 100, 'unit' => 'MB', 'section' => 'Batas unggah',
+            'label' => 'Ukuran maksimal per file', 'help' => 'Tidak boleh melebihi batas upload PHP server.',
         ],
         // 3 file x 2 MB = 6 MB muat di post_max_size bawaan PHP (8M); lebih dari itu seluruh isian form hilang
         self::ATTACHMENT_MAX_FILES => [
-            'value' => '3', 'type' => 'INT', 'group' => 'attachment', 'min' => 1, 'max' => 20,
+            'value' => '3', 'type' => 'INT', 'group' => 'attachment', 'min' => 1, 'max' => 20, 'unit' => 'file', 'section' => 'Batas unggah',
             'label' => 'Jumlah file maksimal per kiriman', 'help' => 'Ukuran file × jumlah file tidak boleh melebihi post_max_size PHP.',
         ],
         self::ATTACHMENT_ALLOWED_EXTENSIONS => [
-            'value' => 'jpg,jpeg,png,pdf,docx,xlsx,txt', 'type' => 'STRING', 'group' => 'attachment',
+            'value' => 'jpg,jpeg,png,pdf,docx,xlsx,txt', 'type' => 'STRING', 'group' => 'attachment', 'section' => 'Batas unggah',
             'label' => 'Ekstensi file yang diizinkan', 'help' => 'Huruf kecil dipisah koma, mis. jpg,png,pdf. File berbahaya (php, exe, html, js, dst.) selalu ditolak.',
         ],
         // Lampiran tiket CLOSED dihapus setelah sekian hari; 0 = tidak pernah dihapus
         self::ATTACHMENT_RETENTION_DAYS => [
-            'value' => '14', 'type' => 'INT', 'group' => 'attachment', 'min' => 0, 'max' => 3650,
-            'label' => 'Hapus lampiran setelah tiket ditutup (hari)', 'help' => 'Isi 0 untuk tidak pernah menghapus. Yang dihapus hanya file; catatan lampiran tetap ada.',
+            'value' => '14', 'type' => 'INT', 'group' => 'attachment', 'min' => 0, 'max' => 3650, 'unit' => 'hari', 'section' => 'Penyimpanan',
+            'label' => 'Hapus lampiran setelah tiket ditutup', 'help' => 'Isi 0 untuk tidak pernah menghapus. Yang dihapus hanya file; catatan lampiran tetap ada.',
         ],
         self::NOTIFY_EMAIL_ENABLED => [
-            'value' => '0', 'type' => 'BOOL', 'group' => 'notification',
+            'value' => '0', 'type' => 'BOOL', 'group' => 'notification', 'section' => 'Kanal pengiriman',
             'label' => 'Kirim notifikasi lewat email', 'help' => 'Nyalakan setelah SMTP dan alamat pengirim dikonfigurasi di server.',
         ],
         self::NOTIFY_WHATSAPP_ENABLED => [
-            'value' => '0', 'type' => 'BOOL', 'group' => 'notification',
+            'value' => '0', 'type' => 'BOOL', 'group' => 'notification', 'section' => 'Kanal pengiriman',
             'label' => 'Kirim notifikasi lewat WhatsApp', 'help' => 'Nyalakan setelah URL dan token API WhatsApp diisi di server.',
         ],
+        // Notifikasi lonceng yang sudah dibaca dihapus setelah sekian hari; yang belum dibaca tidak pernah dihapus; 0 = tidak dihapus
+        self::NOTIFICATION_RETENTION_DAYS => [
+            'value' => '3', 'type' => 'INT', 'group' => 'notification', 'min' => 0, 'max' => 3650, 'unit' => 'hari', 'section' => 'Penyimpanan',
+            'label' => 'Hapus notifikasi lonceng yang sudah dibaca setelah',
+            'help' => 'Dihitung sejak notifikasi dibaca. Notifikasi yang belum dibaca tidak pernah dihapus. Isi 0 untuk tidak pernah menghapus.',
+        ],
         self::SLA_WARNING_MINUTES => [
-            'value' => '30', 'type' => 'INT', 'group' => 'sla', 'min' => 1, 'max' => 1440,
-            'label' => 'Peringatan SLA sebelum batas (menit)', 'help' => 'PIC diberi tahu sekian menit sebelum batas respons/penyelesaian.',
+            'value' => '30', 'type' => 'INT', 'group' => 'sla', 'min' => 1, 'max' => 1440, 'unit' => 'menit',
+            'label' => 'Peringatan SLA sebelum batas', 'help' => 'PIC diberi tahu sekian menit sebelum batas respons/penyelesaian.',
         ],
         // Pelanggaran yang terlewat lebih lama dari ini tidak diperingatkan (mencegah banjir notifikasi saat pertama dijalankan)
         self::SLA_ALERT_MAX_AGE_HOURS => [
-            'value' => '24', 'type' => 'INT', 'group' => 'sla', 'min' => 1, 'max' => 720,
-            'label' => 'Batas usia peringatan pelanggaran SLA (jam)', 'help' => 'Pelanggaran yang sudah lebih lama dari ini tidak lagi diperingatkan.',
+            'value' => '24', 'type' => 'INT', 'group' => 'sla', 'min' => 1, 'max' => 720, 'unit' => 'jam',
+            'label' => 'Batas usia peringatan pelanggaran SLA', 'help' => 'Pelanggaran yang sudah lebih lama dari ini tidak lagi diperingatkan.',
         ],
     ];
 

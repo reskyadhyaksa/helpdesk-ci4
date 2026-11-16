@@ -8,15 +8,15 @@ namespace App\Entities;
  */
 enum TicketStatus: string
 {
-    case Open          = 'OPEN';
-    case InProgress    = 'IN_PROGRESS';
-    case NeedResponse  = 'NEED_RESPONSE';
-    case OnHold        = 'ON_HOLD';
-    case Escalated     = 'ESCALATED';
-    case Resolved      = 'RESOLVED';
-    case Reopened      = 'REOPENED';
-    case Closed        = 'CLOSED';
-    case Cancelled     = 'CANCELLED';
+    case Open = 'OPEN';
+    case InProgress = 'IN_PROGRESS';
+    case NeedResponse = 'NEED_RESPONSE';
+    case OnHold = 'ON_HOLD';
+    case Escalated = 'ESCALATED';
+    case Resolved = 'RESOLVED';
+    case Reopened = 'REOPENED';
+    case Closed = 'CLOSED';
+    case Cancelled = 'CANCELLED';
 
     /**
      * @return list<self>
@@ -24,13 +24,13 @@ enum TicketStatus: string
     public function allowedTransitions(): array
     {
         return match ($this) {
-            self::Open         => [self::InProgress, self::OnHold, self::Cancelled],
-            self::InProgress   => [self::NeedResponse, self::OnHold, self::Escalated, self::Resolved],
+            self::Open => [self::InProgress, self::OnHold, self::Cancelled],
+            self::InProgress => [self::NeedResponse, self::OnHold, self::Escalated, self::Resolved],
             self::NeedResponse => [self::InProgress, self::Resolved, self::Cancelled],
-            self::OnHold       => [self::InProgress, self::Escalated],
-            self::Escalated    => [self::InProgress, self::OnHold, self::Resolved],
-            self::Resolved     => [self::Closed, self::Reopened],
-            self::Reopened     => [self::InProgress, self::Escalated, self::Resolved],
+            self::OnHold => [self::InProgress, self::Escalated],
+            self::Escalated => [self::InProgress, self::OnHold, self::Resolved],
+            self::Resolved => [self::Closed, self::Reopened],
+            self::Reopened => [self::InProgress, self::Escalated, self::Resolved],
             self::Closed, self::Cancelled => [],
         };
     }
@@ -70,12 +70,12 @@ enum TicketStatus: string
     public static function boardColumns(): array
     {
         return [
-            'open'      => ['label' => 'Open', 'tone' => 'info', 'statuses' => [self::Open->value, self::Reopened->value]],
-            'progress'  => ['label' => 'In Progress', 'tone' => 'link', 'statuses' => [self::InProgress->value]],
-            'waiting'   => ['label' => 'Waiting', 'tone' => 'warning', 'statuses' => [self::NeedResponse->value, self::OnHold->value]],
+            'open' => ['label' => 'Open', 'tone' => 'info', 'statuses' => [self::Open->value, self::Reopened->value]],
+            'progress' => ['label' => 'In Progress', 'tone' => 'link', 'statuses' => [self::InProgress->value]],
+            'waiting' => ['label' => 'Waiting', 'tone' => 'warning', 'statuses' => [self::NeedResponse->value, self::OnHold->value]],
             'escalated' => ['label' => 'Escalated', 'tone' => 'danger', 'statuses' => [self::Escalated->value]],
-            'resolved'  => ['label' => 'Resolved', 'tone' => 'success', 'statuses' => [self::Resolved->value]],
-            'closed'    => ['label' => 'Closed', 'tone' => 'grey', 'statuses' => [self::Closed->value, self::Cancelled->value]],
+            'resolved' => ['label' => 'Resolved', 'tone' => 'success', 'statuses' => [self::Resolved->value]],
+            'closed' => ['label' => 'Closed', 'tone' => 'grey', 'statuses' => [self::Closed->value, self::Cancelled->value]],
         ];
     }
 
@@ -87,11 +87,11 @@ enum TicketStatus: string
     public function tagClass(): string
     {
         return match ($this) {
-            self::Open         => 'is-info',
-            self::InProgress   => 'is-link',
+            self::Open => 'is-info',
+            self::InProgress => 'is-link',
             self::NeedResponse, self::OnHold, self::Reopened => 'is-warning',
-            self::Escalated    => 'is-danger',
-            self::Resolved     => 'is-success',
+            self::Escalated => 'is-danger',
+            self::Resolved => 'is-success',
             self::Closed, self::Cancelled => 'is-light',
         };
     }

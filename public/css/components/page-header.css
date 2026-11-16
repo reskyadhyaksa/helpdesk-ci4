@@ -1,10 +1,89 @@
-/* Header halaman admin (components/page_header). */
+/*
+ * Header halaman admin (components/page_header): judul + deskripsi di kiri, tombol aksi dan lonceng di kanan,
+ * dipisah dari isi halaman oleh garis tipis. Satu-satunya definisi gaya header untuk semua halaman admin.
+ */
 
 .admin-page-header {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1rem 1.5rem;
   margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #e5e9f0;
+}
+
+.admin-page-header-main {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.admin-page-header-title {
+  color: var(--bulma-text-strong);
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.admin-page-header-subtitle {
+  max-width: 46rem;
+  margin-top: 0.2rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.admin-page-header-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2rem;
+  margin-bottom: 0.35rem;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.admin-page-header-back:hover,
+.admin-page-header-back:focus-visible {
+  color: var(--bulma-primary);
+}
+
+/* Tombol aksi dan lonceng sebaris, rata tengah terhadap blok judul */
+.admin-page-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.admin-page-header-actions .button,
+.admin-page-header-actions form {
+  margin: 0;
+}
+
+/* Lonceng di header: putih berbingkai dan dipisah garis tipis dari tombol aksi */
+.admin-page-header-actions .notif {
+  margin-left: 0.25rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid #e2e8f0;
+}
+
+.admin-page-header-actions .notif-toggle {
+  border: 1px solid #e2e8f0;
+  background-color: #fff;
+}
+
+/* Layar sempit: judul di atas, aksi di bawahnya rata kiri */
+@media (max-width: 768px) {
+  .admin-page-header-actions {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .admin-page-header-title {
+    font-size: 1.4rem;
+  }
 }

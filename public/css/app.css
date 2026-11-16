@@ -15,6 +15,7 @@
 
 @import url("layout/navbar.css");
 @import url("layout/admin.css");
+@import url("layout/footer.css");
 
 @import url("components/page-header.css");
 @import url("components/form-card.css");
@@ -24,6 +25,8 @@
 @import url("components/modal.css");
 @import url("components/toast.css");
 @import url("components/notifications.css");
+@import url("components/ticket-pipeline.css");
+@import url("components/breadcrumb.css");
 
 @import url("pages/home.css");
 @import url("pages/admin-ticket-detail.css");
@@ -33,3 +36,7 @@
 @import url("pages/admin-roles.css");
 @import url("pages/admin-users.css");
 @import url("pages/admin-reports.css");
+@import url("pages/ticket-form.css");
+@import url("pages/user-dashboard.css");
+@import url("pages/admin-holidays.css");
+@import url("pages/admin-settings.css");

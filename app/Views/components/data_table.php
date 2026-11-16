@@ -19,6 +19,7 @@ use Config\Pager as PagerConfig;
  *   <?= component_end() ?>
  *
  * Tanpa baris (slot kosong) → keadaan kosong tampil di dalam tabel.
+ * Dengan 'flat' => true kartunya dilepas, untuk tabel yang sudah berada di dalam kartu lain (dashboard).
  *
  * @var list<string|array{label: string, width?: int|float}> $columns
  *                                 Teks kepala kolom selalu rata tengah; perataan isi sel ditulis di <td> halamannya.
@@ -31,7 +32,9 @@ use Config\Pager as PagerConfig;
  * @var string|null $emptyMessage
  * @var Pager|null  $pager         tampilkan total + navigasi halaman
  * @var string|null $totalLabel    satuan di footer, mis. "pengguna"
+ * @var bool        $flat          tanpa kartu pembungkus
  */
+$flat ??= false;
 $slot ??= '';
 $emptyIcon ??= 'fa-inbox';
 $emptyTitle ??= null;
@@ -41,64 +44,75 @@ $totalLabel ??= 'data';
 
 $isEmpty = trim($slot) === '';
 
-$widths  = array_map(static fn ($column): float => is_array($column) ? (float) ($column['width'] ?? 0) : 0.0, $columns);
-$isFixed = ! in_array(0.0, $widths, true);
+$widths = array_map(static fn($column): float => is_array($column) ? (float) ($column['width'] ?? 0) : 0.0, $columns);
+$isFixed = !in_array(0.0, $widths, true);
 ?>
-<div class="box p-0 admin-table-card">
-    <div class="table-container">
-        <table class="table is-fullwidth <?= $isEmpty ? '' : 'is-hoverable' ?> <?= $isFixed ? 'is-fixed' : '' ?>"<?= $isFixed ? ' style="min-width: ' . array_sum($widths) . 'rem"' : '' ?>>
-            <thead>
-                <tr>
-                    <?php foreach ($columns as $i => $column): ?>
-                        <th scope="col" class="has-text-centered"<?= $isFixed ? ' style="width: ' . $widths[$i] . 'rem"' : '' ?>><?= esc(is_array($column) ? $column['label'] : $column) ?></th>
-                    <?php endforeach ?>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if ($isEmpty): ?>
-                    <tr>
-                        <td colspan="<?= count($columns) ?>">
-                            <?= component('empty_state', [
-                                'icon' => $emptyIcon,
-                                'title' => $emptyTitle,
-                                'message' => $emptyMessage,
-                            ]) ?>
-                        </td>
-                    </tr>
-                <?php else: ?>
-                    <?= $slot ?>
-                <?php endif ?>
-            </tbody>
-        </table>
-    </div>
-
-    <?php if ($pager !== null && !$isEmpty): ?>
-        <?php
-        $total = $pager->getTotal();
-        $from = ($pager->getCurrentPage() - 1) * $pager->getPerPage() + 1;
-        $to = min($from + $pager->getPerPage() - 1, $total);
-        ?>
-        <div class="admin-table-footer">
-            <div class="admin-table-footer-start">
-                <?php // Pilihan baris per halaman: js/app.js menulis ?per_page=… ke URL dan kembali ke halaman 1 ?>
-                <div class="admin-table-size">
-                    <?= component('select', [
-                        'name' => 'per_page',
-                        'label' => 'Baris per halaman',
-                        'hideLabel' => true,
-                        'options' => array_combine(PagerConfig::PER_PAGE_OPTIONS, PagerConfig::PER_PAGE_OPTIONS),
-                        'selected' => (string) $pager->getPerPage(),
-                        'size' => 'is-small',
-                        'fullwidth' => true,
-                    ]) ?>
+            <div class="<?= $flat ? '' : 'box p-0' ?> admin-table-card">
+                <div class="table-container">
+                    <table
+                        class="table is-fullwidth <?= $isEmpty ? '' : 'is-hoverable' ?> <?= $isFixed ? 'is-fixed' : '' ?>"
+                        <?= $isFixed ? ' style="min-width: ' . array_sum($widths) . 'rem"' : '' ?>>
+                        <thead>
+                            <tr>
+                                <?php foreach ($columns as $i => $column): ?>
+                                    <th scope="col" class="has-text-centered" <?= $isFixed ? ' style="width: ' . $widths[$i] . 'rem"' : '' ?>>
+                                        <?= esc(is_array($column) ? $column['label'] : $column) ?>
+                                    </th>
+                                <?php endforeach ?>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if ($isEmpty): ?>
+                                <tr>
+                                    <td colspan="<?= count($columns) ?>">
+                                        <?= component('empty_state', [
+                                            'illustration' => true,
+                                            'icon' => $emptyIcon,
+                                            'title' => $emptyTitle,
+                                            'message' => $emptyMessage,
+                                        ]) ?>
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?= $slot ?>
+                            <?php endif ?>
+                        </tbody>
+                    </table>
                 </div>
-                <p class="admin-table-info">
-                    Menampilkan
-                    <strong><?= number_format($from, 0, ',', '.') ?>–<?= number_format($to, 0, ',', '.') ?></strong>
-                    dari <strong><?= number_format($total, 0, ',', '.') ?></strong> <?= esc($totalLabel) ?>
-                </p>
+
+                <?php if ($pager !== null && !$isEmpty): ?>
+                    <?php
+                    $total = $pager->getTotal();
+                    $from = ($pager->getCurrentPage() - 1) * $pager->getPerPage() + 1;
+                    $to = min($from + $pager->getPerPage() - 1, $total);
+                    ?>
+                    <div class="admin-table-footer">
+                        <div class="admin-table-footer-start">
+                            <?php // Pilihan baris per halaman: js/app.js menulis ?per_page=… ke URL dan kembali ke halaman 1 ?>
+                            <div class="admin-table-size">
+                                <?= component('select', [
+                                    'name' => 'per_page',
+                                    'label' => 'Baris per halaman',
+                                    'hideLabel' => true,
+                                    'options' => array_combine(PagerConfig::PER_PAGE_OPTIONS, PagerConfig::PER_PAGE_OPTIONS),
+                                    'selected' => (string) $pager->getPerPage(),
+                                    'size' => 'is-small',
+                                    'fullwidth' => true,
+                                ]) ?>
+                            </div>
+                            <p class="admin-table-info">
+                                Menampilkan
+                                <strong>
+                                    <?= number_format($from, 0, ',', '.') ?>–
+                                    <?= number_format($to, 0, ',', '.') ?>
+                                </strong>
+                                dari <strong>
+                                    <?= number_format($total, 0, ',', '.') ?>
+                                </strong>
+                                <?= esc($totalLabel) ?>
+                            </p>
+                        </div>
+                        <?= $pager->links('default', 'bulma') ?>
+                    </div>
+                <?php endif ?>
             </div>
-            <?= $pager->links('default', 'bulma') ?>
-        </div>
-    <?php endif ?>
-</div>

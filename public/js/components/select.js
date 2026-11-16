@@ -1,5 +1,6 @@
 // Dropdown kustom untuk components/select (<div class="select" data-select><select>…</select></div>).
 // <select> asli tetap ada (disembunyikan) dan menjadi sumber nilai yang dikirim form.
+// Isi <select> yang diganti dari luar: ubah options/disabled lalu kirim select.dispatchEvent(new Event('options-changed')).
 // Opsional per pemakaian: data-searchable (kotak cari di menu) dan <select multiple> (checkbox, multi-pilih).
 // Multi-pilih punya baris "Pilih semua" berkotak centang tiga keadaan: kosong (tanpa pilihan), setengah (sebagian),
 // penuh (semua). Bila ada kotak cari, "Pilih semua" hanya berlaku untuk hasil yang tampil.
@@ -118,29 +119,40 @@
             list.appendChild(allItem);
         }
 
-        var items = Array.prototype.map.call(select.options, function (option, index) {
-            var item = document.createElement('li');
-            item.id = listId + '-' + index;
-            item.className = 'select-option' + (option.value === '' ? ' is-placeholder' : '');
-            item.setAttribute('role', 'option');
-            item.innerHTML = isMultiple
-                ? '<span class="select-option-box"><i class="fa-solid fa-check select-box-check" aria-hidden="true"></i></span><span class="select-option-label"></span>'
-                : '<span class="select-option-label"></span><i class="fa-solid fa-check select-option-check" aria-hidden="true"></i>';
-            item.querySelector('.select-option-label').textContent = option.text;
+        var items = [];
 
-            item.addEventListener('click', function () {
-                choose(index);
-            });
-            item.addEventListener('mousemove', function () {
-                if (activeIndex !== index) {
-                    setActive(index);
-                }
+        // Dipanggil saat awal dan setiap kali isi <select> diganti kode lain (event "options-changed")
+        function buildItems() {
+            items.forEach(function (item) {
+                item.remove();
             });
 
-            list.appendChild(item);
+            items = Array.prototype.map.call(select.options, function (option, index) {
+                var item = document.createElement('li');
+                item.id = listId + '-' + index;
+                item.className = 'select-option' + (option.value === '' ? ' is-placeholder' : '');
+                item.setAttribute('role', 'option');
+                item.innerHTML = isMultiple
+                    ? '<span class="select-option-box"><i class="fa-solid fa-check select-box-check" aria-hidden="true"></i></span><span class="select-option-label"></span>'
+                    : '<span class="select-option-label"></span><i class="fa-solid fa-check select-option-check" aria-hidden="true"></i>';
+                item.querySelector('.select-option-label').textContent = option.text;
 
-            return item;
-        });
+                item.addEventListener('click', function () {
+                    choose(index);
+                });
+                item.addEventListener('mousemove', function () {
+                    if (activeIndex !== index) {
+                        setActive(index);
+                    }
+                });
+
+                list.appendChild(item);
+
+                return item;
+            });
+        }
+
+        buildItems();
 
         menu.appendChild(list);
 
@@ -226,6 +238,8 @@
         }
 
         function syncFromSelect() {
+            trigger.disabled = select.disabled;
+
             if (isMultiple) {
                 var chosen = Array.prototype.filter.call(select.options, function (option) {
                     return option.selected;
@@ -536,6 +550,10 @@
 
         // Nilai diubah dari kode lain (mis. modal mengisi nilai awal lalu memicu change): tampilan ikut
         select.addEventListener('change', syncFromSelect);
+        select.addEventListener('options-changed', function () {
+            buildItems();
+            syncFromSelect();
+        });
 
         select.hidden = true;
         wrapper.classList.add('is-enhanced');

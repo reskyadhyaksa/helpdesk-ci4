@@ -9,18 +9,24 @@
 
 <?= $this->section('content') ?>
 <section class="section">
-    <div class="container page-zoom">
-        <p class="mb-3"><a href="<?= url_to('user.tickets.index') ?>"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> <?= esc(lang('Ticket.mineTitle')) ?></a></p>
+    <div class="container">
+        <?= component('breadcrumb', [
+            'items' => [
+                ['label' => lang('Ticket.dashboard.title'), 'href' => url_to('user.dashboard'), 'icon' => 'home.svg'],
+                ['label' => lang('Ticket.historyTitle'), 'href' => url_to('user.tickets.index'), 'icon' => 'doc-search.svg'],
+                ['label' => $ticket['ticket_number']],
+            ]
+        ]) ?>
 
         <?= view('tickets/_detail', ['ticket' => $ticket, 'activities' => $activities]) ?>
 
         <?= view('tickets/_thread', [
-            'thread'          => $thread,
+            'thread' => $thread,
             'attachmentRoute' => 'user.tickets.attachment',
-            'commentRoute'    => 'user.tickets.comment',
-            'ticketId'        => $ticket['id'],
-            'isAgent'         => false,
-            'canReply'        => ! \App\Entities\TicketStatus::from($ticket['status'])->isFinal(),
+            'commentRoute' => 'user.tickets.comment',
+            'ticketId' => $ticket['id'],
+            'isAgent' => false,
+            'canReply' => !\App\Entities\TicketStatus::from($ticket['status'])->isFinal(),
         ]) ?>
     </div>
 </section>

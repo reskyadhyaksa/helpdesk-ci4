@@ -11,8 +11,12 @@
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('content') ?>
-<section class="section ticket-detail">
-    <p class="mb-4"><a href="<?= url_to('admin.tickets.index') ?>"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Semua tiket</a></p>
+<section class="section">
+    <?= component('page_header', [
+        'title' => lang('Ticket.detailTitle'),
+        'subtitle' => lang('Ticket.detailSubtitle'),
+        'back' => ['href' => url_to('admin.tickets.index'), 'label' => 'Semua tiket'],
+    ]) ?>
 
     <?= view('admin/tickets/_content', ['ticket' => $ticket, 'activities' => $activities, 'pics' => $pics, 'thread' => $thread]) ?>
 </section>

@@ -1,7 +1,9 @@
 /*
- * Toast flash message (partials/flash + js/components/toast.js).
- * Kartu berwarna lembut sesuai jenis, ikon bulat berwarna penuh,
- * dan garis progres yang menunjukkan sisa waktu. Tanpa gradasi.
+ * Toast (partials/flash + js/components/toast.js). Tiga jenis dibedakan oleh warna, bentuk ikon, dan label:
+ *   success (hijau, ikon bulat)            pesan hasil aksi, mis. "Tiket berhasil dibuat"
+ *   danger  (merah, ikon bulat)            gagal / isian salah
+ *   info    (biru, ikon kotak + label)     notifikasi lonceng real-time, bisa diklik untuk membuka tiketnya
+ * Semua punya garis progres di bawah yang menunjukkan sisa waktu. Tanpa gradasi.
  */
 
 .toast-region {
@@ -46,6 +48,17 @@
   --toast-title: #7f1d1d;
 }
 
+.toast.is-info {
+  --toast-color: #2563eb;
+  --toast-bg: var(--app-fill-blue);
+  --toast-border: var(--app-stroke-blue);
+  --toast-title: #1e3a8a;
+}
+
+.toast.is-clickable {
+  cursor: pointer;
+}
+
 .toast-icon {
   display: inline-flex;
   flex-shrink: 0;
@@ -58,6 +71,35 @@
   box-shadow: 0 0 0 5px color-mix(in srgb, var(--toast-color) 15%, transparent);
   color: #fff;
   font-size: 1.05rem;
+}
+
+.toast.is-info .toast-icon {
+  border-radius: 0.8rem;
+}
+
+/* Label kecil di atas judul, khusus notifikasi lonceng */
+.toast-kicker {
+  margin-bottom: 0.15rem;
+  color: var(--toast-color);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.toast-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  color: var(--toast-color);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.toast-action:hover,
+.toast-action:focus-visible {
+  text-decoration: underline;
 }
 
 .toast-body {
