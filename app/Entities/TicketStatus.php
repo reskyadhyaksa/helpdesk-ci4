@@ -45,6 +45,40 @@ enum TicketStatus: string
         return $this->allowedTransitions() === [];
     }
 
+    /**
+     * Pilihan untuk dropdown filter: nilai => label.
+     *
+     * @return array<string, string>
+     */
+    public static function options(): array
+    {
+        $options = [];
+
+        foreach (self::cases() as $status) {
+            $options[$status->value] = $status->label();
+        }
+
+        return $options;
+    }
+
+    /**
+     * Kolom papan Kanban di daftar tiket: beberapa status berdekatan digabung supaya papan tidak terlalu lebar.
+     * tone = warna Bulma untuk titik penanda kolom.
+     *
+     * @return array<string, array{label: string, tone: string, statuses: list<string>}>
+     */
+    public static function boardColumns(): array
+    {
+        return [
+            'open'      => ['label' => 'Open', 'tone' => 'info', 'statuses' => [self::Open->value, self::Reopened->value]],
+            'progress'  => ['label' => 'In Progress', 'tone' => 'link', 'statuses' => [self::InProgress->value]],
+            'waiting'   => ['label' => 'Waiting', 'tone' => 'warning', 'statuses' => [self::NeedResponse->value, self::OnHold->value]],
+            'escalated' => ['label' => 'Escalated', 'tone' => 'danger', 'statuses' => [self::Escalated->value]],
+            'resolved'  => ['label' => 'Resolved', 'tone' => 'success', 'statuses' => [self::Resolved->value]],
+            'closed'    => ['label' => 'Closed', 'tone' => 'grey', 'statuses' => [self::Closed->value, self::Cancelled->value]],
+        ];
+    }
+
     public function label(): string
     {
         return lang('Ticket.status.' . $this->value);

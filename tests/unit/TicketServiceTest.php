@@ -4,6 +4,7 @@ use App\Entities\SlaPolicy;
 use App\Entities\TicketStatus;
 use App\Entities\User;
 use App\Exceptions\BusinessException;
+use App\Models\PermissionModel;
 use App\Models\RequestCategoryModel;
 use App\Models\SlaPolicyModel;
 use App\Models\TicketActivityModel;
@@ -247,7 +248,17 @@ final class TicketServiceTest extends CIUnitTestCase
         $this->assertSame(self::POLICY_ID, $row['sla_policy_id']);
         $this->assertSame(SlaPolicy::PRIORITY_URGENT, $row['priority']);
         $this->assertSame('Akun terkunci', $row['subject']);
-        $this->assertSame(1, preg_match('/^TKT-\d{6}-[0-9A-F]{6}$/', $row['ticket_number']));
+        $this->assertSame(sprintf('HC-%s-000001', date('Y')), $row['ticket_number']);
+    }
+
+    public function testTicketNumberContinuesFromLastNumberOfTheYear(): void
+    {
+        $this->categories->method('find')->willReturn($this->category());
+        $this->tickets->method('lastNumberInYear')->willReturn(sprintf('HC-%s-000041', date('Y')));
+
+        $this->createAsSelf();
+
+        $this->assertSame(sprintf('HC-%s-000042', date('Y')), $this->inserted[0]['ticket_number']);
     }
 
     // --- Pemohon: diri sendiri dan atas nama orang lain -------------------
@@ -468,6 +479,26 @@ final class TicketServiceTest extends CIUnitTestCase
         $this->service()->changeStatus('t1', TicketStatus::InProgress, 'u1');
     }
 
+    public function testPicCandidatesAreAdminsWhoCanAccessTheTicket(): void
+    {
+        $admin = static fn (string $id): array => ['id' => $id, 'name' => 'User ' . $id, 'employee_no' => $id];
+
+        $this->users->method('withPermission')->willReturnCallback(
+            static fn (string $slug): array => $slug === PermissionModel::ADMIN_TICKETS_VIEW_ALL
+                ? [$admin('u1')]
+                : [$admin('u1'), $admin('u2'), $admin('u3')],
+        );
+        $this->users->method('find')->willReturnCallback(static fn (string $id): User => new User(['id' => $id]));
+        $this->access->method('effectiveCategoryIds')->willReturnCallback(
+            static fn (User $user): array => $user->id === 'u2' ? [self::CATEGORY_ID] : [],
+        );
+
+        $candidates = $this->service()->picCandidates(['request_category_id' => self::CATEGORY_ID]);
+
+        // u1 lihat-semua, u2 punya akses kategori tiket, u3 tidak punya akses sama sekali
+        $this->assertSame(['u1', 'u2'], array_column($candidates, 'id'));
+    }
+
     public function testAssignRejectsUserThatIsNotACandidate(): void
     {
         $this->users->method('withPermission')->willReturn([['id' => 'u9', 'name' => 'X', 'employee_no' => '9']]);
@@ -579,6 +610,68 @@ final class TicketServiceTest extends CIUnitTestCase
     }
 
     // --- Daftar ------------------------------------------------------------
+
+    public function testNormalizeFiltersKeepsOnlyValidValues(): void
+    {
+        $uuid = '01936b2a-1c2d-7e3f-8a4b-5c6d7e8f9a0b';
+
+        $filters = $this->service()->normalizeFilters([
+            'q'          => '  akun  ',
+            'status'     => ['OPEN', 'BUKAN_STATUS', ''],
+            'category'   => [$uuid, "1' OR '1'='1"],
+            'priority'   => ['urgent', 'p9'],
+            'pic'        => $uuid,
+            'unassigned' => '1',
+            'tab'        => 'expiring',
+            'view'       => 'kanban',
+        ]);
+
+        $this->assertSame([
+            'keyword'    => 'akun',
+            'statuses'   => ['OPEN'],
+            'categories' => [$uuid],
+            'priorities' => ['urgent'],
+            'pics'       => [$uuid],
+            'unassigned' => true,
+            'tab'        => 'expiring',
+            'view'       => 'kanban',
+        ], $filters);
+    }
+
+    public function testBoardHasOneColumnPerBoardStatusGroupWithSlaRemaining(): void
+    {
+        $this->users->method('find')->willReturn(new User(['id' => 'u1']));
+        $this->access->method('effectiveCategoryIds')->willReturn([]);
+        $this->tickets->method('visibleTo')->willReturnSelf();
+        $this->tickets->method('boardColumn')->willReturn(['total' => 0, 'tickets' => []]);
+
+        $board = $this->service()->board($this->actor(), true, null, $this->service()->normalizeFilters([]));
+
+        $this->assertSame(['open', 'progress', 'waiting', 'escalated', 'resolved', 'closed'], array_column($board, 'key'));
+        $this->assertSame(['OPEN', 'REOPENED'], $board[0]['statuses']);
+        $this->assertSame(0, $board[0]['total']);
+    }
+
+    public function testNormalizeFiltersDefaultsToAllTabAndNoFilters(): void
+    {
+        $filters = $this->service()->normalizeFilters(['tab' => 'hack', 'unassigned' => 'yes']);
+
+        $this->assertSame('all', $filters['tab']);
+        $this->assertFalse($filters['unassigned']);
+        $this->assertSame([], $filters['statuses']);
+    }
+
+    public function testTabCountsAskTheModelOncePerTab(): void
+    {
+        $this->users->method('find')->willReturn(new User(['id' => 'u1']));
+        $this->access->method('effectiveCategoryIds')->willReturn([]);
+        $this->tickets->method('visibleTo')->willReturnSelf();
+        $this->tickets->expects($this->exactly(4))->method('countAllResults')->willReturnOnConsecutiveCalls(10, 4, 3, 1);
+
+        $counts = $this->service()->tabCounts($this->actor(), true, null, $this->service()->normalizeFilters([]));
+
+        $this->assertSame(['all' => 10, 'open' => 4, 'progress' => 3, 'expiring' => 1], $counts);
+    }
 
     public function testPaginateVisibleUsesEffectiveCategoriesAndViewAllFlag(): void
     {

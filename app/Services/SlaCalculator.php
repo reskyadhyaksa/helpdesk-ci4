@@ -51,6 +51,36 @@ class SlaCalculator
     }
 
     /**
+     * Menit SLA yang berjalan dari $from ke $to, dengan aturan hari dan jam yang sama seperti dueAt().
+     * Negatif bila $to lebih awal dari $from (mis. sisa waktu ke batas yang sudah lewat).
+     *
+     * @param array<int, array{is_off: bool, start: ?string, end: ?string}> $schedule
+     * @param list<string>                                                  $holidayDates
+     */
+    public function workingMinutesBetween(DateTimeImmutable $from, DateTimeImmutable $to, SlaPolicy $policy, array $schedule, array $holidayDates): int
+    {
+        if ($to < $from) {
+            return -$this->workingMinutesBetween($to, $from, $policy, $schedule, $holidayDates);
+        }
+
+        $total = 0;
+        $day   = $from->setTime(0, 0);
+
+        for ($i = 0; $day < $to && $i < self::MAX_DAYS; $i++) {
+            $window = $this->windowFor($day, $policy, $schedule, $holidayDates);
+
+            if ($window !== null) {
+                $seconds = min($window[1], $to)->getTimestamp() - max($window[0], $from)->getTimestamp();
+                $total  += max(intdiv($seconds, 60), 0);
+            }
+
+            $day = $day->modify('+1 day');
+        }
+
+        return $total;
+    }
+
+    /**
      * @return array{0: DateTimeImmutable, 1: DateTimeImmutable}|null jendela hitung hari itu; null = hari dilewati
      */
     private function windowFor(DateTimeImmutable $day, SlaPolicy $policy, array $schedule, array $holidayDates): ?array

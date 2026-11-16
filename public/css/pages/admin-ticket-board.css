@@ -1,0 +1,230 @@
+/* Papan Kanban daftar tiket admin (admin/tickets/_board). Kolom berbingkai di atas latar halaman, kartu putih yang
+   terangkat saat disorot. Grid membungkus ke baris berikutnya (tanpa gulir mendatar) bila lebar tidak cukup. */
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16.5rem, 1fr));
+  align-items: start;
+  gap: 1rem;
+}
+
+.board-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0.7rem;
+  border: 1px solid #dbe2ea;
+  border-radius: 1.1rem;
+  background-color: #eef2f7;
+}
+
+.board-column-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.25rem 0.4rem 0.65rem;
+}
+
+.board-column-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--bulma-text-strong);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Titik warna status: pelengkap label, bukan satu-satunya pembeda */
+.board-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background-color: #64748b;
+}
+
+.board-dot.is-info {
+  background-color: #0284c7;
+}
+
+.board-dot.is-link {
+  background-color: #1d4ed8;
+}
+
+.board-dot.is-warning {
+  background-color: #d97706;
+}
+
+.board-dot.is-danger {
+  background-color: #dc2626;
+}
+
+.board-dot.is-success {
+  background-color: #16a34a;
+}
+
+.board-count {
+  min-width: 1.7rem;
+  padding: 0.05rem 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background-color: #fff;
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.board-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-height: 4rem;
+  max-height: calc(100vh - 24rem);
+  padding: 0.15rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.board-empty {
+  padding: 1.25rem 0.5rem;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 0.9rem;
+  color: #64748b;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.board-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.9rem;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.board-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 22px -12px rgb(15 23 42 / 0.4);
+  transform: translateY(-2px);
+}
+
+.board-card-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.8rem 0.85rem 0.7rem;
+  border-radius: 0.9rem;
+  color: inherit;
+}
+
+.board-card-link:focus-visible {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: 2px;
+}
+
+.board-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.board-no {
+  color: #1d4ed8;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.board-top .priority-pill {
+  padding: 0.15rem 0.6rem;
+  font-size: 0.7rem;
+}
+
+.board-title {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--bulma-text-strong);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.board-tags,
+.board-sla {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.5rem;
+}
+
+.board-sla small {
+  color: #64748b;
+  font-size: 0.72rem;
+}
+
+.board-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.board-person {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  color: #475569;
+  font-size: 0.78rem;
+}
+
+.board-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-avatar.is-sm {
+  width: 1.7rem;
+  height: 1.7rem;
+  font-size: 0.62rem;
+}
+
+.table-avatar.is-empty {
+  border: 1.5px dashed #94a3b8;
+  background-color: transparent;
+  color: #64748b;
+}
+
+.board-more {
+  margin-top: 0.6rem;
+  padding: 0.4rem;
+  border-radius: 0.6rem;
+  color: #1d4ed8;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.board-more:hover {
+  background-color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board-card {
+    transition: none;
+  }
+
+  .board-card:hover {
+    transform: none;
+  }
+}

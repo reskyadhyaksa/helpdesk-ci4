@@ -53,9 +53,12 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'au
     // Halaman kerangka: cukup gerbang admin.access. Tambah permission per halaman saat fiturnya dibuat.
     $routes->get('tickets', 'TicketController::index', ['as' => 'admin.tickets.index']);
     $routes->get('tickets/mine', 'TicketController::mine', ['as' => 'admin.tickets.mine']);
+    $routes->get('tickets/new', 'TicketController::new', ['as' => 'admin.tickets.new', 'filter' => 'auth:admin.tickets.create']);
+    $routes->post('tickets', 'TicketController::create', ['as' => 'admin.tickets.create', 'filter' => 'auth:admin.tickets.create']);
     $routes->get('tickets/(:uuid)', 'TicketController::show/$1', ['as' => 'admin.tickets.show']);
     $routes->post('tickets/(:uuid)/comments', 'TicketController::comment/$1', ['as' => 'admin.tickets.comment', 'filter' => 'auth:admin.tickets.comment']);
     $routes->get('tickets/attachments/(:uuid)', 'TicketController::attachment/$1', ['as' => 'admin.tickets.attachment']);
+    $routes->get('tickets/attachments/(:uuid)/preview', 'TicketController::preview/$1', ['as' => 'admin.tickets.attachment.preview']);
     $routes->post('tickets/(:uuid)/status', 'TicketController::updateStatus/$1', ['as' => 'admin.tickets.status', 'filter' => 'auth:admin.tickets.update']);
     $routes->post('tickets/(:uuid)/assign', 'TicketController::assign/$1', ['as' => 'admin.tickets.assign', 'filter' => 'auth:admin.tickets.assign']);
     $routes->get('faqs', 'FaqController::index', ['as' => 'admin.faqs.index']);

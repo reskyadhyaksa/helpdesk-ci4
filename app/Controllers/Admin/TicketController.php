@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Entities\TicketStatus;
 use App\Exceptions\BusinessException;
 use App\Models\PermissionModel;
+use App\Services\AttachmentService;
 use App\Services\TicketService;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\DownloadResponse;
@@ -23,18 +24,44 @@ class TicketController extends BaseController
         return $this->listing('admin/tickets/mine', lang('Admin.pages.myTickets.title'), TicketService::SCOPE_ASSIGNED);
     }
 
+    public function new(): string
+    {
+        return view('admin/tickets/new', [
+            'title'      => lang('Ticket.adminNewTitle'),
+            'categories' => service('tickets')->categoryOptions(),
+        ]);
+    }
+
+    public function create(): RedirectResponse
+    {
+        if (! $this->validate('adminTicket')) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        try {
+            $ticket = service('tickets')->create($this->validator->getValidated(), auth_user(), $this->request->getFileMultiple('attachments') ?? []);
+        } catch (BusinessException $e) {
+            return redirect()->back()->withInput()->with('danger', $e->getMessage());
+        }
+
+        return $this->back($ticket['id'])->with('success', lang('Ticket.created'));
+    }
+
     public function show(string $id): string
     {
         $service = service('tickets');
         $ticket  = $service->find($id, auth_user(), $this->canViewAll()) ?? throw PageNotFoundException::forPageNotFound();
 
-        return view('admin/tickets/show', [
+        $data = [
             'title'      => $ticket['ticket_number'],
-            'ticket'     => $ticket,
+            'ticket'     => $service->withSlaRemaining([$ticket])[0],
             'activities' => $service->activities($id),
-            'pics'       => $service->pics(),
+            'pics'       => $service->picCandidates($ticket),
             'thread'     => service('ticketComments')->thread($id, true),
-        ]);
+        ];
+
+        // Modal di daftar tiket mengambil isi yang sama tanpa layout (js/pages/admin/ticket-modal.js)
+        return view($this->request->isAJAX() ? 'admin/tickets/_modal_card' : 'admin/tickets/show', $data);
     }
 
     public function comment(string $id): RedirectResponse
@@ -54,13 +81,15 @@ class TicketController extends BaseController
 
     public function attachment(string $id): DownloadResponse
     {
-        try {
-            $file = service('ticketComments')->attachmentForDownload($id, auth_user(), $this->canViewAll(), true);
-        } catch (BusinessException) {
-            throw PageNotFoundException::forPageNotFound();
-        }
+        return $this->fileResponse($id, inline: false);
+    }
 
-        return $this->response->download($file['path'], null)->setFileName($file['name'])->setHeader('X-Content-Type-Options', 'nosniff');
+    /**
+     * Tampilkan lampiran di browser tanpa mengunduh. Hanya jenis yang aman (AttachmentService::canPreview).
+     */
+    public function preview(string $id): DownloadResponse
+    {
+        return $this->fileResponse($id, inline: true);
     }
 
     public function updateStatus(string $id): RedirectResponse
@@ -91,9 +120,20 @@ class TicketController extends BaseController
 
     private function listing(string $view, string $title, ?string $scope): string
     {
-        $result = service('tickets')->paginateVisible(auth_user(), $this->canViewAll(), $scope);
+        $tickets  = service('tickets');
+        $filters  = $tickets->normalizeFilters($this->request->getGet());
+        $isKanban = $filters['view'] === 'kanban';
+        $result   = $isKanban ? ['tickets' => [], 'pager' => null] : $tickets->paginateVisible(auth_user(), $this->canViewAll(), $scope, $filters);
 
-        return view($view, ['title' => $title, 'tickets' => $result['tickets'], 'pager' => $result['pager']]);
+        return view($view, [
+            'title'     => $title,
+            'tickets'   => $result['tickets'],
+            'pager'     => $result['pager'],
+            'board'     => $isKanban ? $tickets->board(auth_user(), $this->canViewAll(), $scope, $filters) : [],
+            'filters'   => $filters,
+            'tabCounts' => $tickets->tabCounts(auth_user(), $this->canViewAll(), $scope, $filters),
+            'options'   => $tickets->filterOptions(),
+        ]);
     }
 
     /**
@@ -114,6 +154,35 @@ class TicketController extends BaseController
         }
 
         return $this->back($id)->with('success', $successMessage);
+    }
+
+    private function fileResponse(string $id, bool $inline): DownloadResponse
+    {
+        try {
+            $file = service('ticketComments')->attachmentForDownload($id, auth_user(), $this->canViewAll(), true);
+        } catch (BusinessException) {
+            throw PageNotFoundException::forPageNotFound();
+        }
+
+        $response = $this->response->download($file['path'], null)->setFileName($file['name'])->setHeader('X-Content-Type-Options', 'nosniff');
+
+        if (! $inline) {
+            return $response;
+        }
+
+        if (! AttachmentService::canPreview($file['type'])) {
+            throw PageNotFoundException::forPageNotFound();
+        }
+
+        $response->inline()->setContentType($file['type']);
+
+        // Gambar dan teks tidak butuh apa pun selain tampil: sandbox mencegah skrip dari berkas ini berjalan.
+        // PDF dibiarkan agar penampil bawaan browser bisa dipakai.
+        if ($file['type'] !== AttachmentService::TYPE_PDF) {
+            $response->setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+        }
+
+        return $response;
     }
 
     private function back(string $id): RedirectResponse

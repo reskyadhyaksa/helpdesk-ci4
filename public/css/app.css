@@ -26,6 +26,10 @@
 @import url("components/notifications.css");
 
 @import url("pages/home.css");
+@import url("pages/admin-ticket-detail.css");
+@import url("pages/admin-ticket-modal.css");
+@import url("pages/admin-ticket-board.css");
+@import url("pages/admin-ticket-list.css");
 @import url("pages/admin-roles.css");
 @import url("pages/admin-users.css");
 @import url("pages/admin-reports.css");
