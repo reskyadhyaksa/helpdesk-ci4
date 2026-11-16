@@ -9,6 +9,11 @@
 <?= $this->section('content') ?>
 <section class="section">
     <div class="container">
+        <?= component('breadcrumb', ['items' => [
+            ['label' => lang('Ticket.dashboard.title'), 'href' => url_to('user.dashboard'), 'icon' => 'home.svg'],
+            ['label' => lang('Ticket.historyTitle'), 'icon' => 'doc-search.svg'],
+        ]]) ?>
+
         <?= component('page_header', [
             'title'      => lang('Ticket.mineTitle'),
             'subtitle'   => lang('Ticket.mineSubtitle'),

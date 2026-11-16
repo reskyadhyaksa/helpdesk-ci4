@@ -3,7 +3,7 @@
 <head>
     <?= $this->include('partials/head') ?>
 </head>
-<body>
+<body class="site-body">
     <?= $this->include('partials/navbar') ?>
     <?= $this->include('partials/flash') ?>
 

@@ -45,6 +45,21 @@ enum TicketStatus: string
         return $this->allowedTransitions() === [];
     }
 
+    /**
+     * Pengelompokan status untuk kartu ringkasan dashboard user. CANCELLED tidak dihitung.
+     *
+     * @return array<string, list<self>>
+     */
+    public static function dashboardGroups(): array
+    {
+        return [
+            'open'          => [self::Open],
+            'progress'      => [self::InProgress, self::OnHold, self::Escalated, self::Reopened],
+            'need_response' => [self::NeedResponse],
+            'done'          => [self::Resolved, self::Closed],
+        ];
+    }
+
     public function label(): string
     {
         return lang('Ticket.status.' . $this->value);

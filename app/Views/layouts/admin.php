@@ -9,10 +9,6 @@
         <?= $this->include('partials/admin_sidebar') ?>
 
         <div class="admin-main">
-            <div class="notif-floating">
-                <?= $this->include('partials/notification_bell') ?>
-            </div>
-
             <?= $this->include('partials/flash') ?>
 
             <main>

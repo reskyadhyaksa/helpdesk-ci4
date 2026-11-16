@@ -53,6 +53,18 @@ class UserNotificationModel extends Model
         return $this->db->affectedRows() === 1;
     }
 
+    /**
+     * Menghapus notifikasi yang sudah dibaca sebelum $readBefore (retensi). Yang belum dibaca tidak tersentuh.
+     *
+     * @return int jumlah baris yang dihapus
+     */
+    public function deleteReadBefore(string $readBefore): int
+    {
+        $this->builder()->where('read_at IS NOT NULL', null, false)->where('read_at <', $readBefore)->delete();
+
+        return $this->db->affectedRows();
+    }
+
     public function markAllRead(string $userId): void
     {
         $this->builder()->where('user_id', $userId)->where('read_at IS NULL', null, false)->update(['read_at' => date('Y-m-d H:i:s')]);

@@ -70,8 +70,13 @@ return [
         'saved'  => 'Pengaturan berhasil disimpan. Berlaku langsung tanpa perlu login ulang.',
         'groups' => [
             'attachment'   => 'Lampiran Tiket',
-            'notification' => 'Kanal Notifikasi',
+            'notification' => 'Notifikasi',
             'sla'          => 'Peringatan SLA',
+        ],
+        'groupHints' => [
+            'attachment'   => 'Batas file yang boleh diunggah ke tiket dan berapa lama file disimpan.',
+            'notification' => 'Kanal pengiriman di luar aplikasi dan masa simpan notifikasi lonceng.',
+            'sla'          => 'Kapan PIC diberi tahu saat batas SLA mendekat atau terlewat.',
         ],
     ],
 

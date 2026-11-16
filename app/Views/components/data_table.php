@@ -19,6 +19,7 @@ use Config\Pager as PagerConfig;
  *   <?= component_end() ?>
  *
  * Tanpa baris (slot kosong) → keadaan kosong tampil di dalam tabel.
+ * Dengan 'flat' => true kartunya dilepas, untuk tabel yang sudah berada di dalam kartu lain (dashboard).
  *
  * @var list<string|array{label: string, align?: 'left'|'center'|'right'}> $columns
  * @var string      $slot          baris <tr>
@@ -27,7 +28,9 @@ use Config\Pager as PagerConfig;
  * @var string|null $emptyMessage
  * @var Pager|null  $pager         tampilkan total + navigasi halaman
  * @var string|null $totalLabel    satuan di footer, mis. "pengguna"
+ * @var bool        $flat          tanpa kartu pembungkus
  */
+$flat ??= false;
 $slot ??= '';
 $emptyIcon ??= 'fa-inbox';
 $emptyTitle ??= null;
@@ -35,9 +38,10 @@ $emptyMessage ??= null;
 $pager ??= null;
 $totalLabel ??= 'data';
 
-$isEmpty = trim($slot) === '';
+// Komentar HTML diabaikan: di mode debug view() membungkus outputnya dengan <!-- DEBUG-VIEW ... -->
+$isEmpty = trim(preg_replace('/<!--.*?-->/s', '', $slot)) === '';
 ?>
-<div class="box p-0 admin-table-card">
+<div class="<?= $flat ? '' : 'box p-0' ?> admin-table-card">
     <div class="table-container">
         <table class="table is-fullwidth <?= $isEmpty ? '' : 'is-hoverable' ?>">
             <thead>
@@ -56,6 +60,7 @@ $isEmpty = trim($slot) === '';
                     <tr>
                         <td colspan="<?= count($columns) ?>">
                             <?= component('empty_state', [
+                                'illustration' => true,
                                 'icon' => $emptyIcon,
                                 'title' => $emptyTitle,
                                 'message' => $emptyMessage,

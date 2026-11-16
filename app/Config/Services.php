@@ -26,6 +26,7 @@ use App\Services\Auth\KeycloakAuthService;
 use App\Services\InAppNotificationService;
 use App\Services\MessageQueue;
 use App\Services\NotificationPusher;
+use App\Services\NotificationRetentionService;
 use App\Services\SlaAlertService;
 use App\Services\TicketNotifier;
 use App\Services\NotificationDispatcher;
@@ -175,6 +176,15 @@ class Services extends BaseService
         }
 
         return new AttachmentRetentionService(model(TicketAttachmentModel::class), static::attachments(), model(SystemParameterModel::class));
+    }
+
+    public static function notificationRetention(bool $getShared = true): NotificationRetentionService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('notificationRetention');
+        }
+
+        return new NotificationRetentionService(model(UserNotificationModel::class), model(SystemParameterModel::class));
     }
 
     public static function slaAlerts(bool $getShared = true): SlaAlertService

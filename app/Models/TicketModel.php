@@ -157,6 +157,58 @@ class TicketModel extends Model
     }
 
     /**
+     * Beberapa tiket terbaru dengan kategori dan PIC, tanpa paginasi.
+     *
+     * @return list<array>
+     */
+    public function latest(int $limit): array
+    {
+        return $this->selectWithNames()->orderBy('tickets.created_at', 'DESC')->findAll($limit);
+    }
+
+    /**
+     * Jumlah tiket per status. Pasang scope (visibleTo) sebelum memanggil ini.
+     *
+     * @return array<string, int> status => jumlah
+     */
+    public function statusCounts(): array
+    {
+        $rows = $this->select('tickets.status, COUNT(*) AS total')->groupBy('tickets.status')->findAll();
+
+        return array_map('intval', array_column($rows, 'total', 'status'));
+    }
+
+    /**
+     * Pencarian dan filter daftar tiket; nilai kosong diabaikan. Pasang sebelum latest()/paginateList().
+     *
+     * @param list<string> $statuses
+     * @param list<string> $categoryIds kategori utama; tiket di sub kategorinya ikut tercakup
+     */
+    public function filterBy(string $keyword, array $statuses, array $categoryIds): static
+    {
+        if ($keyword !== '') {
+            $this->groupStart()
+                ->like('tickets.ticket_number', $keyword)
+                ->orLike('tickets.subject', $keyword)
+                ->orLike('assignee.name', $keyword)
+                ->groupEnd();
+        }
+
+        if ($statuses !== []) {
+            $this->whereIn('tickets.status', $statuses);
+        }
+
+        if ($categoryIds !== []) {
+            $this->groupStart()
+                ->whereIn('tickets.request_category_id', $categoryIds)
+                ->orWhereIn('category.parent_id', $categoryIds)
+                ->groupEnd();
+        }
+
+        return $this;
+    }
+
+    /**
      * Satu tiket lengkap dengan nama kategori, PIC, dan pengaju. Pasang scope (visibleTo) sebelum memanggil ini.
      */
     public function findDetail(string $id): ?array
@@ -171,7 +223,7 @@ class TicketModel extends Model
     private function selectWithNames(): static
     {
         return $this->select('tickets.*, category.name AS category_name, parent.name AS parent_name, '
-                . 'assignee.name AS assignee_name, resolver.name AS resolver_name')
+                . 'assignee.name AS assignee_name, assignee.job_title AS assignee_job_title, resolver.name AS resolver_name')
             ->join('request_categories category', 'category.id = tickets.request_category_id')
             ->join('request_categories parent', 'parent.id = category.parent_id', 'left')
             ->join('users assignee', 'assignee.id = tickets.assignee_id', 'left')

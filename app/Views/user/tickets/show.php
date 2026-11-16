@@ -10,7 +10,11 @@
 <?= $this->section('content') ?>
 <section class="section">
     <div class="container">
-        <p class="mb-3"><a href="<?= url_to('user.tickets.index') ?>"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> <?= esc(lang('Ticket.mineTitle')) ?></a></p>
+        <?= component('breadcrumb', ['items' => [
+            ['label' => lang('Ticket.dashboard.title'), 'href' => url_to('user.dashboard'), 'icon' => 'home.svg'],
+            ['label' => lang('Ticket.historyTitle'), 'href' => url_to('user.tickets.index'), 'icon' => 'doc-search.svg'],
+            ['label' => $ticket['ticket_number']],
+        ]]) ?>
 
         <?= view('tickets/_detail', ['ticket' => $ticket, 'activities' => $activities]) ?>
 

@@ -66,16 +66,24 @@ class RequestCategoryModel extends Model
     /**
      * Tujuan tiket: kategori aktif yang tidak punya sub kategori (tiket menunjuk kategori paling spesifik).
      *
-     * @return list<array> id, name, parent_name; kategori utama diikuti subnya, urut nama
+     * SLA yang tampil sama dengan yang dipakai saat tiket dibuat: SLA kategori itu sendiri, atau milik kategori
+     * utamanya; kosong bila tidak ada atau tidak aktif.
+     *
+     * @return list<array> id, parent_id, name, description, parent_name, sla_priority, sla_response_minutes,
+     *                     sla_resolution_minutes; kategori utama diikuti subnya, urut nama
      */
     public function selectableForTicket(): array
     {
-        $this->select('request_categories.id, request_categories.name, parent.name AS parent_name')
+        $this->orderedUnderParent()
+            ->join('sla_policies', 'sla_policies.id = COALESCE(request_categories.sla_policy_id, parent.sla_policy_id) AND sla_policies.is_active = 1', 'left', false)
+            ->select('request_categories.id, request_categories.parent_id, request_categories.name, request_categories.description, parent.name AS parent_name, '
+                . 'sla_policies.priority AS sla_priority, sla_policies.response_minutes AS sla_response_minutes, '
+                . 'sla_policies.resolution_minutes AS sla_resolution_minutes')
             ->where('request_categories.is_active', 1)
             ->groupStart()->where('parent.id IS NULL', null, false)->orWhere('parent.is_active', 1)->groupEnd()
             ->where('NOT EXISTS (SELECT 1 FROM request_categories child WHERE child.parent_id = request_categories.id)', null, false);
 
-        return $this->orderedUnderParent()->findAll();
+        return $this->findAll();
     }
 
     public function hasTickets(string $id): bool

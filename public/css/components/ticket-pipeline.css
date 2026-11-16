@@ -1,0 +1,250 @@
+/*
+ * Alur tiket (components/ticket_pipeline): satu panel dengan bar proporsi dan empat langkah yang tersambung garis.
+ * Warna langkah mengikuti .is-info / .is-warning / .is-purple / .is-success.
+ */
+
+.ticket-pipeline {
+  --pl-ink: #1d4ed8;
+  --pl-soft: #dbeafe;
+  --pl-fill: #3b82f6;
+
+  position: relative;
+  margin-bottom: 1.5rem;
+  padding: 1.1rem 1.5rem 1.15rem;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 100% 0, rgb(59 130 246 / 0.08), transparent 18rem),
+    #fff;
+}
+
+.ticket-pipeline-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.ticket-pipeline-title {
+  color: var(--bulma-text-strong);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.ticket-pipeline-hint {
+  margin-top: 0.15rem;
+  color: #64748b;
+  font-size: 0.88rem;
+}
+
+.ticket-pipeline-total {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.ticket-pipeline-total strong {
+  color: var(--bulma-text-strong);
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Bar proporsi: lebar tiap segmen = jumlah tiket di langkah itu */
+.ticket-pipeline-bar {
+  display: flex;
+  gap: 3px;
+  height: 0.5rem;
+  margin-bottom: 1.1rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background-color: #f1f5f9;
+}
+
+.ticket-pipeline-bar.is-empty {
+  background: repeating-linear-gradient(135deg, #f1f5f9 0 8px, #e8edf3 8px 16px);
+}
+
+.ticket-pipeline-seg {
+  --pl-fill: #3b82f6;
+
+  min-width: 0.5rem;
+  border-radius: 999px;
+  background-color: var(--pl-fill);
+}
+
+.ticket-pipeline-seg.is-warning { --pl-fill: #f59e0b; }
+.ticket-pipeline-seg.is-purple { --pl-fill: #a855f7; }
+.ticket-pipeline-seg.is-success { --pl-fill: #22c55e; }
+
+/* Langkah: simpul bernomor tersambung garis ke langkah berikutnya */
+.ticket-pipeline-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ticket-pipeline-step {
+  --pl-ink: #1d4ed8;
+  --pl-soft: #dbeafe;
+  --pl-fill: #3b82f6;
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.1rem 1rem;
+}
+
+.ticket-pipeline-step:first-child {
+  padding-left: 0;
+}
+
+.ticket-pipeline-step.is-warning { --pl-ink: #b45309; --pl-soft: #fef3c7; --pl-fill: #f59e0b; }
+.ticket-pipeline-step.is-purple { --pl-ink: #7e22ce; --pl-soft: #f3e8ff; --pl-fill: #a855f7; }
+.ticket-pipeline-step.is-success { --pl-ink: #15803d; --pl-soft: #dcfce7; --pl-fill: #22c55e; }
+
+/* Pemisah tipis antar langkah */
+.ticket-pipeline-step:not(:first-child) {
+  border-left: 1px solid #e8edf3;
+}
+
+.ticket-pipeline-node {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  border: 2px solid var(--pl-fill);
+  border-radius: 50%;
+  background-color: var(--pl-soft);
+  color: var(--pl-ink);
+  font-size: 1rem;
+}
+
+.ticket-pipeline-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.ticket-pipeline-label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #334155;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.ticket-pipeline-no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background-color: var(--pl-soft);
+  color: var(--pl-ink);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.ticket-pipeline-value {
+  color: var(--bulma-text-strong);
+  flex-shrink: 0;
+  font-size: 2.1rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.ticket-pipeline-caption {
+  color: #64748b;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+/* Langkah tanpa tiket diredupkan agar mata tertuju ke yang berisi */
+.ticket-pipeline-step.is-zero .ticket-pipeline-node {
+  border-color: #cbd5e1;
+  background-color: #f8fafc;
+  color: #94a3b8;
+}
+
+.ticket-pipeline-step.is-zero .ticket-pipeline-value {
+  color: #94a3b8;
+}
+
+/* Perlu tindakan user: simpul berdenyut dan ada penanda */
+.ticket-pipeline-step.is-alert .ticket-pipeline-node {
+  background-color: var(--pl-fill);
+  color: #fff;
+  animation: pipeline-pulse 2s ease-out infinite;
+}
+
+.ticket-pipeline-flag {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 0.35rem;
+  margin-top: 0.2rem;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  background-color: var(--pl-soft);
+  color: var(--pl-ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+@keyframes pipeline-pulse {
+  0% { box-shadow: 0 0 0 0 rgb(168 85 247 / 0.45); }
+  70%, 100% { box-shadow: 0 0 0 0.7rem rgb(168 85 247 / 0); }
+}
+
+@media (max-width: 1023px) {
+  .ticket-pipeline-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 0;
+  }
+
+  .ticket-pipeline-step:nth-child(odd) {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .ticket-pipeline {
+    padding: 1rem;
+  }
+
+  .ticket-pipeline-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-pipeline-step {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticket-pipeline-step.is-alert .ticket-pipeline-node {
+    animation: none;
+  }
+}

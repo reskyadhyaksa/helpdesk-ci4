@@ -21,6 +21,20 @@ class AttachmentService
     }
 
     /**
+     * Batas lampiran untuk ditampilkan di form.
+     *
+     * @return array{extensions: list<string>, max_mb: int, max_files: int}
+     */
+    public function limits(): array
+    {
+        return [
+            'extensions' => $this->allowedExtensions(),
+            'max_mb'     => $this->parameters->int(SystemParameterModel::ATTACHMENT_MAX_SIZE_MB),
+            'max_files'  => $this->parameters->int(SystemParameterModel::ATTACHMENT_MAX_FILES),
+        ];
+    }
+
+    /**
      * Memvalidasi semua file dari satu form dan membuang input file yang dikosongkan pengguna.
      *
      * @param array<int, mixed> $files

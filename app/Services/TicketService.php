@@ -23,7 +23,10 @@ class TicketService
     public const SCOPE_MINE     = 'mine';
     public const SCOPE_ASSIGNED = 'assigned';
 
-    private const NO_NOTIFICATIONS = ['outbox' => [], 'inApp' => []];
+    public const DASHBOARD_TICKET_LIMIT = 5;
+    private const DASHBOARD_SLA_LIMIT    = 3;
+
+    private const NO_NOTIFICATIONS =['outbox' => [], 'inApp' => []];
 
     // Peran PIC → kolom tiket dan nama aktivitas
     private const PIC_ROLES = [
@@ -208,6 +211,66 @@ class TicketService
      */
     public function paginateVisible(array $viewer, bool $canViewAll, ?string $scope = null): array
     {
+        $this->applyScope($viewer, $canViewAll, $scope);
+
+        return ['tickets' => $this->tickets->paginateList(), 'pager' => $this->tickets->pager];
+    }
+
+    /**
+     * Jumlah tiket milik user per kelompok status dashboard (lihat TicketStatus::dashboardGroups()).
+     *
+     * @param array{id: string, employee_no?: string} $viewer
+     *
+     * @return array<string, int> kelompok => jumlah
+     */
+    public function statusSummary(array $viewer): array
+    {
+        $this->applyScope($viewer, false, self::SCOPE_MINE);
+        $counts = $this->tickets->statusCounts();
+
+        $summary = [];
+
+        foreach (TicketStatus::dashboardGroups() as $group => $statuses) {
+            $summary[$group] = 0;
+
+            foreach ($statuses as $status) {
+                $summary[$group] += $counts[$status->value] ?? 0;
+            }
+        }
+
+        return $summary;
+    }
+
+    /**
+     * Tiket terbaru milik user untuk dashboard, bisa dicari dan difilter.
+     *
+     * @param array{id: string, employee_no?: string}                              $viewer
+     * @param array{keyword: string, status: list<string>, category: list<string>} $filters
+     *
+     * @return list<array>
+     */
+    public function recentFor(array $viewer, array $filters): array
+    {
+        $this->applyScope($viewer, false, self::SCOPE_MINE);
+        $this->tickets->filterBy($filters['keyword'], $filters['status'], $filters['category']);
+
+        return $this->tickets->latest(self::DASHBOARD_TICKET_LIMIT);
+    }
+
+    /**
+     * Beberapa kategori beserta batas SLA-nya, untuk kartu "Standar SLA" di dashboard.
+     *
+     * @return list<array> baris seperti categoryOptions(), hanya yang punya SLA
+     */
+    public function slaStandards(): array
+    {
+        $withSla = array_filter($this->categories->selectableForTicket(), static fn (array $category): bool => $category['sla_priority'] !== null);
+
+        return array_slice(array_values($withSla), 0, self::DASHBOARD_SLA_LIMIT);
+    }
+
+    private function applyScope(array $viewer, bool $canViewAll, ?string $scope): void
+    {
         $this->tickets->visibleTo($viewer, $this->categoryIdsFor($viewer['id']), $canViewAll);
 
         if ($scope === self::SCOPE_MINE) {
@@ -217,8 +280,6 @@ class TicketService
         if ($scope === self::SCOPE_ASSIGNED) {
             $this->tickets->onlyAssignedTo($viewer['id']);
         }
-
-        return ['tickets' => $this->tickets->paginateList(), 'pager' => $this->tickets->pager];
     }
 
     /**

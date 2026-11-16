@@ -34,7 +34,11 @@ $picForms = [
 
 <?= $this->section('content') ?>
 <section class="section">
-    <p class="mb-3"><a href="<?= url_to('admin.tickets.index') ?>"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Semua tiket</a></p>
+    <?= component('page_header', [
+        'title'    => lang('Ticket.detailTitle'),
+        'subtitle' => lang('Ticket.detailSubtitle'),
+        'back'     => ['href' => url_to('admin.tickets.index'), 'label' => 'Semua tiket'],
+    ]) ?>
 
     <?= view('tickets/_detail', ['ticket' => $ticket, 'activities' => $activities]) ?>
 

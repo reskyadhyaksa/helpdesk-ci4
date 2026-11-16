@@ -1,0 +1,341 @@
+/*
+ * Halaman System Parameters (views/admin/settings/index.php, js/pages/admin/settings.js):
+ * bar tab kelompok di atas, kartu per kelompok, baris pengaturan (teks di kiri, isian di kanan), dan bilah simpan.
+ */
+
+.settings-layout {
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* Bar tab horizontal di atas kartu: lompat ke kelompok; menempel di atas saat halaman digulir */
+.settings-nav {
+  position: sticky;
+  top: 0.75rem;
+  z-index: 6;
+  padding: 0.35rem;
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  background-color: #fff;
+  box-shadow: 0 6px 18px -10px rgb(15 23 42 / 0.2);
+}
+
+.settings-nav ul {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.settings-nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.75rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.75rem;
+  color: #475569;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.settings-nav a:hover,
+.settings-nav a:focus-visible {
+  background-color: #f1f5f9;
+  color: var(--bulma-text-strong);
+}
+
+.settings-nav a.is-active {
+  background-color: var(--app-fill-blue);
+  color: var(--bulma-primary);
+  box-shadow: inset 0 0 0 1px var(--app-stroke-blue);
+}
+
+.settings-nav-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.5rem;
+  background-color: #fff;
+  box-shadow: inset 0 0 0 1px #e2e8f0;
+  font-size: 0.8rem;
+}
+
+.settings-nav-count {
+  margin-left: auto;
+  min-width: 1.4rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background-color: #e2e8f0;
+  color: #334155;
+  font-size: 0.7rem;
+  line-height: 1.4rem;
+  text-align: center;
+}
+
+.settings-main {
+  display: grid;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+.settings-card {
+  margin-bottom: 0;
+  overflow: hidden;
+  scroll-margin-top: 1.5rem;
+}
+
+.settings-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #eef0f4;
+  background-color: var(--app-fill-blue);
+}
+
+.settings-card-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--app-stroke-blue);
+  border-radius: 0.8rem;
+  background-color: #fff;
+  color: var(--bulma-primary);
+}
+
+.settings-card-title {
+  color: var(--bulma-text-strong);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.settings-card-head p {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.settings-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 1rem 1.5rem 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.65rem;
+  background-color: #f1f5f9;
+  color: #475569;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.settings-note i {
+  margin-top: 0.2rem;
+  color: #64748b;
+}
+
+/* Judul subbagian di dalam kartu */
+.settings-section {
+  padding: 1.1rem 1.5rem 0.25rem;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Satu parameter: teks di kiri, isian di kanan */
+.settings-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(12rem, 18rem);
+  gap: 0.5rem 2rem;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #eef0f4;
+}
+
+.settings-row:last-child {
+  border-bottom: 0;
+}
+
+.settings-row-label {
+  display: block;
+  color: var(--bulma-text-strong);
+  font-weight: 600;
+}
+
+.settings-row-help {
+  margin-top: 0.15rem;
+  color: #64748b;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.settings-row-control.is-wide {
+  grid-column: 1 / -1;
+}
+
+.settings-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.settings-input-group .input {
+  max-width: 8rem;
+  min-height: 2.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.settings-row-control .input {
+  min-height: 2.75rem;
+}
+
+.settings-unit {
+  color: #475569;
+  font-weight: 600;
+}
+
+.settings-meta {
+  margin-top: 0.35rem;
+  color: #64748b;
+  font-size: 0.75rem;
+}
+
+/* Saklar Aktif/Nonaktif dari kotak centang: kotak asli tetap bisa difokus keyboard */
+.settings-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+}
+
+.settings-switch input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.settings-switch-track {
+  position: relative;
+  flex-shrink: 0;
+  width: 2.9rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  background-color: #cbd5e1;
+  transition: background-color 0.2s ease;
+}
+
+.settings-switch-track::after {
+  content: "";
+  position: absolute;
+  top: 0.2rem;
+  left: 0.2rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.3);
+  transition: transform 0.2s ease;
+}
+
+.settings-switch input:checked ~ .settings-switch-track {
+  background-color: hsl(153deg 50% 30%);
+}
+
+.settings-switch input:checked ~ .settings-switch-track::after {
+  transform: translateX(1.3rem);
+}
+
+.settings-switch:has(input:focus-visible) .settings-switch-track {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: 2px;
+}
+
+.settings-switch-text {
+  min-width: 4.5rem;
+  color: #475569;
+  font-weight: 600;
+}
+
+.settings-switch-text .is-on,
+.settings-switch input:checked ~ .settings-switch-text .is-off {
+  display: none;
+}
+
+.settings-switch input:checked ~ .settings-switch-text .is-on {
+  display: inline;
+  color: hsl(153deg 50% 26%);
+}
+
+/* Bilah simpan: menempel di bawah layar, berubah warna sesuai keadaan (bersih / ada perubahan / ada isian salah) */
+.settings-savebar {
+  position: sticky;
+  bottom: 1rem;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem 0.75rem 1.25rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  background-color: #fff;
+  box-shadow: 0 12px 32px -12px rgb(15 23 42 / 0.25);
+}
+
+.settings-savebar-text {
+  display: flex;
+  flex: 1 1 14rem;
+  align-items: center;
+  gap: 0.6rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+.settings-savebar.is-dirty {
+  border-color: #fde68a;
+  background-color: #fffbeb;
+}
+
+.settings-savebar.is-dirty .settings-savebar-text {
+  color: #78350f;
+}
+
+.settings-savebar.is-invalid {
+  border-color: #fecaca;
+  background-color: #fef2f2;
+}
+
+.settings-savebar.is-invalid .settings-savebar-text {
+  color: var(--app-danger-ink);
+}
+
+.settings-savebar .button {
+  margin: 0;
+}
+
+/* Tablet dan ponsel: baris pengaturan bertumpuk (teks di atas, isian di bawah) */
+@media (max-width: 1023px) {
+  .settings-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-switch-track,
+  .settings-switch-track::after {
+    transition: none;
+  }
+}

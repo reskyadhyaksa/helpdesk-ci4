@@ -68,6 +68,7 @@ class TicketController extends BaseController
         return view('user/tickets/new', [
             'title'      => lang('Ticket.newTitle'),
             'categories' => service('tickets')->categoryOptions(),
+            'limits'     => service('attachments')->limits(),
         ]);
     }
 
