@@ -3,6 +3,7 @@
 namespace App\Controllers\User;
 
 use App\Controllers\BaseController;
+use App\Controllers\Traits\ServesAttachments;
 use App\Exceptions\BusinessException;
 use App\Services\TicketService;
 use CodeIgniter\Exceptions\PageNotFoundException;
@@ -11,6 +12,8 @@ use CodeIgniter\HTTP\RedirectResponse;
 
 class TicketController extends BaseController
 {
+    use ServesAttachments;
+
     public function index(): string
     {
         $result = service('tickets')->paginateVisible(auth_user(), false, TicketService::SCOPE_MINE);
@@ -29,7 +32,7 @@ class TicketController extends BaseController
 
         return view('user/tickets/show', [
             'title'      => $ticket['ticket_number'],
-            'ticket'     => $ticket,
+            'ticket'     => $service->withSlaRemaining([$ticket])[0],
             'activities' => $service->activities($id),
             'thread'     => service('ticketComments')->thread($id, false),
         ]);
@@ -54,13 +57,15 @@ class TicketController extends BaseController
 
     public function attachment(string $id): DownloadResponse
     {
-        try {
-            $file = service('ticketComments')->attachmentForDownload($id, auth_user(), false, false);
-        } catch (BusinessException) {
-            throw PageNotFoundException::forPageNotFound();
-        }
+        return $this->fileResponse($id, inline: false);
+    }
 
-        return $this->response->download($file['path'], null)->setFileName($file['name'])->setHeader('X-Content-Type-Options', 'nosniff');
+    /**
+     * Tampilkan lampiran di browser tanpa mengunduh. Hanya jenis yang aman (AttachmentService::canPreview).
+     */
+    public function preview(string $id): DownloadResponse
+    {
+        return $this->fileResponse($id, inline: true);
     }
 
     public function new(): string
@@ -68,6 +73,7 @@ class TicketController extends BaseController
         return view('user/tickets/new', [
             'title'      => lang('Ticket.newTitle'),
             'categories' => service('tickets')->categoryOptions(),
+            'limits'     => service('attachments')->limits(),
         ]);
     }
 
@@ -84,5 +90,16 @@ class TicketController extends BaseController
         }
 
         return redirect()->to(url_to('user.tickets.index'))->with('success', lang('Ticket.created'));
+    }
+
+    private function fileResponse(string $id, bool $inline): DownloadResponse
+    {
+        try {
+            $file = service('ticketComments')->attachmentForDownload($id, auth_user(), false, false);
+        } catch (BusinessException) {
+            throw PageNotFoundException::forPageNotFound();
+        }
+
+        return $this->attachmentResponse($file, $inline);
     }
 }

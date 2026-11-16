@@ -11,17 +11,19 @@ class HolidayModel extends Model
     use Auditable;
     use UsesUuidV7;
 
-    protected $table            = 'holidays';
-    protected $primaryKey       = 'id';
+    protected $table = 'holidays';
+    protected $primaryKey = 'id';
     protected $useAutoIncrement = false;
-    protected $returnType       = 'array';
-    protected $beforeInsert     = ['generateUuid'];
-    protected $allowedFields    = ['holiday_date', 'name', 'description', 'is_mass_leave'];
+    protected $returnType = 'array';
+    protected $beforeInsert = ['generateUuid'];
+    protected $allowedFields = ['holiday_date', 'name', 'description', 'is_mass_leave'];
 
     protected $validationRules = [
-        'holiday_date'  => 'required|valid_date[Y-m-d]|is_unique[holidays.holiday_date,id,{id}]',
-        'name'          => 'required|max_length[150]',
-        'description'   => 'permit_empty|max_length[255]',
+        // CodeIgniter 4.7 mewajibkan aturan untuk field placeholder {id} di bawah. Id berupa UUID, bukan angka.
+        'id' => 'permit_empty|exact_length[36]',
+        'holiday_date' => 'required|valid_date[Y-m-d]|is_unique[holidays.holiday_date,id,{id}]',
+        'name' => 'required|max_length[150]',
+        'description' => 'permit_empty|max_length[255]',
         'is_mass_leave' => 'in_list[0,1]',
     ];
 
@@ -30,8 +32,18 @@ class HolidayModel extends Model
     ];
 
     public const MONTHS = [
-        1  => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni',
-        7  => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+        1 => 'Januari',
+        2 => 'Februari',
+        3 => 'Maret',
+        4 => 'April',
+        5 => 'Mei',
+        6 => 'Juni',
+        7 => 'Juli',
+        8 => 'Agustus',
+        9 => 'September',
+        10 => 'Oktober',
+        11 => 'November',
+        12 => 'Desember',
     ];
 
     /**

@@ -47,13 +47,15 @@ class TicketNotifier
     }
 
     /**
-     * Komentar hanya menghasilkan notifikasi lonceng.
+     * Komentar hanya menghasilkan notifikasi lonceng. $mentionedIds = user yang disebut (@) di komentar.
+     *
+     * @param list<string> $mentionedIds
      *
      * @return Pending
      */
-    public function forComment(array $ticket, string $authorId, string $authorType, string $visibility): array
+    public function forComment(array $ticket, string $authorId, string $authorType, string $visibility, array $mentionedIds = []): array
     {
-        return ['outbox' => [], 'inApp' => $this->inApp->forComment($ticket, $authorId, $authorType, $visibility)];
+        return ['outbox' => [], 'inApp' => $this->inApp->forComment($ticket, $authorId, $authorType, $visibility, $mentionedIds)];
     }
 
     /**

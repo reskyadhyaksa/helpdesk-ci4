@@ -1,0 +1,334 @@
+/* Papan Kanban daftar tiket admin (admin/tickets/_board + js/pages/admin/ticket-board.js).
+   Permukaan datar dan lembut: kolom berlatar abu kebiruan tanpa garis tepi, kartu putih hanya dengan bayangan tipis.
+   Tanpa gradasi dan tanpa outline; keadaan seret-lepas dibedakan lewat warna latar. Satu kolom per kelompok status,
+   kartu bertumpuk ke bawah tapi melebar (tiga baris pendek), kolom membungkus di layar sempit (tanpa gulir mendatar). */
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
+  align-items: start;
+  gap: 1rem;
+}
+
+.board-lane {
+  --lane-tone: #64748b;
+
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0.75rem;
+  border-radius: 1.25rem;
+  background-color: #edf1f6;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.board-lane[data-lane="open"] {
+  --lane-tone: #0284c7;
+}
+
+.board-lane[data-lane="progress"] {
+  --lane-tone: #1d4ed8;
+}
+
+.board-lane[data-lane="waiting"] {
+  --lane-tone: #d97706;
+}
+
+.board-lane[data-lane="escalated"] {
+  --lane-tone: #dc2626;
+}
+
+.board-lane[data-lane="resolved"] {
+  --lane-tone: #16a34a;
+}
+
+/* ---- Kepala kolom ---- */
+.board-lane-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.15rem 0.4rem 0.65rem;
+}
+
+.board-lane-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--bulma-text-strong);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Titik warna status di judul kolom (label teks tetap ada, warna bukan satu-satunya pembeda) */
+.board-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background-color: var(--lane-tone);
+}
+
+.board-count {
+  min-width: 1.7rem;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.board-more {
+  margin-left: auto;
+  color: #1d4ed8;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.board-more:hover {
+  text-decoration: underline;
+}
+
+/* ---- Daftar kartu (menggulir sendiri bila panjang) ---- */
+.board-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-height: 4.5rem;
+  max-height: calc(100vh - 24rem);
+  padding: 0.15rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-width: thin;
+}
+
+.board-empty {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem 0.75rem;
+  border-radius: 1rem;
+  background-color: rgb(255 255 255 / 0.55);
+  color: #64748b;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+/* ---- Kartu: melebar, tiga baris ---- */
+.board-card {
+  border-radius: 1rem;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.06), 0 1px 1px rgb(15 23 42 / 0.03);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.board-card:hover {
+  box-shadow: 0 10px 24px -12px rgb(15 23 42 / 0.35);
+  transform: translateY(-2px);
+}
+
+.board-card.is-movable {
+  cursor: grab;
+}
+
+.board-card.is-movable:active {
+  cursor: grabbing;
+}
+
+.board-card.is-dragging {
+  opacity: 0.4;
+  transform: scale(0.97);
+}
+
+.board-card.is-moving {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* Tautan di dalam kartu tidak boleh menjadi "hantu seret" tautan bawaan browser: yang terseret adalah kartunya */
+.board-card-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.7rem 0.85rem 0.75rem;
+  border-radius: 1rem;
+  color: inherit;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.board-card-link:focus-visible {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: 2px;
+}
+
+/* Baris 1: nomor + prioritas di kiri, kondisi SLA di kanan */
+.board-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.5rem;
+}
+
+.board-no {
+  color: #1d4ed8;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.board-top .priority-pill {
+  padding: 0.1rem 0.55rem;
+  font-size: 0.68rem;
+}
+
+.board-sla {
+  display: inline-flex;
+  margin-left: auto;
+}
+
+/* Teks "SLA Limit" / "Terlambat ..." tidak dimuat di kartu: ringkas, lencana SLA sudah cukup */
+.board-sla small {
+  display: none;
+}
+
+.board-sla .sla-badge {
+  padding: 0.15rem 0.5rem;
+  font-size: 0.68rem;
+}
+
+/* Baris 2: judul */
+.board-title {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--bulma-text-strong);
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* Baris 3: kategori, pemohon, dan PIC sejajar */
+.board-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+}
+
+.board-foot .table-chip {
+  flex: 0 1 auto;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.board-person {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  color: #475569;
+  font-size: 0.78rem;
+}
+
+.board-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-avatar.is-sm {
+  flex-shrink: 0;
+  width: 1.7rem;
+  height: 1.7rem;
+  font-size: 0.62rem;
+}
+
+.table-avatar.is-empty {
+  background-color: #e8edf3;
+  color: #64748b;
+}
+
+/* ---- Seret dan lepas ---- */
+.board.is-dragging .board-lane.cannot-drop {
+  opacity: 0.5;
+}
+
+.board.is-dragging .board-lane.can-drop {
+  background-color: #e3ecfb;
+}
+
+.board.is-dragging .board-lane.can-drop.is-over {
+  background-color: #cfdffa;
+}
+
+/* Menu pilihan status saat kolom tujuan memuat lebih dari satu status yang sah (mis. Waiting) */
+.board-choice {
+  position: fixed;
+  z-index: 60;
+  min-width: 13rem;
+  padding: 0.4rem;
+  border-radius: 1rem;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgb(15 23 42 / 0.08), 0 18px 40px -14px rgb(15 23 42 / 0.3);
+}
+
+.board-choice-title {
+  padding: 0.35rem 0.6rem 0.4rem;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.board-choice button {
+  display: block;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: var(--bulma-text-strong);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.board-choice button:hover,
+.board-choice button:focus-visible {
+  background-color: #eff6ff;
+  outline: none;
+}
+
+/* ---- Layar kecil: kolom penuh satu per baris ---- */
+@media (max-width: 700px) {
+  .board {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .board-cards {
+    max-height: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board-lane,
+  .board-card {
+    transition: none;
+  }
+
+  .board-card:hover,
+  .board-card.is-dragging {
+    transform: none;
+  }
+}

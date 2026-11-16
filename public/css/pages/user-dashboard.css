@@ -1,0 +1,127 @@
+/* Dashboard user (views/user/dashboard.php): sapaan, kartu ringkasan tiket, dan daftar standar SLA */
+
+.user-dashboard-greeting {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.user-dashboard-greeting .title {
+  margin-bottom: 0.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.user-dashboard-subtitle {
+  color: #64748b;
+}
+
+/* Kartu tanggal dan jam di kanan sapaan */
+.user-dashboard-clock {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem 0.6rem 0.65rem;
+  border: 1px solid var(--app-stroke-blue);
+  border-radius: 0.9rem;
+  background-color: #fff;
+}
+
+.user-dashboard-clock-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.7rem;
+  background-color: var(--app-fill-blue);
+  color: var(--bulma-primary);
+}
+
+.user-dashboard-clock p {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
+
+.user-dashboard-clock strong {
+  color: var(--bulma-text-strong);
+}
+
+.user-dashboard-clock span:not(.user-dashboard-clock-icon) {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.user-dashboard-summary {
+  padding: 1rem 1.1rem;
+  border-radius: 1rem;
+}
+
+/* Header ringkas: judul + keterangan di kiri, tombol dan waktu pembaruan kecil di kanan, tanpa garis pemisah */
+.user-dashboard-summary-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.user-dashboard-summary-head > div {
+  flex: 1 1 12rem;
+}
+
+.user-dashboard-summary-head .title {
+  font-size: 1.05rem;
+}
+
+
+.user-dashboard-updated {
+  color: #64748b;
+  font-size: 0.72rem;
+}
+
+.user-dashboard-assignee {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.user-dashboard-assignee .avatar {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.7rem;
+}
+
+.user-dashboard-sla {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.user-dashboard-sla li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.15rem 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.75rem;
+  background-color: #f8fafc;
+}
+
+.user-dashboard-sla strong,
+.user-dashboard-sla-max {
+  color: var(--bulma-text-strong);
+  font-weight: 600;
+}
+
+.user-dashboard-sla small {
+  grid-column: 1 / -1;
+  color: #64748b;
+}

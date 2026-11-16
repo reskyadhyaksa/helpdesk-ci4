@@ -1,7 +1,7 @@
 <?php
 /**
- * Lonceng notifikasi dalam aplikasi: tombol + penanda belum dibaca + daftar. Perilakunya di
- * public/js/components/notifications.js. Hanya ditampilkan untuk pengguna yang login.
+ * Lonceng notifikasi dalam aplikasi: tombol + penanda belum dibaca + panel daftar (filter Semua / Belum dibaca,
+ * dikelompokkan per hari). Perilakunya di public/js/components/notifications.js. Hanya untuk pengguna yang login.
  */
 if (auth_user() === null) {
     return;
@@ -22,10 +22,29 @@ if (auth_user() === null) {
 
     <div class="notif-panel" data-notif-panel hidden role="dialog" aria-label="Daftar notifikasi">
         <div class="notif-head">
-            <strong>Notifikasi</strong>
-            <button type="button" class="button is-small is-text" data-notif-read-all>Tandai semua dibaca</button>
+            <div class="notif-head-title">
+                <strong>Notifikasi</strong>
+                <span class="notif-count" data-notif-count hidden></span>
+            </div>
+            <button type="button" class="notif-read-all" data-notif-read-all disabled>
+                <i class="fa-solid fa-check-double" aria-hidden="true"></i>
+                <span>Tandai semua dibaca</span>
+            </button>
         </div>
+
+        <div class="notif-tabs" role="group" aria-label="Filter notifikasi">
+            <button type="button" class="notif-tab is-active" data-notif-filter="all" aria-pressed="true">Semua</button>
+            <button type="button" class="notif-tab" data-notif-filter="unread" aria-pressed="false">
+                Belum dibaca <span class="notif-tab-count" data-notif-unread-count>0</span>
+            </button>
+        </div>
+
         <ul class="notif-list" data-notif-list></ul>
-        <p class="notif-empty has-text-grey" data-notif-empty hidden>Belum ada notifikasi.</p>
+
+        <div class="notif-empty" data-notif-empty hidden>
+            <span class="notif-empty-icon"><i class="fa-regular fa-bell-slash" aria-hidden="true"></i></span>
+            <p class="notif-empty-title" data-notif-empty-title>Belum ada notifikasi</p>
+            <p class="notif-empty-text" data-notif-empty-text>Pembaruan tiket Anda akan muncul di sini.</p>
+        </div>
     </div>
 </div>

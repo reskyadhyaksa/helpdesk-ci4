@@ -1,14 +1,5 @@
 /* Beranda portal: banner, kartu aksi cepat, kolom lacak tiket, baris layanan yang bisa digeser. */
 
-/*
- * Seluruh isi beranda (teks, kartu, jarak, ikon) tampil sedikit lebih kecil. Navbar ikut, tapi hanya di
- * beranda (:has), supaya halaman lain yang memakai layout yang sama tidak berubah. Footer tidak ikut.
- */
-.home-page,
-body:has(.home-page) .navbar {
-  zoom: 0.9;
-}
-
 /* Banner beranda: sorotan navy kabur di pojok kanan atas */
 .hero-card {
   position: relative;
@@ -100,6 +91,17 @@ body:has(.home-page) .navbar {
   margin-top: 1rem;
 }
 
+/* Dua kolom berdampingan (>=1216px): margin bawah dibuang agar kartu lacak (tinggi 100% kolom) rata dengan kartu aksi cepat */
+@media (min-width: 1216px) {
+  .home-page > .columns.is-desktop > .column > .quick-actions {
+    margin-bottom: 0;
+  }
+
+  .track-card {
+    margin-bottom: 0;
+  }
+}
+
 /*
  * iPad landscape (1024-1215px): kolom kiri hanya ~500px, terlalu sempit untuk 3 kartu aksi cepat berdampingan
  * dengan kolom lacak tiket 440px. Susunannya sama dengan tablet portrait: banner, aksi cepat, lalu lacak tiket di bawah.
@@ -177,18 +179,18 @@ body:has(.home-page) .navbar {
 }
 
 /*
- * Layar sentuh (iPad): target sentuh 44px. Isi beranda dan navbar sedang diskala 0.9 (zoom), jadi minimum
- * di CSS dibagi 0.9 agar ukuran yang terlihat tetap 44px.
+ * Layar sentuh (iPad): target sentuh 44px. Isi halaman dan navbar sedang diskala 0.9 (zoom, .page-zoom), jadi
+ * minimum di CSS dibagi 0.9 agar ukuran yang terlihat tetap 44px.
  */
 @media (pointer: coarse) {
-  .home-page .button,
-  .home-page .input,
-  body:has(.home-page) .navbar-item,
-  body:has(.home-page) .navbar-burger {
+  .page-zoom .button,
+  .page-zoom .input,
+  body:has(.page-zoom) .navbar-item,
+  body:has(.page-zoom) .navbar-burger {
     min-height: calc(44px / 0.9);
   }
 
-  body:has(.home-page) .navbar-burger {
+  body:has(.page-zoom) .navbar-burger {
     min-width: calc(44px / 0.9);
   }
 }

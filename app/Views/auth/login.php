@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
 <section class="section">
-    <div class="container">
+    <div class="container page-zoom">
         <div class="columns is-centered">
             <div class="column is-5-tablet is-4-desktop">
                 <h1 class="title">Login</h1>

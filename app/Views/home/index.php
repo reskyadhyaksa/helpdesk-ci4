@@ -1,25 +1,18 @@
 <?= $this->extend('layouts/main') ?>
 
 <?php
-// Data sementara. Pindahkan ke controller saat sudah berasal dari database.
+// Aksi cepat masih statis; kartu layanan ($services) berasal dari kategori request (HomeController).
 $quickActions = [
     ['icon' => 'reset.svg', 'bg' => 'has-background-link-light', 'title' => 'Reset Sandi Aplikasi HC Eazy', 'desc' => 'Ganti/lupa password', 'label' => 'Form Reset Password', 'href' => '#'],
     ['icon' => 'shield-question.svg', 'bg' => 'has-background-grey-lighter', 'title' => 'Pusat Bantuan & FAQ', 'desc' => 'Cari panduan kekaryawanan', 'label' => 'Buka Pusat Bantuan HC', 'href' => '#'],
     ['icon' => 'call.png', 'bg' => 'has-background-warning-light', 'title' => 'Hotline Darurat HC', 'desc' => '[nomor handphone PIC Ticketing]', 'label' => 'Jam Operasional 08.30 - 17.30', 'modal' => 'hotlineModal'],
 ];
 
-$services = [
-    ['tag' => 'Payroll', 'title' => 'Slip Gaji & Bukti Pajak', 'desc' => 'Permintaan bukti potong PPh 21 (1721-A1), klarifikasi tunjangan, dan rincian payroll.', 'sla' => '12 Jam'],
-    ['tag' => 'Surat Keterangan', 'title' => 'Surat Keterangan Kepegawaian', 'desc' => 'Ajukan permohonan surat keterangan aktif bekerja untuk keperluan instansi atau visa.', 'sla' => '12 Jam'],
-    ['tag' => 'Presensi', 'title' => 'Koreksi Kehadiran & Presensi', 'desc' => 'Sinkronisasi kehadiran HC Eazy, lupa tap absensi, cuti mendesak, dan lembur.', 'sla' => '12 Jam'],
-    ['tag' => 'Hubungan Kerja', 'title' => 'Konsultasi & Pengaduan HR', 'desc' => 'Saluran konfidensial hubungan industrial, etika kerja, dan mediasi permasalahan internal.', 'sla' => '10 Jam'],
-];
-
 $values = ['Kepercayaan', 'Kewirausahaan', 'Inovatif', 'Kegembiraan'];
 ?>
 
 <?= $this->section('content') ?>
-<div class="container page-container home-page py-5">
+<div class="container page-container page-zoom home-page py-5">
 
     <div class="columns is-desktop is-3 is-7-desktop">
         <!-- Kiri: banner dan aksi cepat -->
@@ -141,29 +134,41 @@ $values = ['Kepercayaan', 'Kewirausahaan', 'Inovatif', 'Kegembiraan'];
                 <h2 class="title is-4 mb-1">Layanan &amp; Bantuan Kepegawaian</h2>
                 <p class="is-size-7">Pilih kategori layanan cepat untuk memproses tiket bantuan Anda.</p>
             </div>
-            <div class="buttons is-hidden-mobile">
-                <button type="button" class="button is-rounded" aria-label="Sebelumnya" data-scroll-target="servicesRow"
-                    data-scroll-dir="-1">←</button>
-                <button type="button" class="button is-rounded" aria-label="Berikutnya" data-scroll-target="servicesRow"
-                    data-scroll-dir="1">→</button>
-            </div>
+            <?php if ($services !== []): ?>
+                <div class="buttons is-hidden-mobile">
+                    <button type="button" class="button is-rounded" aria-label="Sebelumnya" data-scroll-target="servicesRow"
+                        data-scroll-dir="-1">←</button>
+                    <button type="button" class="button is-rounded" aria-label="Berikutnya" data-scroll-target="servicesRow"
+                        data-scroll-dir="1">→</button>
+                </div>
+            <?php endif ?>
         </div>
 
-        <div class="scroll-row" id="servicesRow">
-            <?php foreach ($services as $service): ?>
-                <article class="box mb-0 is-flex is-flex-direction-column">
-                    <span
-                        class="tag is-info is-light is-uppercase has-text-weight-bold is-align-self-flex-start mb-4"><?= esc($service['tag']) ?></span>
-                    <h3 class="title is-6 mb-2"><?= esc($service['title']) ?></h3>
-                    <p class="is-size-7 is-flex-grow-1 mb-5"><?= esc($service['desc']) ?></p>
-                    <div class="is-flex is-justify-content-space-between is-size-7 pt-4"
-                        style="border-top: 1px solid #eef0f4">
-                        <a class="has-text-weight-bold has-text-grey-dark" href="#">Ajukan Tiketing →</a>
-                        <span class="has-text-grey">SLA <?= esc($service['sla']) ?></span>
-                    </div>
-                </article>
-            <?php endforeach ?>
-        </div>
+        <?php if ($services === []): ?>
+            <div class="box">
+                <?= component('empty_state', [
+                    'icon'    => 'fa-folder-open',
+                    'title'   => 'Belum ada kategori layanan',
+                    'message' => 'Kategori layanan akan tampil di sini setelah admin menambahkannya.',
+                ]) ?>
+            </div>
+        <?php else: ?>
+            <div class="scroll-row" id="servicesRow">
+                <?php foreach ($services as $service): ?>
+                    <article class="box mb-0 is-flex is-flex-direction-column">
+                        <span
+                            class="tag is-info is-light is-uppercase has-text-weight-bold is-align-self-flex-start mb-4"><?= esc($service['parent_name'] ?? 'Layanan') ?></span>
+                        <h3 class="title is-6 mb-2"><?= esc($service['name']) ?></h3>
+                        <p class="is-size-7 is-flex-grow-1 mb-5"><?= esc($service['description'] ?? '') ?></p>
+                        <div class="is-flex is-justify-content-space-between is-size-7 pt-4"
+                            style="border-top: 1px solid #eef0f4">
+                            <a class="has-text-weight-bold has-text-grey-dark" href="<?= auth_user() ? url_to('user.tickets.new') : url_to('public.tickets.new') ?>">Ajukan Tiketing →</a>
+                            <span class="has-text-grey"><?= $service['sla_resolution_minutes'] === null ? esc(lang('Ticket.noSla')) : 'SLA ' . esc(format_duration((int) $service['sla_resolution_minutes'])) ?></span>
+                        </div>
+                    </article>
+                <?php endforeach ?>
+            </div>
+        <?php endif ?>
     </section>
 
     <!-- Nilai budaya perusahaan -->

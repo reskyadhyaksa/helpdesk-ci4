@@ -29,7 +29,7 @@ class SystemParameterService
     }
 
     /**
-     * @return array<string, list<array{key: string, label: string, help: string, type: string, value: string, min: ?int, max: ?int}>>
+     * @return array<string, list<array{key: string, label: string, help: string, type: string, value: string, min: ?int, max: ?int, unit: ?string, section: ?string, default: string}>>
      */
     public function groups(): array
     {
@@ -44,6 +44,9 @@ class SystemParameterService
                 'value' => $this->parameters->value($key),
                 'min'   => $definition['min'] ?? null,
                 'max'   => $definition['max'] ?? null,
+                'unit'    => $definition['unit'] ?? null,
+                'section' => $definition['section'] ?? null,
+                'default' => $definition['value'],
             ];
         }
 

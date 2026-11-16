@@ -10,7 +10,7 @@
 
     <?= component('data_table', [
         'emptyIcon' => 'fa-circle-question',
-        'columns' => ['Pertanyaan', 'Kategori', 'Status', 'Diperbarui'],
+        'columns' => [['label' => 'Pertanyaan', 'width' => 30], ['label' => 'Kategori', 'width' => 13], ['label' => 'Status', 'width' => 9], ['label' => 'Diperbarui', 'width' => 13]],
     ]) ?>
 </section>
 <?= $this->endSection() ?>

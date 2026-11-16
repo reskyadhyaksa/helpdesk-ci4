@@ -1,0 +1,501 @@
+/* Modal detail tiket di daftar tiket (admin/tickets/_modal + _modal_card). Isi dua kolomnya memakai gaya
+   admin-ticket-detail.css; file ini hanya kerangka modal: latar gelap kabur, header, area gulir, dan footer. */
+
+.ticket-modal .modal-background {
+  background-color: rgb(2 6 23 / 0.62);
+  backdrop-filter: blur(6px);
+}
+
+.ticket-modal-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(84rem, calc(100vw - 2rem));
+  height: min(calc(100vh - 3rem), 62rem);
+  overflow: hidden;
+  border-radius: 1.5rem;
+  background-color: #fff;
+  box-shadow: 0 30px 80px -20px rgb(2 6 23 / 0.6);
+  animation: ticket-modal-in 0.2s ease-out;
+}
+
+@keyframes ticket-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+}
+
+.ticket-modal-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+/* ---- Header ---- */
+.ticket-modal-head {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.85rem 1.5rem;
+  border-bottom: 1px solid #eef0f4;
+  background-color: #fff;
+}
+
+.ticket-modal-logo {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.75rem;
+  background-color: var(--bulma-primary);
+  color: #fff;
+}
+
+.ticket-modal-crumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #475569;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.ticket-modal-sep {
+  color: #94a3b8;
+}
+
+.ticket-modal-no {
+  padding: 0.15rem 0.6rem;
+  border-radius: 0.5rem;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.ticket-modal-divider {
+  width: 1px;
+  height: 1.25rem;
+  background-color: #e2e8f0;
+}
+
+.ticket-modal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background-color: #dbeafe;
+  color: #1d4ed8;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.ticket-modal-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.ticket-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.ticket-modal-icon,
+.ticket-modal-text {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.25rem;
+  min-width: 2.25rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: #475569;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.ticket-modal-text {
+  gap: 0.4rem;
+  padding: 0 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.ticket-modal-icon:hover,
+.ticket-modal-text:hover {
+  background-color: #f1f5f9;
+  color: var(--bulma-text-strong);
+}
+
+.ticket-modal-icon:focus-visible,
+.ticket-modal-text:focus-visible {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: 1px;
+}
+
+/* Umpan balik singkat "Tersalin" di bawah tombol salin/bagikan */
+.has-feedback::after {
+  content: attr(data-feedback);
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 5;
+  padding: 0.25rem 0.55rem;
+  border-radius: 0.4rem;
+  background-color: #0f172a;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ticket-modal-head .dropdown-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* ---- Isi: area gulir dengan dua kolom (utama + samping bertinta) ---- */
+/*
+ * Skala isi: --ticket-zoom = yang terkecil dari skala menurut lebar (--zw) dan tinggi (--zh) layar, jadi isi makin kecil
+ * di laptop/tablet agar kedua kolom muat tanpa gulir mendatar. Di bawah lebar iPad (767px) skala 1 dan susunan
+ * satu kolom yang digulir.
+ */
+.ticket-modal {
+  --zw: 0.9;
+  --zh: 0.9;
+  --ticket-zoom: min(var(--zw), var(--zh));
+}
+
+@media (max-height: 900px) {
+  .ticket-modal {
+    --zh: 0.85;
+  }
+}
+
+@media (max-height: 800px) {
+  .ticket-modal {
+    --zh: 0.8;
+  }
+}
+
+@media (max-height: 720px) {
+  .ticket-modal {
+    --zh: 0.72;
+  }
+}
+
+@media (max-width: 1440px) {
+  .ticket-modal {
+    --zw: 0.85;
+  }
+}
+
+@media (max-width: 1280px) {
+  .ticket-modal {
+    --zw: 0.8;
+  }
+}
+
+@media (max-width: 1100px) {
+  .ticket-modal {
+    --zw: 0.75;
+  }
+}
+
+@media (max-width: 900px) {
+  .ticket-modal {
+    --zw: 0.7;
+  }
+}
+
+.ticket-modal-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  transition: opacity 0.15s ease;
+}
+
+/* Area ini setinggi kartu; kedua kolom menggulir sendiri. Zoom dipasang pada isi tiap kolom (.ticket-zoom), bukan pada
+   wadah yang menggulir, supaya ujung bawah isi (tombol kirim) selalu bisa digulir sampai terlihat. */
+.ticket-modal-zoom {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ticket-modal .ticket-zoom {
+  zoom: var(--ticket-zoom);
+}
+
+.ticket-modal .is-busy .ticket-modal-scroll {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.ticket-modal .ticket-layout {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) minmax(17rem, 24rem);
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+  margin: 0;
+}
+
+/* Kolom utama dan samping menggulir sendiri-sendiri; panel samping tetap terlihat saat percakapan digulir */
+.ticket-modal .ticket-layout > .column {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Spesifisitas sengaja sama (.column di grid): padding kolom diatur di bawah, bukan dihapus oleh aturan ini */
+.ticket-modal .ticket-layout > .column {
+  flex: none;
+  width: auto;
+  min-width: 0;
+  padding: 0;
+}
+
+.ticket-modal .ticket-layout > .ticket-main {
+  padding: 2rem 2.25rem;
+}
+
+.ticket-modal .ticket-layout > .ticket-aside {
+  padding: 1.25rem;
+  background-color: #f6f8fb;
+}
+
+/* Dropdown PIC + tombol Simpan harus muat di lebar kolom samping */
+.ticket-modal .ticket-pic-form .control.is-expanded {
+  min-width: 0;
+}
+
+/* Fokus awal ada di kartu (tabindex -1), bukan tombol tutup: tanpa cincin fokus yang mengganggu */
+.ticket-modal-card:focus {
+  outline: none;
+}
+
+.ticket-modal-notice {
+  margin: 1rem 2.25rem 0;
+  border-radius: 0.9rem;
+}
+
+/* ---- Footer: pintasan keyboard ---- */
+.ticket-modal-foot {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+  padding: 0.65rem 1.5rem;
+  border-top: 1px solid #eef0f4;
+  background-color: #fbfcfd;
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.ticket-modal-keys {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1rem;
+}
+
+.ticket-modal-foot kbd {
+  min-width: 1.4rem;
+  margin-right: 0.25rem;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.35rem;
+  background-color: #fff;
+  box-shadow: 0 1px 0 #e2e8f0;
+  color: #334155;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+/* ---- Memuat / gagal ---- */
+.ticket-modal-state {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  color: #64748b;
+}
+
+.ticket-modal-spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid #cbd5e1;
+  border-top-color: var(--bulma-link);
+  border-radius: 50%;
+  animation: ticket-modal-spin 0.8s linear infinite;
+}
+
+@keyframes ticket-modal-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---- Tablet (iPad portrait dan sekitarnya): tetap dua kolom, header lebih ringkas ---- */
+@media (max-width: 900px) {
+  .ticket-modal-card {
+    width: calc(100vw - 1rem);
+    height: calc(100vh - 1rem);
+  }
+
+  .ticket-modal .ticket-layout > .ticket-main {
+    padding: 1.25rem 1.25rem 1.5rem;
+  }
+
+  .ticket-modal .ticket-layout > .ticket-aside {
+    padding: 0.85rem;
+  }
+
+  .ticket-modal-head {
+    padding: 0.7rem 1rem;
+  }
+
+  .ticket-modal-divider,
+  .ticket-modal-text span,
+  .ticket-modal-brand {
+    display: none;
+  }
+}
+
+/* ---- Di bawah lebar iPad: layar penuh, satu kolom, seluruh isi digulir, tanpa pengecilan ---- */
+@media (max-width: 767px) {
+  .ticket-modal {
+    --zw: 1;
+    --zh: 1;
+  }
+
+  .ticket-modal-card {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    border-radius: 0;
+  }
+
+  .ticket-modal-scroll {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .ticket-modal-zoom {
+    display: block;
+    height: auto;
+  }
+
+  .ticket-modal .ticket-layout {
+    display: block;
+  }
+
+  .ticket-modal .ticket-layout > .column {
+    overflow: visible;
+  }
+
+  .ticket-modal .ticket-layout > .ticket-main {
+    padding: 1rem;
+  }
+
+  .ticket-modal-chip {
+    display: none;
+  }
+
+  .ticket-modal-notice {
+    margin: 0.75rem 1rem 0;
+  }
+}
+
+/* Petunjuk keyboard tidak berguna di layar sentuh */
+@media (pointer: coarse) {
+  .ticket-modal-keys {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticket-modal-card,
+  .ticket-modal-spinner {
+    animation: none;
+  }
+
+  .ticket-modal-scroll,
+  .ticket-modal-icon,
+  .ticket-modal-text {
+    transition: none;
+  }
+}
+
+/* ---- Cetak: hanya isi modal yang sedang terbuka ---- */
+@media print {
+  body:has(.ticket-modal.is-active) > *:not(.ticket-modal) {
+    display: none !important;
+  }
+
+  html.is-clipped {
+    overflow: visible;
+  }
+
+  .ticket-modal.is-active {
+    position: static;
+    display: block;
+    overflow: visible;
+  }
+
+  .ticket-modal .modal-background,
+  .ticket-modal-actions,
+  .ticket-modal-foot,
+  .ticket-reply,
+  .ticket-tabs-bar,
+  .ticket-toolbar {
+    display: none !important;
+  }
+
+  .ticket-modal-card {
+    width: auto;
+    height: auto;
+    overflow: visible;
+    border-radius: 0;
+    box-shadow: none;
+    animation: none;
+  }
+
+  .ticket-modal-inner,
+  .ticket-modal-scroll,
+  .ticket-modal-zoom,
+  .ticket-modal .ticket-layout {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+
+  .ticket-modal .ticket-zoom {
+    zoom: 1;
+  }
+
+  .ticket-modal .ticket-layout > .column {
+    overflow: visible;
+  }
+}

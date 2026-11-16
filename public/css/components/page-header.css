@@ -1,10 +1,160 @@
-/* Header halaman admin (components/page_header). */
+/*
+ * Header halaman admin (components/page_header): judul + deskripsi di kiri, tombol aksi dan lonceng di kanan,
+ * dipisah dari isi halaman oleh garis tipis. Satu-satunya definisi gaya header untuk semua halaman admin.
+ */
 
 .admin-page-header {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1rem 1.5rem;
   margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #e5e9f0;
+}
+
+.admin-page-header-main {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.admin-page-header-title {
+  color: var(--bulma-text-strong);
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.admin-page-header-subtitle {
+  max-width: 46rem;
+  margin-top: 0.2rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.admin-page-header-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2rem;
+  margin-bottom: 0.35rem;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.admin-page-header-back:hover,
+.admin-page-header-back:focus-visible {
+  color: var(--bulma-primary);
+}
+
+/* Tombol aksi dan lonceng sebaris, rata tengah terhadap blok judul */
+.admin-page-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.admin-page-header-actions .button,
+.admin-page-header-actions form {
+  margin: 0;
+}
+
+/* Lonceng di header: putih berbingkai dan dipisah garis tipis dari tombol aksi */
+.admin-page-header-actions .notif {
+  margin-left: 0.25rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid #e2e8f0;
+}
+
+.admin-page-header-actions .notif-toggle {
+  border: 1px solid #e2e8f0;
+  background-color: #fff;
+}
+
+/* Tab di dasar header: bertumpu pada garis pemisah header, tab aktif bergaris bawah biru (tanpa jarak tambahan) */
+.admin-page-header:has(.admin-page-header-tab-list) {
+  padding-bottom: 0;
+}
+
+.admin-page-header-tab-list {
+  display: flex;
+  flex: 1 1 100%;
+  gap: 0.25rem;
+  margin-bottom: -1px;
+  overflow-x: auto;
+}
+
+.admin-page-header-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.5rem;
+  padding: 0 0.9rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-page-header-tab:hover {
+  color: var(--bulma-text-strong);
+}
+
+.admin-page-header-tab:focus-visible {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: -2px;
+  border-radius: 0.4rem;
+}
+
+.admin-page-header-tab.is-active {
+  border-bottom-color: var(--bulma-link);
+  color: var(--bulma-link);
+}
+
+/* Jumlah item di tab; tab berisi isian tidak sah ditandai merah */
+.admin-page-header-tab-count {
+  min-width: 1.35rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background-color: #e2e8f0;
+  color: #334155;
+  font-size: 0.7rem;
+  line-height: 1.35rem;
+  text-align: center;
+}
+
+.admin-page-header-tab.is-active .admin-page-header-tab-count {
+  background-color: var(--app-fill-blue);
+  color: var(--bulma-link);
+}
+
+.admin-page-header-tab.has-error {
+  color: var(--app-danger-ink);
+}
+
+.admin-page-header-tab.has-error .admin-page-header-tab-count {
+  background-color: #fee2e2;
+  color: var(--app-danger-ink);
+}
+
+/* Layar sempit: judul di atas, aksi di bawahnya rata kiri */
+@media (max-width: 768px) {
+  .admin-page-header-actions {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .admin-page-header-title {
+    font-size: 1.4rem;
+  }
 }

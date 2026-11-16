@@ -75,40 +75,149 @@
         return Math.floor(seconds / 86400) + ' hari lalu';
     }
 
+    // Jenis kejadian → ikon, warna, dan label singkat (nama kelas warna ada di css/components/notifications.css)
+    var KINDS = {
+        ticket_assigned: { icon: 'fa-user-check', tone: 'is-blue', label: 'Penugasan' },
+        status_changed: { icon: 'fa-rotate', tone: 'is-purple', label: 'Status tiket' },
+        comment_added: { icon: 'fa-comment-dots', tone: 'is-green', label: 'Balasan' },
+        sla_warning: { icon: 'fa-triangle-exclamation', tone: 'is-amber', label: 'SLA hampir habis' },
+        sla_breached: { icon: 'fa-circle-exclamation', tone: 'is-red', label: 'SLA terlewat' }
+    };
+    var FALLBACK_KIND = { icon: 'fa-bell', tone: 'is-blue', label: 'Info' };
+    var filter = 'all'; // 'all' | 'unread'
+
+    function parseDate(value) {
+        return new Date(String(value).replace(' ', 'T'));
+    }
+
+    // Kelompok hari untuk judul pemisah daftar: Hari ini, Kemarin, Sebelumnya
+    function dayGroup(value) {
+        var date = parseDate(value);
+        var today = new Date();
+
+        today.setHours(0, 0, 0, 0);
+        date.setHours(0, 0, 0, 0);
+
+        var days = Math.round((today.getTime() - date.getTime()) / 86400000);
+
+        if (isNaN(days) || days <= 0) {
+            return 'Hari ini';
+        }
+
+        return days === 1 ? 'Kemarin' : 'Sebelumnya';
+    }
+
+    function buildItem(item) {
+        var kind = KINDS[item.event_type] || FALLBACK_KIND;
+        var isUnread = ! item.read_at;
+        var li = document.createElement('li');
+        var button = document.createElement('button');
+        var icon = document.createElement('span');
+        var main = document.createElement('span');
+        var title = document.createElement('span');
+        var body = document.createElement('span');
+        var meta = document.createElement('span');
+        var tag = document.createElement('span');
+        var time = document.createElement('time');
+
+        button.type = 'button';
+        button.className = 'notif-item' + (isUnread ? ' is-unread' : '');
+        icon.className = 'notif-item-icon ' + kind.tone;
+        icon.innerHTML = '<i class="fa-solid ' + kind.icon + '" aria-hidden="true"></i>';
+        main.className = 'notif-item-main';
+        title.className = 'notif-item-title';
+        body.className = 'notif-item-body';
+        meta.className = 'notif-item-meta';
+        tag.className = 'notif-item-kind';
+        tag.textContent = kind.label;
+        time.className = 'notif-item-time';
+        time.textContent = timeAgo(item.created_at);
+        time.dateTime = String(item.created_at).replace(' ', 'T');
+        time.title = parseDate(item.created_at).toLocaleString('id-ID');
+
+        // Status baca tidak hanya lewat warna: teks untuk pembaca layar dan titik penanda
+        if (isUnread) {
+            var hidden = document.createElement('span');
+
+            hidden.className = 'is-sr-only';
+            hidden.textContent = 'Belum dibaca: ';
+            title.appendChild(hidden);
+        }
+
+        title.append(document.createTextNode(item.title));
+        body.textContent = item.body;
+        meta.append(tag, time);
+        main.append(title, body, meta);
+        button.append(icon, main);
+
+        if (isUnread) {
+            var dot = document.createElement('span');
+
+            dot.className = 'notif-item-dot';
+            dot.setAttribute('aria-hidden', 'true');
+            button.appendChild(dot);
+        }
+
+        button.addEventListener('click', function () {
+            open(item);
+        });
+        li.appendChild(button);
+
+        return li;
+    }
+
     function render() {
+        var visible = filter === 'unread' ? items.filter(function (item) { return ! item.read_at; }) : items;
+
         roots.forEach(function (root) {
             var badge = root.querySelector('[data-notif-badge]');
             var list = root.querySelector('[data-notif-list]');
             var empty = root.querySelector('[data-notif-empty]');
+            var count = root.querySelector('[data-notif-count]');
+            var readAll = root.querySelector('[data-notif-read-all]');
 
             badge.textContent = unread > 99 ? '99+' : String(unread);
             badge.hidden = unread === 0;
+            count.textContent = unread + ' baru';
+            count.hidden = unread === 0;
+            readAll.disabled = unread === 0;
+            root.querySelector('[data-notif-unread-count]').textContent = String(unread);
+
+            root.querySelectorAll('[data-notif-filter]').forEach(function (tab) {
+                var isActive = tab.dataset.notifFilter === filter;
+
+                tab.classList.toggle('is-active', isActive);
+                tab.setAttribute('aria-pressed', String(isActive));
+            });
 
             list.textContent = '';
-            empty.hidden = items.length > 0;
+            empty.hidden = visible.length > 0;
 
-            items.forEach(function (item) {
-                var li = document.createElement('li');
-                var button = document.createElement('button');
-                var title = document.createElement('span');
-                var body = document.createElement('span');
-                var time = document.createElement('span');
+            if (visible.length === 0) {
+                var isUnreadView = filter === 'unread';
 
-                button.type = 'button';
-                button.className = 'notif-item' + (item.read_at ? '' : ' is-unread');
-                title.className = 'notif-item-title';
-                title.textContent = item.title;
-                body.className = 'notif-item-body';
-                body.textContent = item.body;
-                time.className = 'notif-item-time';
-                time.textContent = timeAgo(item.created_at);
+                root.querySelector('[data-notif-empty-title]').textContent = isUnreadView ? 'Semua sudah dibaca' : 'Belum ada notifikasi';
+                root.querySelector('[data-notif-empty-text]').textContent = isUnreadView
+                    ? 'Tidak ada notifikasi yang belum dibaca.'
+                    : 'Pembaruan tiket Anda akan muncul di sini.';
+            }
 
-                button.append(title, body, time);
-                button.addEventListener('click', function () {
-                    open(item);
-                });
-                li.appendChild(button);
-                list.appendChild(li);
+            var lastGroup = null;
+
+            visible.forEach(function (item) {
+                var group = dayGroup(item.created_at);
+
+                if (group !== lastGroup) {
+                    var heading = document.createElement('li');
+
+                    heading.className = 'notif-group';
+                    heading.setAttribute('role', 'presentation');
+                    heading.textContent = group;
+                    list.appendChild(heading);
+                    lastGroup = group;
+                }
+
+                list.appendChild(buildItem(item));
             });
         });
     }
@@ -135,44 +244,21 @@
         }).catch(function () {});
     }
 
-    // Pop-up memakai gaya toast yang sudah ada (css/components/toast.css)
+    // Pop-up memakai mesin toast bersama (js/components/toast.js). Selalu bergaya "info" (biru) dengan label
+    // "Notifikasi baru" dan ikon sesuai jenis kejadian, supaya tidak tertukar dengan pesan sukses (hijau) atau gagal (merah).
     function toast(notification) {
-        var region = document.querySelector('.toast-region');
+        var kind = KINDS[notification.event_type] || FALLBACK_KIND;
 
-        if (! region) {
-            region = document.createElement('div');
-            region.className = 'toast-region';
-            region.setAttribute('aria-label', 'Notifikasi');
-            document.body.appendChild(region);
-        }
-
-        var el = document.createElement('div');
-        var body = document.createElement('div');
-        var heading = document.createElement('p');
-        var title = document.createElement('span');
-        var message = document.createElement('p');
-
-        el.className = 'toast is-info';
-        el.setAttribute('role', 'status');
-        el.style.cursor = 'pointer';
-        body.className = 'toast-body';
-        heading.className = 'toast-heading';
-        title.className = 'toast-title';
-        title.textContent = notification.title;
-        message.className = 'toast-message';
-        message.textContent = notification.body;
-
-        heading.appendChild(title);
-        body.append(heading, message);
-        el.appendChild(body);
-        region.appendChild(el);
-
-        el.addEventListener('click', function () {
-            window.location.href = safeUrl(notification.url);
+        window.AppToast.show({
+            type: 'info',
+            icon: kind.icon,
+            kicker: 'Notifikasi baru · ' + kind.label,
+            title: notification.title,
+            message: notification.body,
+            href: safeUrl(notification.url),
+            actionLabel: 'Buka tiket',
+            timeout: 7000
         });
-        setTimeout(function () {
-            el.remove();
-        }, 7000);
     }
 
     function onPush(notification) {
@@ -260,6 +346,13 @@
 
         panel.addEventListener('click', function (event) {
             event.stopPropagation();
+        });
+
+        root.querySelectorAll('[data-notif-filter]').forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                filter = tab.dataset.notifFilter;
+                render();
+            });
         });
 
         root.querySelector('[data-notif-read-all]').addEventListener('click', function () {

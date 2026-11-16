@@ -1,0 +1,869 @@
+/* Detail tiket admin (admin/tickets/show): judul + status, deskripsi, lini masa percakapan, form balas, dan panel samping. */
+
+/* Seluruh isi halaman tampil sedikit lebih kecil (seperti beranda portal). Modal pratinjau ada di luar section ini. */
+.ticket-detail {
+  zoom: 0.9;
+}
+
+.ticket-title {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* ---- Status ---- */
+.ticket-status-button {
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  border-radius: 0.6rem;
+  font-weight: 700;
+}
+
+.ticket-status-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.ticket-detail .dropdown-item {
+  width: 100%;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* ---- Kartu ---- */
+.ticket-card {
+  padding: 1.5rem;
+  border-radius: 1.25rem;
+}
+
+.ticket-card.is-soft {
+  background-color: #f1f4f8;
+}
+
+.ticket-card-title,
+.ticket-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--bulma-text-strong);
+  font-weight: 700;
+}
+
+.ticket-card-title {
+  margin-bottom: 1rem;
+  font-size: 1.05rem;
+}
+
+.ticket-card-title i {
+  color: var(--bulma-link);
+}
+
+.ticket-subtitle {
+  margin: 1.5rem 0 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.ticket-description {
+  color: #1e293b;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ---- Lampiran ---- */
+.ticket-files {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.ticket-files.is-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+  gap: 0.75rem;
+  margin-top: 0;
+}
+
+.ticket-file {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.9rem;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+}
+
+.ticket-file.is-purged {
+  opacity: 0.6;
+}
+
+.ticket-file-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.6rem;
+  background-color: #e5e9f0;
+  color: #475569;
+}
+
+.ticket-file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ticket-file-name {
+  overflow: hidden;
+  color: var(--bulma-text-strong);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ticket-file-meta {
+  overflow: hidden;
+  color: #64748b;
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ticket-file-action,
+.ticket-icon-link {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.6rem;
+  color: #475569;
+  transition: background-color 0.15s ease;
+}
+
+button.ticket-file-action {
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.ticket-file-action:hover,
+.ticket-icon-link:hover {
+  background-color: #eef1f5;
+  color: var(--bulma-link);
+}
+
+.ticket-file-action:focus-visible,
+.ticket-icon-link:focus-visible {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: 2px;
+}
+
+/* ---- Pratinjau lampiran (modal) ---- */
+.preview-modal .modal-card {
+  width: min(64rem, calc(100vw - 2rem));
+}
+
+.preview-modal .modal-card-body {
+  padding: 0;
+  background-color: #f1f4f8;
+}
+
+.preview-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24rem;
+  max-height: calc(100vh - 14rem);
+  overflow: auto;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: calc(100vh - 14rem);
+  object-fit: contain;
+}
+
+.preview-iframe {
+  width: 100%;
+  height: calc(100vh - 14rem);
+  border: 0;
+  background-color: #fff;
+}
+
+/* ---- Tab + urutan ---- */
+.ticket-tabs-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.ticket-tabs,
+.ticket-modes {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 0.8rem;
+  background-color: #eef1f5;
+}
+
+.ticket-tab,
+.ticket-mode > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 1rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: #475569;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ticket-tab.is-active,
+.ticket-mode input:checked + span {
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.1);
+  color: var(--bulma-text-strong);
+  font-weight: 700;
+}
+
+.ticket-tab:focus-visible,
+.ticket-mode input:focus-visible + span,
+.ticket-sort:focus-visible {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: 2px;
+}
+
+.ticket-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ---- Lini masa ---- */
+.ticket-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ticket-timeline [hidden] {
+  display: none;
+}
+
+.ticket-comment {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+}
+
+.ticket-comment-body {
+  flex: 1;
+  min-width: 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid #eef0f4;
+  border-radius: 1.1rem;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+}
+
+.ticket-comment-body.is-internal {
+  border-color: #fde68a;
+  background-color: #fffbeb;
+}
+
+.ticket-comment-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.ticket-comment-head strong {
+  color: var(--bulma-text-strong);
+}
+
+.ticket-comment-time {
+  margin-left: auto;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.ticket-comment-text {
+  color: #1e293b;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ticket-comment-text ul,
+.ticket-comment-text ol {
+  margin: 0.25rem 0 0.25rem 1.4rem;
+  white-space: normal;
+}
+
+.ticket-comment-text ul {
+  list-style: disc;
+}
+
+.ticket-comment-text ol {
+  list-style: decimal;
+}
+
+.mention {
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+/* Komentar dari editor (HTML tersaring): paragraf dan daftar menentukan jarak, bukan pre-wrap */
+.ticket-comment-text.is-rich {
+  white-space: normal;
+}
+
+.ticket-comment-text p {
+  margin-bottom: 0.5rem;
+}
+
+.ticket-comment-text p:last-child {
+  margin-bottom: 0;
+}
+
+.ticket-comment-text code {
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.35rem;
+  background-color: #eef1f5;
+  color: #be185d;
+  font-size: 0.875em;
+}
+
+.ticket-activity {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding-left: 0.4rem;
+  color: #475569;
+  font-size: 0.875rem;
+}
+
+.ticket-activity strong {
+  color: var(--bulma-text-strong);
+}
+
+.ticket-activity-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: #eef1f5;
+  color: #64748b;
+  font-size: 0.75rem;
+}
+
+.ticket-chip {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 0.35rem;
+  background-color: #eef0f4;
+  color: #475569;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.ticket-chip.is-strong {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+/* ---- Avatar ---- */
+.ticket-avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.ticket-avatar.is-lg {
+  width: 3rem;
+  height: 3rem;
+  font-size: 0.95rem;
+}
+
+.ticket-avatar.is-agent {
+  background-color: var(--bulma-link);
+  color: #fff;
+}
+
+.ticket-avatar.is-requester {
+  background-color: var(--bulma-primary);
+  color: #fff;
+}
+
+/* ---- Form balas ---- */
+.ticket-reply {
+  padding: 1rem 1.25rem;
+  border-radius: 1.1rem;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.08);
+}
+
+.ticket-reply-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.ticket-reply-hint {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.ticket-mode {
+  display: inline-flex;
+}
+
+.ticket-mode input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ticket-mode.is-internal i {
+  color: #c81e1e;
+}
+
+.ticket-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.ticket-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: #475569;
+  cursor: pointer;
+}
+
+.ticket-toolbar button:hover {
+  background-color: #eef1f5;
+  color: var(--bulma-text-strong);
+}
+
+.ticket-toolbar button:focus-visible {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: 1px;
+}
+
+.ticket-editor {
+  position: relative;
+}
+
+/* Saran @mention: kartu melayang di bawah kursor. Opsi: avatar + nama (bagian cocok tebal) + NIK.
+   Aktif = latar biru muda; tinggi opsi 2.75rem agar mudah disentuh. */
+.mention-list {
+  position: absolute;
+  top: 100%; /* posisi awal; js/pages/admin/ticket-detail.js memindahkannya ke bawah kursor */
+  left: 0;
+  z-index: 20;
+  width: 19rem;
+  max-width: 100%;
+  padding: 0.35rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgb(15 23 42 / 0.06), 0 18px 40px -14px rgb(15 23 42 / 0.3);
+  animation: mention-in 0.12s ease-out;
+}
+
+.mention-list[hidden] {
+  display: none;
+}
+
+@keyframes mention-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.mention-head,
+.mention-foot {
+  color: #64748b;
+  font-size: 0.72rem;
+}
+
+.mention-head {
+  padding: 0.35rem 0.6rem 0.4rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mention-foot {
+  margin-top: 0.25rem;
+  padding: 0.45rem 0.6rem 0.15rem;
+  border-top: 1px solid #eef0f4;
+}
+
+.mention-empty {
+  padding: 0.75rem 0.6rem;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.mention-option {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 2.75rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.7rem;
+  cursor: pointer;
+}
+
+.mention-option.is-active {
+  background-color: #eff6ff;
+}
+
+.mention-option .ticket-avatar {
+  background-color: var(--bulma-primary);
+  color: #fff;
+}
+
+.ticket-avatar.is-sm {
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.7rem;
+}
+
+.mention-text {
+  min-width: 0;
+}
+
+.mention-name {
+  display: block;
+  overflow: hidden;
+  color: var(--bulma-text-strong);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mention-name b {
+  color: #1d4ed8;
+  font-weight: 800;
+}
+
+.mention-text small {
+  display: block;
+  color: #475569;
+  font-size: 0.75rem;
+}
+
+/* Petunjuk keyboard tidak berguna di layar sentuh */
+@media (pointer: coarse) {
+  .mention-foot {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mention-list {
+    animation: none;
+  }
+}
+
+.ticket-toolbar button[aria-pressed="true"] {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* Bulma memberi .textarea display: block, yang mengalahkan atribut hidden; tanpa ini textarea cadangan ikut tampil */
+.ticket-editor .textarea[hidden] {
+  display: none;
+}
+
+/* Editor visual: tampil seperti textarea, tinggi menyesuaikan isi */
+.ticket-editor-area {
+  height: auto;
+  max-height: 20rem;
+  overflow-y: auto;
+  outline: none;
+  cursor: text;
+}
+
+.ticket-editor-area:empty::before {
+  content: attr(data-placeholder);
+  color: #64748b;
+  pointer-events: none;
+}
+
+.ticket-editor-area .mention {
+  padding: 0 0.25rem;
+  border-radius: 0.35rem;
+  background-color: #eff6ff;
+}
+
+.ticket-editor-area code {
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.35rem;
+  background-color: #eef1f5;
+  color: #be185d;
+}
+
+.ticket-toolbar-divider {
+  width: 1px;
+  height: 1.25rem;
+  margin: 0 0.35rem;
+  background-color: #cbd5e1;
+}
+
+.ticket-reply .textarea {
+  min-height: 7rem;
+  border-color: transparent;
+  box-shadow: none;
+  resize: vertical;
+}
+
+.ticket-reply .textarea:focus {
+  border-color: var(--bulma-link);
+}
+
+.ticket-reply-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eef0f4;
+}
+
+.ticket-reply-foot .buttons {
+  margin-bottom: 0;
+}
+
+.ticket-attach {
+  max-width: 14rem;
+}
+
+.ticket-attach:focus-within {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: 2px;
+}
+
+.ticket-attach span:not(.icon) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Panel samping ---- */
+.ticket-sla-card {
+  margin-bottom: 1rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: 1.1rem;
+}
+
+.ticket-sla-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.ticket-sla-used {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.ticket-sla-card .progress {
+  margin-top: 0.35rem;
+  margin-bottom: 0;
+}
+
+.ticket-side-card {
+  margin-bottom: 1rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: 1.1rem;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.06), 0 6px 18px rgb(15 23 42 / 0.04);
+}
+
+.ticket-side-card > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--bulma-text-strong);
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+}
+
+.ticket-side-card > summary::-webkit-details-marker {
+  display: none;
+}
+
+.ticket-side-card > summary i {
+  color: var(--bulma-link);
+}
+
+.ticket-side-card > summary::after {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  margin: 0 0.25rem 0 auto;
+  border-right: 2px solid #64748b;
+  border-bottom: 2px solid #64748b;
+  transform: rotate(225deg);
+  transition: transform 0.15s ease;
+}
+
+.ticket-side-card:not([open]) > summary::after {
+  transform: rotate(45deg);
+}
+
+.ticket-side-card > summary:focus-visible {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: 4px;
+  border-radius: 0.4rem;
+}
+
+.ticket-label {
+  margin-bottom: 0.5rem;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ticket-pic {
+  margin-top: 1rem;
+}
+
+.ticket-pic-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* PIC belum ada: kotak putus-putus dengan tombol "Assign to me" */
+.ticket-pic-empty {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 0.9rem;
+}
+
+.ticket-pic-empty-text {
+  color: #64748b;
+  font-style: italic;
+}
+
+.ticket-avatar.is-outline {
+  border: 1.5px dashed #94a3b8;
+  background-color: transparent;
+  color: #64748b;
+}
+
+.ticket-pic-form {
+  margin-top: 0.6rem;
+}
+
+.ticket-info {
+  margin-top: 0.75rem;
+}
+
+.ticket-info > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.ticket-info dt {
+  color: #475569;
+}
+
+.ticket-info dd {
+  color: var(--bulma-text-strong);
+  font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 768px) {
+  .ticket-comment-time {
+    margin-left: 0;
+  }
+
+  .ticket-comment {
+    gap: 0.6rem;
+  }
+
+  .ticket-avatar.is-lg {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticket-side-card > summary::after,
+  .ticket-file-action,
+  .ticket-icon-link {
+    transition: none;
+  }
+}

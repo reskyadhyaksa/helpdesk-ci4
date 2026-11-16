@@ -96,6 +96,39 @@ final class SlaCalculatorTest extends CIUnitTestCase
         $this->assertSame('2026-11-23 09:00', $this->due('2026-11-20 16:00', 120, null, $this->schedule('08:30:00', '17:30:00')));
     }
 
+    private function between(string $from, string $to, ?SlaPolicy $policy = null, array $holidays = []): int
+    {
+        return (new SlaCalculator())->workingMinutesBetween(
+            new DateTimeImmutable($from, new DateTimeZone('Asia/Jakarta')),
+            new DateTimeImmutable($to, new DateTimeZone('Asia/Jakarta')),
+            $policy ?? $this->policy(),
+            $this->schedule(),
+            $holidays,
+        );
+    }
+
+    public function testBetweenWithinOneDay(): void
+    {
+        $this->assertSame(60, $this->between('2026-11-16 10:00', '2026-11-16 11:00'));
+    }
+
+    public function testBetweenSkipsOffDaysAndOutsideWorkHours(): void
+    {
+        // Jumat 16:00–17:30 (90) + Senin 08:30–09:00 (30); Sabtu dan Minggu tidak dihitung
+        $this->assertSame(120, $this->between('2026-11-20 16:00', '2026-11-23 09:00'));
+    }
+
+    public function testBetweenSkipsHoliday(): void
+    {
+        // Selasa libur: hanya Senin 16:30–17:30 (60) + Rabu 08:30–09:00 (30)
+        $this->assertSame(90, $this->between('2026-11-16 16:30', '2026-11-18 09:00', null, ['2026-11-17']));
+    }
+
+    public function testBetweenIsNegativeWhenTargetIsEarlier(): void
+    {
+        $this->assertSame(-120, $this->between('2026-11-23 09:00', '2026-11-20 16:00'));
+    }
+
     public function testThrowsWhenAllDaysSkipped(): void
     {
         $allOff = [];

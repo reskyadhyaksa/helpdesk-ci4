@@ -15,6 +15,7 @@ class PublicTicketController extends BaseController
         return view('public/tickets/new', [
             'title'      => lang('Ticket.publicTitle'),
             'categories' => service('tickets')->categoryOptions(),
+            'limits'     => service('attachments')->limits(),
         ]);
     }
 

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Isian inti tiket (kategori, judul, deskripsi), dipakai form tiket user dan form tanpa login.
+ * Isian inti tiket (kategori, judul, deskripsi, lampiran) untuk form admin membuatkan tiket (new.php).
  *
  * @var list<array>        $categories id, name, parent_name
  * @var array<string, string> $errors

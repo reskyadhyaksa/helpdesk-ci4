@@ -15,7 +15,7 @@ use App\Models\UserNotificationModel;
 class InAppNotificationService
 {
     // Kejadian yang hanya ditujukan ke agen/PIC
-    private const AGENT_EVENTS = ['ticket_assigned', 'sla_warning', 'sla_breached'];
+    private const AGENT_EVENTS = ['ticket_assigned', 'comment_mention', 'sla_warning', 'sla_breached'];
 
     public const SLA_RESPONSE_WARNING    = 'response_warning';
     public const SLA_RESPONSE_BREACHED   = 'response_breached';
@@ -86,25 +86,42 @@ class InAppNotificationService
 
     /**
      * Balasan publik agen → pemohon dan PIC lain; catatan internal → PIC saja (tidak pernah ke pihak pemohon);
-     * balasan pemohon → PIC.
+     * balasan pemohon → PIC. Yang disebut ($mentionedIds) mendapat notifikasi "disebut" sebagai gantinya, bukan dua kali.
+     *
+     * @param list<string> $mentionedIds
      *
      * @return list<array>
      */
-    public function forComment(array $ticket, string $authorId, string $authorType, string $visibility): array
+    public function forComment(array $ticket, string $authorId, string $authorType, string $visibility, array $mentionedIds = []): array
     {
         $internal   = $visibility === 'INTERNAL';
         $recipients = $authorType === 'AGENT' && ! $internal
             ? [...$this->requesterSide($ticket), ...$this->pics($ticket)]
             : $this->pics($ticket);
 
-        return $this->create(
+        $created = $this->create(
             $ticket,
             'comment_added',
             $internal ? lang('InApp.comment.internal') : lang('InApp.comment.title'),
             lang('InApp.comment.body', [$ticket['ticket_number'], $authorType === 'AGENT' ? lang('InApp.roles.assignee') : lang('InApp.someone')]),
-            $recipients,
+            array_diff($recipients, $mentionedIds),
             $authorId,
         );
+
+        if ($mentionedIds === []) {
+            return $created;
+        }
+
+        $authorName = $this->users->find($authorId)?->name ?? lang('InApp.someone');
+
+        return [...$created, ...$this->create(
+            $ticket,
+            'comment_mention',
+            lang('InApp.mention.title'),
+            lang('InApp.mention.body', [$ticket['ticket_number'], $authorName]),
+            $mentionedIds,
+            $authorId,
+        )];
     }
 
     /**

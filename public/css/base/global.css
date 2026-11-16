@@ -97,6 +97,17 @@ html {
   border-radius: 1rem;
 }
 
+/*
+ * Halaman portal (beranda, dashboard user) tampil sedikit lebih kecil: teks, kartu, jarak, ikon. Navbar ikut,
+ * tapi hanya di halaman yang punya .page-zoom (:has), supaya halaman lain tidak berubah. Footer ikut diskala
+ * agar margin kiri-kanannya sama dengan isi halaman (max-width container dihitung di ruang yang sudah di-zoom).
+ */
+.page-zoom,
+body:has(.page-zoom) .navbar,
+body:has(.page-zoom) > footer.container {
+  zoom: 0.9;
+}
+
 /* Isi halaman sejajar dengan navbar di desktop; di mobile diberi gutter */
 .page-container {
   padding-left: 1rem;
@@ -119,36 +130,37 @@ html {
 }
 
 /*
- * Layout user (navbar, isi, footer): margin kiri-kanan 30% lebih kecil dari bawaan Bulma (tampilan lebih lebar).
- * Lebar container = lebar tersedia − 0,7 × sisa ruang di kiri-kanannya, di mana sisa ruang dihitung dari
- * lebar maksimum Bulma di tiap breakpoint (--layout-max). Di bawah 1024px container selebar layar, jadi tidak berubah.
- * Nilai --layout-max harus sama dengan .container Bulma: 960 / 1152 / 1344px.
+ * Layout user (navbar, isi, footer): hampir selebar layar. Di bawah 1024px container selebar layar;
+ * di atasnya disisakan gutter 2rem di tiap sisi dan dibatasi 1760px agar baris teks tidak terlalu panjang di monitor ultrawide.
+ * Tiga :not() menyamai spesifisitas aturan max-width Bulma di >=1408px, supaya aturan ini yang menang.
  */
-:root {
-  --layout-max: 100%;
-}
-
 @media (min-width: 1024px) {
-  :root {
-    --layout-max: 960px;
+  :is(.navbar .container, main .container, body > footer.container):not(.is-max-tablet):not(.is-max-desktop):not(.is-max-widescreen) {
+    max-width: min(calc(100% - 4rem), 1760px);
   }
 }
 
-@media (min-width: 1216px) {
-  :root {
-    --layout-max: 1152px;
-  }
+/* Halaman portal user (/u: dashboard, riwayat, detail, buat tiket) dan form tanpa login: header di posisi yang sama,
+   lebih dekat ke navbar daripada padding atas .section Bulma (3rem) */
+.user-page {
+  padding-top: 1.25rem;
 }
 
-@media (min-width: 1408px) {
-  :root {
-    --layout-max: 1344px;
-  }
+/* Footer menempel di dasar layar walau isi halaman pendek */
+.site-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-/* Tiga :not() menyamai spesifisitas aturan max-width Bulma di ≥1408px, supaya aturan ini yang menang */
-:is(.navbar .container, main .container, body > footer.container):not(.is-max-tablet):not(.is-max-desktop):not(.is-max-widescreen) {
-  max-width: calc(100% - 0.7 * (100% - min(100%, var(--layout-max))));
+.site-body > main {
+  flex: 1 0 auto;
+}
+
+/* Bulma memberi .container flex-grow:1; tanpa ini footer ikut melar dan kartunya tertinggal di atas */
+.site-body > footer.container {
+  flex: 0 0 auto;
+  width: 100%;
 }
 
 .h-100 {

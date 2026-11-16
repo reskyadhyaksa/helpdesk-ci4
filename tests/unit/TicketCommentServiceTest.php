@@ -97,6 +97,62 @@ final class TicketCommentServiceTest extends CIUnitTestCase
         $this->assertSame(['commit', 'dispatch'], $this->events);
     }
 
+    public function testOnlyPeopleWhoCanAccessTheTicketAreMentioned(): void
+    {
+        $this->ticketIs('OPEN');
+        $this->tickets->method('picCandidates')->willReturn([['id' => 'u2', 'name' => 'Siti', 'employee_no' => '2']]);
+        $this->notifier = $this->createMock(TicketNotifier::class);
+        $this->notifier->expects($this->once())
+            ->method('forComment')
+            ->with($this->anything(), 'u1', 'AGENT', 'PUBLIC', ['u2'])
+            ->willReturn(['outbox' => [], 'inApp' => []]);
+
+        $html = '<p>Mohon cek <span class="mention" data-user-id="u2">@Siti</span> <span class="mention" data-user-id="u9">@Orang</span> <span class="mention" data-user-id="u2">@Siti</span></p>';
+
+        $this->add(['body' => $html, 'format' => 'html'], isAgent: true);
+    }
+
+    public function testHtmlFromTheEditorIsSanitizedAndStoredAsHtml(): void
+    {
+        $this->ticketIs('OPEN');
+
+        $this->add(['body' => '<p onclick="x()">Halo <b>tim</b></p><script>alert(1)</script>', 'format' => 'html'], isAgent: true);
+
+        $this->assertSame('<p>Halo <strong>tim</strong></p>', $this->inserted[0]['body']);
+        $this->assertSame('HTML', $this->inserted[0]['body_format']);
+    }
+
+    public function testEmptyEditorContentIsRejected(): void
+    {
+        $this->ticketIs('OPEN');
+        $this->expectException(BusinessException::class);
+
+        $this->add(['body' => '<p><br></p>', 'format' => 'html'], isAgent: true);
+    }
+
+    public function testPlainTextWithoutFormatIsStoredAsText(): void
+    {
+        $this->ticketIs('OPEN');
+
+        $this->add(['body' => '<b>bukan html</b>']);
+
+        $this->assertSame('<b>bukan html</b>', $this->inserted[0]['body']);
+        $this->assertSame('TEXT', $this->inserted[0]['body_format']);
+    }
+
+    public function testRequesterSideCannotMentionAnyone(): void
+    {
+        $this->ticketIs('OPEN');
+        $this->tickets->expects($this->never())->method('picCandidates');
+        $this->notifier = $this->createMock(TicketNotifier::class);
+        $this->notifier->expects($this->once())
+            ->method('forComment')
+            ->with($this->anything(), 'u1', 'REQUESTER', 'PUBLIC', [])
+            ->willReturn(['outbox' => [], 'inApp' => []]);
+
+        $this->add(['body' => '<p>Halo <span class="mention" data-user-id="u2">@Siti</span></p>', 'format' => 'html']);
+    }
+
     public function testAnotificationFailureDoesNotBreakTheComment(): void
     {
         $this->ticketIs('OPEN');

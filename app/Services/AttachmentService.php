@@ -14,10 +14,34 @@ use CodeIgniter\HTTP\Files\UploadedFile;
  */
 class AttachmentService
 {
+    public const TYPE_PDF = 'application/pdf';
+
+    // Jenis yang aman ditampilkan langsung di browser. SVG dan HTML sengaja tidak ada: keduanya bisa memuat skrip.
+    private const PREVIEWABLE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', self::TYPE_PDF, 'text/plain'];
+
+    public static function canPreview(string $contentType): bool
+    {
+        return in_array(strtolower($contentType), self::PREVIEWABLE_TYPES, true);
+    }
+
     public function __construct(
         private readonly TicketAttachmentModel $attachments,
         private readonly SystemParameterModel $parameters,
     ) {
+    }
+
+    /**
+     * Batas lampiran untuk ditampilkan di form.
+     *
+     * @return array{extensions: list<string>, max_mb: int, max_files: int}
+     */
+    public function limits(): array
+    {
+        return [
+            'extensions' => $this->allowedExtensions(),
+            'max_mb'     => $this->parameters->int(SystemParameterModel::ATTACHMENT_MAX_SIZE_MB),
+            'max_files'  => $this->parameters->int(SystemParameterModel::ATTACHMENT_MAX_FILES),
+        ];
     }
 
     /**

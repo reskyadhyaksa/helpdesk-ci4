@@ -19,10 +19,15 @@ $canSync       = auth_can(PermissionModel::ADMIN_HOLIDAYS_SYNC);
 $canEditOffDay = auth_can(PermissionModel::ADMIN_OFF_DAYS_UPDATE);
 
 $hasActions = $canUpdate || $canDelete;
-$columns    = ['Tanggal', 'Nama Hari Libur', 'Jenis', 'Diperbarui'];
+$columns    = [
+    ['label' => 'Tanggal', 'width' => 13],
+    ['label' => 'Nama Hari Libur', 'width' => 22],
+    ['label' => 'Jenis', 'width' => 11],
+    ['label' => 'Diperbarui', 'width' => 13],
+];
 
 if ($hasActions) {
-    $columns[] = ['label' => 'Aksi', 'align' => 'right'];
+    $columns[] = ['label' => 'Aksi', 'align' => 'end', 'width' => 12];
 }
 
 $isFiltered = $keyword !== '' || $selectedMonths !== [] || $selectedYears !== [(int) date('Y')];
@@ -44,62 +49,145 @@ $isFiltered = $keyword !== '' || $selectedMonths !== [] || $selectedYears !== [(
                 </button>
             </form>
         <?php endif ?>
+        <?php component_slot('tabs') ?>
+        <?php // Dua tab di dalam header agar halaman tidak panjang: jadwal mingguan dan daftar hari libur (js/components/header-tabs.js) ?>
+        <div class="admin-page-header-tab-list" role="tablist" aria-label="Pengaturan hari kerja dan libur" data-header-tabs data-storage-key="holidays.tab" data-default="schedule" data-query-tab="holidays">
+            <button type="button" class="admin-page-header-tab" role="tab" id="tab-schedule" aria-controls="panel-schedule" data-tab="schedule">
+                <i class="fa-regular fa-clock" aria-hidden="true"></i> Jadwal Kerja
+            </button>
+            <button type="button" class="admin-page-header-tab" role="tab" id="tab-holidays" aria-controls="panel-holidays" data-tab="holidays">
+                <i class="fa-solid fa-calendar-days" aria-hidden="true"></i> Hari Libur
+            </button>
+        </div>
     <?= component_end() ?>
 
-    <!-- Hari off mingguan: dipakai SLA dengan opsi "Lewati hari off". Nilai = nomor hari ISO (Senin = 1).
-         Terkunci sampai tombol Edit ditekan (js/pages/admin/holidays.js). -->
-    <form class="box p-0 mb-5" action="<?= url_to('admin.holidays.off-days') ?>" method="post" data-off-days>
+    <div id="panel-schedule" role="tabpanel" aria-labelledby="tab-schedule" data-tab-panel="schedule">
+    <!-- Jadwal kerja mingguan: satu baris per hari berisi status (Kerja/Libur) dan jam kerjanya. Nilai = nomor hari ISO
+         (Senin = 1). Kotak centang off_days[] = hari libur; baris libur tidak mengirim jam. Terkunci sampai tombol Edit
+         ditekan (js/pages/admin/holidays.js). -->
+    <form class="box p-0 mb-5 week-schedule" action="<?= url_to('admin.holidays.off-days') ?>" method="post" data-off-days>
         <?= csrf_field() ?>
 
         <div class="form-card-body">
-            <p class="form-section-label mb-1">Hari Off dan Jam Kerja Mingguan</p>
-            <p class="is-size-7 has-text-grey-dark mb-4">
-                Hari yang dicentang tidak dihitung pada kebijakan SLA yang mengaktifkan opsi <strong>Lewati hari off</strong>.
-                Jam kerja tiap hari dipakai kebijakan SLA yang mengaktifkan opsi <strong>Hanya jam kerja</strong>.
-                Perubahan berlaku untuk perhitungan SLA berikutnya.
+            <div class="week-top">
+                <div>
+                    <h2 class="form-section-label mb-1">Jadwal Kerja Mingguan</h2>
+                    <p class="is-size-7 has-text-grey-dark">
+                        Tentukan hari kantor beroperasi dan jam kerjanya. Berlaku untuk perhitungan SLA berikutnya.
+                    </p>
+                </div>
+
+                <?php // Status mode: terkunci / sedang mengedit / ada perubahan belum disimpan (diatur js/pages/admin/holidays.js) ?>
+                <p class="week-mode" data-mode-note role="status">
+                    <i class="fa-solid <?= $canEditOffDay ? 'fa-lock' : 'fa-eye' ?>" aria-hidden="true" data-mode-icon></i>
+                    <span data-mode-text>
+                        <?php if ($canEditOffDay): ?>
+                            Terkunci. Tekan <strong>Edit</strong> untuk mengubah.
+                        <?php else: ?>
+                            Hanya bisa dilihat.
+                        <?php endif ?>
+                    </span>
+                </p>
+            </div>
+
+            <dl class="week-summary" aria-label="Ringkasan jadwal">
+                <div>
+                    <dt><i class="fa-solid fa-briefcase" aria-hidden="true"></i> Hari kerja</dt>
+                    <dd data-summary-work>—</dd>
+                </div>
+                <div>
+                    <dt><i class="fa-regular fa-clock" aria-hidden="true"></i> Jam kerja</dt>
+                    <dd data-summary-hours>—</dd>
+                </div>
+                <div>
+                    <dt><i class="fa-solid fa-mug-hot" aria-hidden="true"></i> Libur mingguan</dt>
+                    <dd data-summary-off>—</dd>
+                </div>
+                <div>
+                    <dt><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i> Total per minggu</dt>
+                    <dd data-summary-total>—</dd>
+                </div>
+            </dl>
+
+            <p class="week-hint">
+                <strong>Hari libur</strong> dilewati pada opsi <strong>Lewati hari off</strong>; <strong>jam kerja</strong> menentukan SLA berjalan
+                pada opsi <strong>Hanya jam kerja</strong> (di luar jam itu SLA berhenti).
             </p>
 
-            <fieldset disabled style="min-width: 0; border: 0">
-                <legend class="is-sr-only">Pilih hari off dan jam kerja mingguan</legend>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.75rem">
+            <fieldset class="week-fieldset" disabled>
+                <legend class="is-sr-only">Atur status dan jam kerja tiap hari</legend>
+
+
+                <div class="week-head" aria-hidden="true">
+                    <span>Hari</span>
+                    <span>Status</span>
+                    <span>Jam mulai – selesai</span>
+                    <span>
+                        Posisi dalam sehari (jam)
+                        <span class="week-scale"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></span>
+                    </span>
+                    <span>Durasi</span>
+                </div>
+
+                <ul class="week-list">
                     <?php foreach (WeeklyOffDayModel::DAYS as $number => $label): ?>
                         <?php
+                        $isOff = in_array($number, $offDayNums, true);
                         $start = $schedule[$number]['start'] ?? WeeklyOffDayModel::DEFAULT_WORK_START;
                         $end   = $schedule[$number]['end'] ?? WeeklyOffDayModel::DEFAULT_WORK_END;
                         ?>
-                        <div class="option-card is-locked" style="flex-direction: column; gap: 0.5rem">
-                            <label class="option-card-label" style="cursor: inherit">
-                                <input type="checkbox" name="off_days[]" value="<?= $number ?>"
-                                    <?= in_array($number, $offDayNums, true) ? 'checked' : '' ?>>
-                                <span><?= esc($label) ?> libur</span>
+                        <li class="week-row <?= $isOff ? 'is-off' : '' ?>" data-day="<?= $number ?>" data-day-name="<?= esc($label, 'attr') ?>">
+                            <span class="week-day"><?= esc($label) ?></span>
+
+                            <label class="week-toggle">
+                                <input type="checkbox" name="off_days[]" value="<?= $number ?>" <?= $isOff ? 'checked' : '' ?>
+                                    aria-label="<?= esc($label, 'attr') ?> libur">
+                                <span class="week-toggle-option is-work" aria-hidden="true"><i class="fa-solid fa-briefcase"></i> Kerja</span>
+                                <span class="week-toggle-option is-off" aria-hidden="true"><i class="fa-solid fa-mug-hot"></i> Libur</span>
                             </label>
-                            <div class="is-flex is-align-items-center" style="gap: 0.4rem">
-                                <input class="input is-small" type="time" name="work_start[<?= $number ?>]"
-                                    value="<?= esc($start, 'attr') ?>" aria-label="Jam mulai <?= esc($label, 'attr') ?>">
+
+                            <div class="week-hours">
+                                <label class="is-sr-only" for="work_start_<?= $number ?>">Jam mulai <?= esc($label) ?></label>
+                                <input class="input" type="time" id="work_start_<?= $number ?>" name="work_start[<?= $number ?>]"
+                                    value="<?= esc($start, 'attr') ?>" <?= $isOff ? 'disabled' : '' ?>>
                                 <span aria-hidden="true">–</span>
-                                <input class="input is-small" type="time" name="work_end[<?= $number ?>]"
-                                    value="<?= esc($end, 'attr') ?>" aria-label="Jam selesai <?= esc($label, 'attr') ?>">
+                                <label class="is-sr-only" for="work_end_<?= $number ?>">Jam selesai <?= esc($label) ?></label>
+                                <input class="input" type="time" id="work_end_<?= $number ?>" name="work_end[<?= $number ?>]"
+                                    value="<?= esc($end, 'attr') ?>" <?= $isOff ? 'disabled' : '' ?>>
                             </div>
-                        </div>
+                            <p class="week-off-note">Libur, tidak dihitung dalam SLA</p>
+
+                            <?php // Rentang jam kerja pada skala 00–24 (diisi js/pages/admin/holidays.js) ?>
+                            <div class="week-track" aria-hidden="true"><span class="week-track-fill" data-fill><span data-fill-text></span></span></div>
+
+                            <span class="week-duration" data-duration aria-live="polite"></span>
+                        </li>
                     <?php endforeach ?>
-                </div>
+                </ul>
             </fieldset>
         </div>
 
         <?php if ($canEditOffDay): ?>
             <div class="form-card-footer">
+                <button type="button" class="button is-light" data-copy-hours hidden
+                    title="Salin jam kerja hari kerja pertama ke semua hari kerja lainnya">
+                    <span class="icon"><i class="fa-regular fa-copy" aria-hidden="true"></i></span>
+                    <span>Samakan jam semua hari kerja</span>
+                </button>
                 <button type="button" class="button is-light" data-off-days-toggle aria-pressed="false">
                     <span class="icon"><i class="fa-solid fa-pen" aria-hidden="true"></i></span>
                     <span data-label>Edit</span>
                 </button>
                 <button type="submit" class="button is-primary" data-off-days-save disabled>
                     <span class="icon"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i></span>
-                    <span>Simpan Hari Off</span>
+                    <span>Simpan Jadwal</span>
                 </button>
             </div>
         <?php endif ?>
     </form>
+    </div>
 
+    <div id="panel-holidays" role="tabpanel" aria-labelledby="tab-holidays" data-tab-panel="holidays" hidden>
     <p class="is-size-7 has-text-grey-dark mb-4">
         Tanggal merah dan cuti bersama, tidak dihitung pada kebijakan SLA yang mengaktifkan opsi <strong>Lewati hari libur</strong>.
     </p>
@@ -187,9 +275,8 @@ $isFiltered = $keyword !== '' || $selectedMonths !== [] || $selectedYears !== [(
                             <?php if ($canDelete): ?>
                                 <form action="<?= url_to('admin.holidays.delete', $holiday['id']) ?>" method="post" data-confirm="<?= esc(lang('Admin.holiday.confirmDelete'), 'attr') ?>">
                                     <?= csrf_field() ?>
-                                    <button type="submit" class="button is-small is-danger is-light" aria-label="Hapus <?= esc($holiday['name'], 'attr') ?>">
+                                    <button type="submit" class="button is-small is-danger is-light" aria-label="Hapus <?= esc($holiday['name'], 'attr') ?>" title="Hapus <?= esc($holiday['name'], 'attr') ?>">
                                         <span class="icon"><i class="fa-solid fa-trash" aria-hidden="true"></i></span>
-                                        <span>Hapus</span>
                                     </button>
                                 </form>
                             <?php endif ?>
@@ -199,9 +286,11 @@ $isFiltered = $keyword !== '' || $selectedMonths !== [] || $selectedYears !== [(
             </tr>
         <?php endforeach ?>
     <?= component_end() ?>
+    </div>
 </section>
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('js/components/header-tabs.js') ?>"></script>
 <script src="<?= base_url('js/pages/admin/holidays.js') ?>"></script>
 <?= $this->endSection() ?>

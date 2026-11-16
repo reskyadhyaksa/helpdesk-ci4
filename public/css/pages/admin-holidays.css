@@ -1,0 +1,308 @@
+/*
+ * Jadwal kerja mingguan di halaman Holiday (views/admin/holidays/index.php, js/pages/admin/holidays.js):
+ * ringkasan jadwal, keterangan, lalu satu baris per hari dengan pilihan Kerja/Libur dan jam kerjanya.
+ */
+
+.week-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* Ringkasan: tiga angka kunci jadwal, selalu terlihat walau form terkunci */
+.week-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.5rem 1.5rem;
+  margin: 0 0 0.6rem;
+  padding: 0.6rem 1rem;
+  border-radius: 0.75rem;
+  background-color: var(--app-fill-blue);
+}
+
+.week-summary dt {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.week-summary dd {
+  margin: 0.1rem 0 0;
+  color: var(--bulma-text-strong);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+/* Judul di kiri, status mode di kanan: satu baris */
+.week-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.week-hint {
+  margin: 0 0 0.6rem;
+  color: #475569;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.week-hint strong {
+  color: var(--bulma-text-strong);
+}
+
+/* Status mode: abu saat terkunci, biru saat mengedit, kuning saat ada perubahan belum disimpan */
+.week-mode {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background-color: #f1f5f9;
+  color: #475569;
+  font-size: 0.78rem;
+}
+
+.week-mode.is-editing {
+  background-color: var(--app-fill-blue);
+  color: var(--bulma-text-strong);
+}
+
+.week-mode.is-dirty {
+  background-color: #fffbeb;
+  color: #78350f;
+}
+
+/* Kolom: hari | status | jam (dua input) | rentang 00–24 (mengisi sisa lebar) | durasi */
+.week-head,
+.week-row {
+  display: grid;
+  grid-template-columns: 5.5rem 10.5rem 16rem minmax(8rem, 1fr) 6rem;
+  align-items: center;
+  gap: 0.5rem 1.25rem;
+}
+
+/* Atribut hidden harus menang atas display bawaan .button (tombol "Samakan jam" saat form terkunci) */
+.week-schedule [hidden] {
+  display: none !important;
+}
+
+.week-head {
+  padding: 0.35rem 1rem;
+  border-radius: 0.6rem;
+  background-color: #f8fafc;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.week-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.week-row {
+  padding: 0.3rem 1rem;
+  border-bottom: 1px solid #eef0f4;
+}
+
+.week-row:last-child {
+  border-bottom: 0;
+}
+
+.week-day {
+  color: var(--bulma-text-strong);
+  font-weight: 600;
+}
+
+/* Kontrol Kerja/Libur dari satu kotak centang: tercentang = libur. Kotak aslinya tetap bisa difokus keyboard. */
+.week-toggle {
+  position: relative;
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.15rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.65rem;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.week-toggle input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.week-toggle-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 1.75rem;
+  padding: 0 0.7rem;
+  border-radius: 0.5rem;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.week-toggle input:not(:checked) ~ .is-work {
+  background-color: hsl(153deg 50% 30%);
+  color: #fff;
+}
+
+.week-toggle input:checked ~ .is-off {
+  background-color: #475569;
+  color: #fff;
+}
+
+.week-toggle:has(input:focus-visible) {
+  outline: 2px solid var(--bulma-link);
+  outline-offset: 2px;
+}
+
+fieldset:disabled .week-toggle {
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+/* Jam kerja: tampil hanya di hari kerja; hari libur menampilkan keterangan */
+.week-hours {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.week-hours .input {
+  width: 7.5rem;
+  min-height: 2rem;
+  padding-block: 0;
+}
+
+.week-hours .input:disabled {
+  opacity: 1;
+  background-color: #f8fafc;
+  color: #334155;
+}
+
+.week-off-note {
+  display: none;
+  color: #64748b;
+  font-style: italic;
+}
+
+.week-row.is-off .week-hours,
+.week-row.is-off .week-track {
+  display: none;
+}
+
+.week-row.is-off .week-off-note {
+  display: block;
+  grid-column: 3 / 5;
+}
+
+/* Skala 00–24 di kepala kolom dan bar rentang jam kerja tiap hari */
+.week-scale {
+  display: flex;
+  justify-content: space-between;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Garis tipis di 06, 12, dan 18 membantu membaca posisi jam; jam kerja tertulis di dalam bar hijau */
+.week-track {
+  position: relative;
+  height: 1.3rem;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background-color: #e2e8f0;
+  background-image: linear-gradient(to right, transparent calc(25% - 1px), #cbd5e1 calc(25% - 1px), #cbd5e1 25%, transparent 25%,
+    transparent calc(50% - 1px), #cbd5e1 calc(50% - 1px), #cbd5e1 50%, transparent 50%,
+    transparent calc(75% - 1px), #cbd5e1 calc(75% - 1px), #cbd5e1 75%, transparent 75%);
+}
+
+.week-track-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--start, 0%);
+  width: var(--span, 0%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background-color: hsl(153deg 50% 30%);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.week-row.is-off .week-day {
+  color: #64748b;
+}
+
+.week-duration {
+  color: #475569;
+  font-variant-numeric: tabular-nums;
+}
+
+.week-duration.is-invalid {
+  color: var(--app-danger-ink);
+  font-weight: 600;
+}
+
+/* Footer: tombol "Samakan jam" di kiri, Edit dan Simpan di kanan */
+.week-schedule .form-card-footer [data-copy-hours] {
+  margin-right: auto;
+}
+
+@media (max-width: 768px) {
+  .week-head {
+    display: none;
+  }
+
+  .week-row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .week-hours,
+  .week-track,
+  .week-off-note,
+  .week-row.is-off .week-off-note,
+  .week-duration {
+    grid-column: 1 / -1;
+  }
+
+  .week-hours .input {
+    flex: 1;
+    width: auto;
+  }
+}
+
+@media (pointer: coarse) {
+  .week-toggle-option {
+    min-height: 2.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .week-toggle-option {
+    transition: none;
+  }
+}

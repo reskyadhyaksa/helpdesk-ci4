@@ -20,8 +20,20 @@ use Throwable;
 
 class TicketService
 {
-    public const SCOPE_MINE     = 'mine';
+    public const SCOPE_MINE = 'mine';
     public const SCOPE_ASSIGNED = 'assigned';
+
+    // Dashboard user: jumlah tiket terbaru dan kartu standar SLA yang ditampilkan
+    public const DASHBOARD_TICKET_LIMIT = 5;
+    private const DASHBOARD_SLA_LIMIT = 3;
+
+    // Tab cepat di daftar tiket; "expiring" = tiket berjalan yang urgent atau batas penyelesaiannya habis dalam jendela ini
+    public const TABS = ['all', 'open', 'progress', 'expiring'];
+
+    private const EXPIRING_WINDOW_MINUTES = 60;
+
+    // Kartu per kolom di papan Kanban; selebihnya dilihat di tampilan tabel
+    public const BOARD_LIMIT = 20;
 
     private const NO_NOTIFICATIONS = ['outbox' => [], 'inApp' => []];
 
@@ -81,17 +93,17 @@ class TicketService
      */
     public function createPublic(array $data, array $files = []): array
     {
-        $nip      = trim($data['nip']);
+        $nip = trim($data['nip']);
         $employee = $this->hr->getHelpdeskUserData($nip);
 
         $requester = [
-            'requester_id'           => null,
-            'requester_nip'          => $nip,
-            'requester_name'         => $employee['name'] ?? $employee['fullName'] ?? $nip,
-            'requester_phone'        => trim($data['phone']),
-            'requester_email'        => trim($data['email']) ?: null,
+            'requester_id' => null,
+            'requester_nip' => $nip,
+            'requester_name' => $employee['name'] ?? $employee['fullName'] ?? $nip,
+            'requester_phone' => trim($data['phone']),
+            'requester_email' => trim($data['email']) ?: null,
             'requester_organization' => ($employee['organization'] ?? null) ?: (trim($data['organization']) ?: null),
-            'is_requester_verified'  => $this->matchesHr($employee, $data) ? 1 : 0,
+            'is_requester_verified' => $this->matchesHr($employee, $data) ? 1 : 0,
         ];
 
         return $this->store($data, $requester, TicketModel::CHANNEL_PUBLIC_FORM, null, $files);
@@ -103,9 +115,9 @@ class TicketService
     public function changeStatus(string $ticketId, TicketStatus $to, ?string $actorId): void
     {
         $ticket = $this->tickets->find($ticketId) ?? throw new BusinessException(lang('Ticket.notFound'));
-        $from   = TicketStatus::from($ticket['status']);
+        $from = TicketStatus::from($ticket['status']);
 
-        if (! $from->canTransitionTo($to)) {
+        if (!$from->canTransitionTo($to)) {
             throw new BusinessException(lang('Ticket.illegalTransition', [$from->label(), $to->label()]));
         }
 
@@ -118,7 +130,7 @@ class TicketService
             $this->tickets->update($ticketId, $changes);
             $this->activities->record($ticketId, $actorId, TicketActivityModel::ACTION_STATUS_CHANGED, $from->value, $to->value);
 
-            $pending = $this->queueNotifications(fn (): array => $this->notifications->forStatusChange($ticket, $from, $to, $actorId));
+            $pending = $this->queueNotifications(fn(): array => $this->notifications->forStatusChange($ticket, $from, $to, $actorId));
         });
 
         $this->notifications->dispatch($pending);
@@ -132,11 +144,11 @@ class TicketService
      */
     public function assign(string $ticketId, string $role, ?string $userId, ?string $actorId): void
     {
-        $config    = self::PIC_ROLES[$role] ?? throw new BusinessException(lang('Ticket.picInvalid'));
-        $ticket    = $this->tickets->find($ticketId) ?? throw new BusinessException(lang('Ticket.notFound'));
-        $newName   = $userId === null ? null : $this->candidateName($userId);
+        $config = self::PIC_ROLES[$role] ?? throw new BusinessException(lang('Ticket.picInvalid'));
+        $ticket = $this->tickets->find($ticketId) ?? throw new BusinessException(lang('Ticket.notFound'));
+        $newName = $userId === null ? null : $this->candidateName($ticket, $userId);
         $oldUserId = $ticket[$config['column']] ?? null;
-        $oldName   = $oldUserId === null ? null : $this->users->find($oldUserId)?->name;
+        $oldName = $oldUserId === null ? null : $this->users->find($oldUserId)?->name;
 
         $pending = self::NO_NOTIFICATIONS;
 
@@ -146,7 +158,7 @@ class TicketService
 
             // Hanya PIC yang benar-benar baru yang diberi tahu
             if ($userId !== null && $userId !== $oldUserId) {
-                $pending = $this->queueNotifications(fn (): array => $this->notifications->forAssignment($ticket, $role, $userId, $actorId));
+                $pending = $this->queueNotifications(fn(): array => $this->notifications->forAssignment($ticket, $role, $userId, $actorId));
             }
         });
 
@@ -173,11 +185,21 @@ class TicketService
     }
 
     /**
-     * @return list<array{id: string, name: string, employee_no: string}> kandidat PIC
+     * Kandidat PIC untuk satu tiket: pengguna dengan akses panel admin yang juga boleh mengakses tiket itu,
+     * yaitu punya permission lihat-semua atau kategori tiketnya ada di akses kategorinya.
+     *
+     * @return list<array{id: string, name: string, employee_no: string}>
      */
-    public function pics(): array
+    public function picCandidates(array $ticket): array
     {
-        return $this->users->withPermission(PermissionModel::ADMIN_ACCESS);
+        $viewAllIds = array_column($this->users->withPermission(PermissionModel::ADMIN_TICKETS_VIEW_ALL), 'id');
+        $categoryId = (string) ($ticket['request_category_id'] ?? '');
+
+        return array_values(array_filter(
+            $this->users->withPermission(PermissionModel::ADMIN_ACCESS),
+            fn(array $candidate): bool => in_array($candidate['id'], $viewAllIds, true)
+                || in_array($categoryId, $this->categoryIdsFor($candidate['id']), true),
+        ));
     }
 
     /**
@@ -201,12 +223,170 @@ class TicketService
     }
 
     /**
+     * Saringan daftar tiket dari query string (q, status[], category[], priority[], pic[], unassigned, tab) → nilai yang
+     * aman dan sudah dibersihkan; nilai di luar pilihan dibuang.
+     *
+     * @param array<string, mixed> $input
+     *
+     * @return array{keyword: string, statuses: list<string>, categories: list<string>, priorities: list<string>, pics: list<string>, unassigned: bool, tab: string, view: 'table'|'kanban'}
+     */
+    public function normalizeFilters(array $input): array
+    {
+        $values = static fn(mixed $value): array => array_values(array_filter(array_map('strval', (array) $value), static fn(string $item): bool => $item !== ''));
+        $ids = static fn(array $list): array => array_values(array_filter($list, static fn(string $id): bool => preg_match('/^[0-9a-f-]{36}$/i', $id) === 1));
+
+        return [
+            'keyword' => trim((string) ($input['q'] ?? '')),
+            'statuses' => array_values(array_intersect(array_keys(TicketStatus::options()), $values($input['status'] ?? []))),
+            'categories' => $ids($values($input['category'] ?? [])),
+            'priorities' => array_values(array_intersect(array_keys(SlaPolicy::PRIORITY_LABELS), $values($input['priority'] ?? []))),
+            'pics' => $ids($values($input['pic'] ?? [])),
+            'unassigned' => ($input['unassigned'] ?? '') === '1',
+            'tab' => in_array($input['tab'] ?? '', self::TABS, true) ? $input['tab'] : 'all',
+            'view' => ($input['view'] ?? '') === 'kanban' ? 'kanban' : 'table',
+        ];
+    }
+
+    /**
+     * Pilihan dropdown filter daftar tiket: nilai => label per saringan.
+     *
+     * @return array{status: array<string, string>, category: array<string, string>, priority: array<string, string>, pic: array<string, string>}
+     */
+    public function filterOptions(): array
+    {
+        $names = array_column($this->categories->allOrdered(), 'name', 'id');
+        $category = [];
+
+        foreach ($this->categories->allOrdered() as $row) {
+            $category[$row['id']] = $row['parent_id'] === null ? $row['name'] : ($names[$row['parent_id']] ?? '') . ' › ' . $row['name'];
+        }
+
+        return [
+            'status' => TicketStatus::options(),
+            'category' => $category,
+            'priority' => SlaPolicy::PRIORITY_LABELS,
+            'pic' => array_column($this->users->withPermission(PermissionModel::ADMIN_ACCESS), 'name', 'id'),
+        ];
+    }
+
+    /**
      * @param array{id: string, employee_no?: string} $viewer
-     * @param self::SCOPE_*|null                      $scope  null = semua yang terlihat
+     * @param self::SCOPE_*|null                      $scope   null = semua yang terlihat
+     * @param array<string, mixed>                    $filters hasil normalizeFilters(); kosong = tanpa saringan
      *
      * @return array{tickets: list<array>, pager: Pager}
      */
-    public function paginateVisible(array $viewer, bool $canViewAll, ?string $scope = null): array
+    public function paginateVisible(array $viewer, bool $canViewAll, ?string $scope = null, array $filters = []): array
+    {
+        $this->scoped($viewer, $canViewAll, $scope)->matching($this->withExpiringBefore($filters));
+
+        return ['tickets' => $this->withSlaRemaining($this->tickets->paginateList()), 'pager' => $this->tickets->pager];
+    }
+
+    /**
+     * Papan Kanban: satu kolom per TicketStatus::boardColumns(), masing-masing berisi jumlah total dan
+     * BOARD_LIMIT tiket terbaru (lengkap dengan sisa SLA). Cakupan dan saringan sama dengan daftar tabel.
+     *
+     * @param array<string, mixed> $filters hasil normalizeFilters()
+     *
+     * @return list<array{key: string, label: string, tone: string, statuses: list<string>, total: int, tickets: list<array>}>
+     */
+    public function board(array $viewer, bool $canViewAll, ?string $scope, array $filters): array
+    {
+        $columns = [];
+
+        foreach (TicketStatus::boardColumns() as $key => $column) {
+            $this->scoped($viewer, $canViewAll, $scope)->matching($this->withExpiringBefore($filters));
+
+            $result = $this->tickets->boardColumn($column['statuses'], self::BOARD_LIMIT);
+            $columns[] = ['key' => $key, 'total' => $result['total'], 'tickets' => $this->withSlaRemaining($result['tickets'])] + $column;
+        }
+
+        return $columns;
+    }
+
+    /**
+     * Jumlah tiket per tab (all, open, progress, expiring) pada cakupan dan saringan yang sama dengan daftar,
+     * kecuali tab itu sendiri, jadi angkanya sama dengan isi daftar bila tab diklik.
+     *
+     * @param array<string, mixed> $filters hasil normalizeFilters()
+     *
+     * @return array<string, int>
+     */
+    public function tabCounts(array $viewer, bool $canViewAll, ?string $scope, array $filters): array
+    {
+        $counts = [];
+
+        foreach (self::TABS as $tab) {
+            $this->scoped($viewer, $canViewAll, $scope)->matching($this->withExpiringBefore(['tab' => $tab] + $filters));
+
+            $counts[$tab] = $this->tickets->countAllResults();
+        }
+
+        return $counts;
+    }
+
+    private function scoped(array $viewer, bool $canViewAll, ?string $scope): TicketModel
+    {
+        $this->applyScope($viewer, $canViewAll, $scope);
+
+        return $this->tickets;
+    }
+
+    /**
+     * Jumlah tiket milik user per kelompok status dashboard (lihat TicketStatus::dashboardGroups()).
+     *
+     * @param array{id: string, employee_no?: string} $viewer
+     *
+     * @return array<string, int> kelompok => jumlah
+     */
+    public function statusSummary(array $viewer): array
+    {
+        $this->applyScope($viewer, false, self::SCOPE_MINE);
+        $counts = $this->tickets->statusCounts();
+
+        $summary = [];
+
+        foreach (TicketStatus::dashboardGroups() as $group => $statuses) {
+            $summary[$group] = 0;
+
+            foreach ($statuses as $status) {
+                $summary[$group] += $counts[$status->value] ?? 0;
+            }
+        }
+
+        return $summary;
+    }
+
+    /**
+     * Tiket terbaru milik user untuk dashboard, bisa dicari dan difilter.
+     *
+     * @param array{id: string, employee_no?: string}                              $viewer
+     * @param array{keyword: string, status: list<string>, category: list<string>} $filters
+     *
+     * @return list<array>
+     */
+    public function recentFor(array $viewer, array $filters): array
+    {
+        $this->applyScope($viewer, false, self::SCOPE_MINE);
+        $this->tickets->filterBy($filters['keyword'], $filters['status'], $filters['category']);
+
+        return $this->tickets->latest(self::DASHBOARD_TICKET_LIMIT);
+    }
+
+    /**
+     * Beberapa kategori beserta batas SLA-nya, untuk kartu "Standar SLA" di dashboard.
+     *
+     * @return list<array> baris seperti categoryOptions(), hanya yang punya SLA
+     */
+    public function slaStandards(): array
+    {
+        $withSla = array_filter($this->categories->selectableForTicket(), static fn(array $category): bool => $category['sla_priority'] !== null);
+
+        return array_slice(array_values($withSla), 0, self::DASHBOARD_SLA_LIMIT);
+    }
+
+    private function applyScope(array $viewer, bool $canViewAll, ?string $scope): void
     {
         $this->tickets->visibleTo($viewer, $this->categoryIdsFor($viewer['id']), $canViewAll);
 
@@ -217,8 +397,64 @@ class TicketService
         if ($scope === self::SCOPE_ASSIGNED) {
             $this->tickets->onlyAssignedTo($viewer['id']);
         }
+    }
 
-        return ['tickets' => $this->tickets->paginateList(), 'pager' => $this->tickets->pager];
+    /**
+     * @param array<string, mixed> $filters
+     *
+     * @return array<string, mixed>
+     */
+    private function withExpiringBefore(array $filters): array
+    {
+        $before = new DateTimeImmutable('now +' . self::EXPIRING_WINDOW_MINUTES . ' minutes', new DateTimeZone(app_timezone()));
+
+        return $filters + ['expiring_before' => $before->format('Y-m-d H:i:s')];
+    }
+
+    /**
+     * Menambah sla_remaining_minutes: sisa menit SLA ke batas penyelesaian, dihitung dengan aturan kebijakan tiket
+     * itu (lewati hari libur, hari off, hanya jam kerja), sama dengan perhitungan batasnya. Negatif = terlambat.
+     * Null untuk tiket tanpa SLA atau yang sudah selesai.
+     *
+     * @param list<array> $tickets
+     *
+     * @return list<array>
+     */
+    public function withSlaRemaining(array $tickets): array
+    {
+        $now = new DateTimeImmutable('now', new DateTimeZone(app_timezone()));
+        $dues = [];
+        $dates = [$now->format('Y-m-d')];
+
+        foreach ($tickets as $i => $ticket) {
+            $status = TicketStatus::from($ticket['status']);
+
+            if ($ticket['resolution_due_at'] !== null && $ticket['sla_limit_minutes'] !== null && $status !== TicketStatus::Resolved && !$status->isFinal()) {
+                $dues[$i] = new DateTimeImmutable($ticket['resolution_due_at'], new DateTimeZone(app_timezone()));
+                $dates[] = $dues[$i]->format('Y-m-d');
+            }
+        }
+
+        if ($dues === []) {
+            return array_map(static fn(array $ticket): array => $ticket + ['sla_remaining_minutes' => null], $tickets);
+        }
+
+        $schedule = $this->holidays->schedule();
+        $holidayDates = $this->holidays->holidayDatesFrom(min($dates));
+
+        foreach ($tickets as $i => $ticket) {
+            $policy = new SlaPolicy([
+                'is_holiday' => $ticket['sla_is_holiday'],
+                'is_off_day' => $ticket['sla_is_off_day'],
+                'is_work_hours' => $ticket['sla_is_work_hours'],
+            ]);
+
+            $tickets[$i]['sla_remaining_minutes'] = isset($dues[$i])
+                ? $this->calculator->workingMinutesBetween($now, $dues[$i], $policy, $schedule, $holidayDates)
+                : null;
+        }
+
+        return $tickets;
     }
 
     /**
@@ -230,9 +466,9 @@ class TicketService
         return $this->access->effectiveCategoryIds($this->users->find($userId));
     }
 
-    private function candidateName(string $userId): string
+    private function candidateName(array $ticket, string $userId): string
     {
-        foreach ($this->pics() as $candidate) {
+        foreach ($this->picCandidates($ticket) as $candidate) {
             if ($candidate['id'] === $userId) {
                 return $candidate['name'];
             }
@@ -261,26 +497,26 @@ class TicketService
         $employee = $this->hr->getHelpdeskUserData($forNip) ?? throw new BusinessException(lang('Ticket.requesterNotFound'));
 
         return [
-            'requester_id'           => null,
-            'requester_nip'          => $forNip,
-            'requester_name'         => $employee['name'] ?? $employee['fullName'] ?? $forNip,
-            'requester_phone'        => null,
-            'requester_email'        => null,
+            'requester_id' => null,
+            'requester_nip' => $forNip,
+            'requester_name' => $employee['name'] ?? $employee['fullName'] ?? $forNip,
+            'requester_phone' => null,
+            'requester_email' => null,
             'requester_organization' => null,
-            'is_requester_verified'  => 1,
+            'is_requester_verified' => 1,
         ];
     }
 
     private function fromUser(object $user, bool $withContact): array
     {
         return [
-            'requester_id'           => $user->id,
-            'requester_nip'          => $user->employee_no,
-            'requester_name'         => $user->name,
-            'requester_phone'        => null,
-            'requester_email'        => $withContact ? $user->email : null,
+            'requester_id' => $user->id,
+            'requester_nip' => $user->employee_no,
+            'requester_name' => $user->name,
+            'requester_phone' => null,
+            'requester_email' => $withContact ? $user->email : null,
             'requester_organization' => $withContact ? $user->organization : null,
-            'is_requester_verified'  => 1,
+            'is_requester_verified' => 1,
         ];
     }
 
@@ -300,9 +536,9 @@ class TicketService
         ];
         $organization = $this->compare($employee['organization'] ?? null, $data['organization'] ?? '', $this->normalizeText(...));
 
-        $compared = array_filter([...$contact, $organization], static fn (?bool $r): bool => $r !== null);
+        $compared = array_filter([...$contact, $organization], static fn(?bool $r): bool => $r !== null);
 
-        return array_filter($contact, static fn (?bool $r): bool => $r !== null) !== [] && ! in_array(false, $compared, true);
+        return array_filter($contact, static fn(?bool $r): bool => $r !== null) !== [] && !in_array(false, $compared, true);
     }
 
     /**
@@ -341,7 +577,7 @@ class TicketService
     {
         $category = $this->categories->find($data['category_id']);
 
-        if ($category === null || ! (int) $category['is_active'] || ! $this->parentIsActive($category)) {
+        if ($category === null || !(int) $category['is_active'] || !$this->parentIsActive($category)) {
             throw new BusinessException(lang('Ticket.categoryInvalid'));
         }
 
@@ -353,26 +589,27 @@ class TicketService
         $files = $this->attachments->validateAll($files);
 
         $policy = $this->activePolicy($this->effectiveSlaPolicyId($category));
-        $now    = new DateTimeImmutable('now', new DateTimeZone(app_timezone()));
+        $now = new DateTimeImmutable('now', new DateTimeZone(app_timezone()));
 
         $row = $requester + [
-            'ticket_number'       => $this->newTicketNumber($now),
-            'channel'             => $channel,
-            'status'              => TicketStatus::Open->value,
+            'channel' => $channel,
+            'status' => TicketStatus::Open->value,
             'request_category_id' => $category['id'],
-            'sla_policy_id'       => $policy?->id,
-            'priority'            => $policy?->priority,
-            'subject'             => trim($data['subject']),
-            'description'         => trim($data['description']),
-            'response_due_at'     => $policy === null ? null : $this->dueAt($now, $policy->response_minutes, $policy),
-            'resolution_due_at'   => $policy === null ? null : $this->dueAt($now, $policy->resolution_minutes, $policy),
+            'sla_policy_id' => $policy?->id,
+            'priority' => $policy?->priority,
+            'subject' => trim($data['subject']),
+            'description' => trim($data['description']),
+            'response_due_at' => $policy === null ? null : $this->dueAt($now, $policy->response_minutes, $policy),
+            'resolution_due_at' => $policy === null ? null : $this->dueAt($now, $policy->resolution_minutes, $policy),
         ];
 
-        $id     = null;
+        $id = null;
         $stored = [];
 
         try {
-            $this->inTransaction(function () use ($row, $actorId, $files, &$id, &$stored): void {
+            $this->inTransaction(function () use ($row, $now, $actorId, $files, &$id, &$stored): void {
+                // Nomor diambil di dalam transaksi: baris terakhir terkunci, jadi dua tiket bersamaan tidak berebut nomor
+                $row['ticket_number'] = $this->newTicketNumber($now);
                 $id = $this->tickets->insert($row, true);
 
                 if ($id === false) {
@@ -400,7 +637,7 @@ class TicketService
      */
     private function effectiveSlaPolicyId(array $category): ?string
     {
-        if (! empty($category['sla_policy_id'])) {
+        if (!empty($category['sla_policy_id'])) {
             return $category['sla_policy_id'];
         }
 
@@ -449,9 +686,16 @@ class TicketService
         return $due->format('Y-m-d H:i:s');
     }
 
+    /**
+     * HC-YYYY-NNNNNN: nomor urut per tahun, mulai 000001 tiap tahun baru.
+     */
     private function newTicketNumber(DateTimeImmutable $now): string
     {
-        return 'TKT-' . $now->format('ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
+        $year = $now->format('Y');
+        $last = $this->tickets->lastNumberInYear($year);
+        $next = $last === null ? 1 : (int) substr($last, -TicketModel::NUMBER_DIGITS) + 1;
+
+        return sprintf('%s-%s-%0' . TicketModel::NUMBER_DIGITS . 'd', TicketModel::NUMBER_PREFIX, $year, $next);
     }
 
     /**

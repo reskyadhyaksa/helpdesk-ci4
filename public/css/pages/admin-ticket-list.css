@@ -1,0 +1,84 @@
+/* Daftar tiket admin (All Ticket / My Ticket): hanya judul + tab + pilihan tampilan yang berada dalam kartu
+   (admin/tickets/_list_controls). Baris filter dan tabel/papan di bawahnya berdiri sendiri di atas latar halaman. */
+
+.list-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 1.25rem;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.06), 0 8px 24px rgb(15 23 42 / 0.05);
+}
+
+/* Layar sedang (laptop 13-14"): tab di baris sendiri di bawah judul, tab di kiri dan pilihan tampilan di kanan */
+.list-panel-head .quick-tabs {
+  flex: 1 1 100%;
+  align-items: center;
+  margin: 0;
+}
+
+/* Layar lebar: judul di kiri, tab dan pilihan tampilan rata kanan pada baris yang sama */
+@media (min-width: 1500px) {
+  .list-panel-head .quick-tabs {
+    flex: 0 1 auto;
+    justify-content: flex-end;
+    margin-left: auto;
+  }
+}
+
+/* Di atas kartu putih, tab dan toggle memakai isian abu-abu muda tanpa bingkai */
+.list-panel-head .quick-tab {
+  border-color: transparent;
+  background-color: #f1f4f8;
+}
+
+.list-panel-head .quick-tab:hover {
+  background-color: #e5e9f0;
+}
+
+.list-panel-head .quick-tab.is-active {
+  background-color: var(--bulma-link);
+}
+
+.list-panel-head .quick-tab.is-alert {
+  background-color: #fef2f2;
+}
+
+.list-panel-head .quick-tab.is-alert.is-active {
+  background-color: #c81e1e;
+}
+
+.list-panel-head .view-toggle {
+  border-color: transparent;
+  background-color: #f1f4f8;
+}
+
+.list-panel-head .view-toggle button[aria-pressed="true"] {
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.1);
+  color: var(--bulma-text-strong);
+}
+
+/* Tombol "Buat Tiket": di kartu judul pada layar di bawah 1500px, di baris filter pada layar lebar (tidak dobel) */
+.list-panel-head .list-create-head {
+  align-self: flex-start;
+  margin-left: auto;
+}
+
+.list-create-bar {
+  display: none;
+}
+
+@media (min-width: 1500px) {
+  .list-panel-head .list-create-head {
+    display: none;
+  }
+
+  .list-create-bar {
+    display: inline-flex;
+  }
+}
