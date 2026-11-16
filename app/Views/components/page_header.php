@@ -26,6 +26,7 @@
  * @var array|null  $back        href dan label tautan kembali
  * @var bool|null   $withBell    lonceng notifikasi di kanan; default hanya di area /admin (portal user sudah punya di navbar)
  * @var string      $slot        Tombol tambahan
+ * @var string      $tabs        Slot bernama `tabs`: daftar tab (.admin-page-header-tab) di dasar header, bertumpu pada garis pemisah
  */
 $subtitle   ??= null;
 $action     ??= null;
@@ -34,6 +35,7 @@ $actionHref ??= null;
 $back       ??= null;
 $withBell   ??= url_is('admin*');
 $slot       ??= '';
+$tabs       ??= '';
 
 $hasActions = $action !== null || trim($slot) !== '' || $withBell;
 ?>
@@ -73,5 +75,9 @@ $hasActions = $action !== null || trim($slot) !== '' || $withBell;
                 <?= view('partials/notification_bell') ?>
             <?php endif ?>
         </div>
+    <?php endif ?>
+
+    <?php if (trim($tabs) !== ''): ?>
+        <?= $tabs ?>
     <?php endif ?>
 </header>

@@ -49,17 +49,17 @@ $isFiltered = $keyword !== '' || $selectedMonths !== [] || $selectedYears !== [(
                 </button>
             </form>
         <?php endif ?>
+        <?php component_slot('tabs') ?>
+        <?php // Dua tab di dalam header agar halaman tidak panjang: jadwal mingguan dan daftar hari libur (js/pages/admin/holidays.js) ?>
+        <div class="admin-page-header-tab-list" role="tablist" aria-label="Pengaturan hari kerja dan libur" data-holiday-tabs data-default="<?= $isFiltered ? 'holidays' : 'schedule' ?>">
+            <button type="button" class="admin-page-header-tab" role="tab" id="tab-schedule" aria-controls="panel-schedule" data-tab="schedule">
+                <i class="fa-regular fa-clock" aria-hidden="true"></i> Jadwal Kerja
+            </button>
+            <button type="button" class="admin-page-header-tab" role="tab" id="tab-holidays" aria-controls="panel-holidays" data-tab="holidays">
+                <i class="fa-solid fa-calendar-days" aria-hidden="true"></i> Hari Libur
+            </button>
+        </div>
     <?= component_end() ?>
-
-    <?php // Dua tab agar halaman tidak panjang: jadwal mingguan dan daftar hari libur (js/pages/admin/holidays.js). Tab awal: Hari Libur bila sedang memfilter/berhalaman. ?>
-    <div class="quick-tabs" role="tablist" aria-label="Pengaturan hari kerja dan libur" data-holiday-tabs data-default="<?= $isFiltered ? 'holidays' : 'schedule' ?>">
-        <button type="button" class="quick-tab" role="tab" id="tab-schedule" aria-controls="panel-schedule" data-tab="schedule">
-            <i class="fa-regular fa-clock" aria-hidden="true"></i> Jadwal Kerja
-        </button>
-        <button type="button" class="quick-tab" role="tab" id="tab-holidays" aria-controls="panel-holidays" data-tab="holidays">
-            <i class="fa-solid fa-calendar-days" aria-hidden="true"></i> Hari Libur
-        </button>
-    </div>
 
     <div id="panel-schedule" role="tabpanel" aria-labelledby="tab-schedule" data-tab-panel="schedule">
     <!-- Jadwal kerja mingguan: satu baris per hari berisi status (Kerja/Libur) dan jam kerjanya. Nilai = nomor hari ISO
