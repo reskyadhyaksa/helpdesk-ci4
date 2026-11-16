@@ -764,6 +764,17 @@
   font-size: 0.85rem;
 }
 
+/* Tombol berikon + teks (mis. Ubah): jarak ikon ke teks lebih lega dan tombol sedikit lebih panjang */
+/* Bulma memberi .icon margin negatif; di sini diganti gap supaya jaraknya pasti */
+.admin-table-card .table td .button.is-small:has(span:not(.icon)) {
+  gap: 0.5rem;
+  padding: 0 1.1rem;
+}
+
+.admin-table-card .table td .button.is-small:has(span:not(.icon)) .icon {
+  margin: 0;
+}
+
 /* Tombol hanya berikon (tempat sampah): persegi, ikon sedikit lebih besar */
 .admin-table-card .table td .button.is-small:not(:has(span:not(.icon))) {
   width: 2.15rem;
