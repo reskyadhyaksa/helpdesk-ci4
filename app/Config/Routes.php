@@ -43,6 +43,7 @@ $routes->group('u', ['namespace' => 'App\Controllers\User', 'filter' => 'auth:us
     $routes->get('tickets/(:uuid)', 'TicketController::show/$1', ['as' => 'user.tickets.show', 'filter' => 'auth:user.tickets.view']);
     $routes->post('tickets/(:uuid)/comments', 'TicketController::comment/$1', ['as' => 'user.tickets.comment', 'filter' => 'auth:user.tickets.view']);
     $routes->get('tickets/attachments/(:uuid)', 'TicketController::attachment/$1', ['as' => 'user.tickets.attachment', 'filter' => 'auth:user.tickets.view']);
+    $routes->get('tickets/attachments/(:uuid)/preview', 'TicketController::preview/$1', ['as' => 'user.tickets.attachment.preview', 'filter' => 'auth:user.tickets.view']);
     $routes->post('tickets', 'TicketController::create', ['as' => 'user.tickets.create', 'filter' => 'auth:user.tickets.create']);
 });
 

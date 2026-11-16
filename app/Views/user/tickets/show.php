@@ -23,6 +23,7 @@
         <?= view('admin/tickets/_content', ['ticket' => $ticket, 'activities' => $activities, 'pics' => [], 'thread' => $thread, 'userView' => true]) ?>
     </div>
 </section>
+<?= view('admin/tickets/_preview_modal') ?>
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>

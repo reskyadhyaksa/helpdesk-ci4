@@ -3,10 +3,10 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Controllers\Traits\ServesAttachments;
 use App\Entities\TicketStatus;
 use App\Exceptions\BusinessException;
 use App\Models\PermissionModel;
-use App\Services\AttachmentService;
 use App\Services\TicketService;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\DownloadResponse;
@@ -15,6 +15,8 @@ use CodeIgniter\HTTP\ResponseInterface;
 
 class TicketController extends BaseController
 {
+    use ServesAttachments;
+
     public function index(): string
     {
         return $this->listing('admin/tickets/index', lang('Admin.pages.tickets.title'), null);
@@ -190,25 +192,7 @@ class TicketController extends BaseController
             throw PageNotFoundException::forPageNotFound();
         }
 
-        $response = $this->response->download($file['path'], null)->setFileName($file['name'])->setHeader('X-Content-Type-Options', 'nosniff');
-
-        if (! $inline) {
-            return $response;
-        }
-
-        if (! AttachmentService::canPreview($file['type'])) {
-            throw PageNotFoundException::forPageNotFound();
-        }
-
-        $response->inline()->setContentType($file['type']);
-
-        // Gambar dan teks tidak butuh apa pun selain tampil: sandbox mencegah skrip dari berkas ini berjalan.
-        // PDF dibiarkan agar penampil bawaan browser bisa dipakai.
-        if ($file['type'] !== AttachmentService::TYPE_PDF) {
-            $response->setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
-        }
-
-        return $response;
+        return $this->attachmentResponse($file, $inline);
     }
 
     private function back(string $id): RedirectResponse

@@ -85,7 +85,7 @@ $statusLabel = static fn (?string $value): string => TicketStatus::tryFrom((stri
 
     <?php if ($thread['ticketAttachments'] !== []): ?>
         <h3 class="ticket-subtitle"><i class="fa-solid fa-paperclip" aria-hidden="true"></i> Lampiran Berkas (<?= count($thread['ticketAttachments']) ?>)</h3>
-        <?= view('admin/tickets/_attachments', ['attachments' => $thread['ticketAttachments'], 'cards' => true, 'routePrefix' => $routePrefix, 'previewable' => $isAgent]) ?>
+        <?= view('admin/tickets/_attachments', ['attachments' => $thread['ticketAttachments'], 'cards' => true, 'routePrefix' => $routePrefix]) ?>
     <?php endif ?>
 </section>
 
@@ -121,7 +121,7 @@ $statusLabel = static fn (?string $value): string => TicketStatus::tryFrom((stri
                         </time>
                     </header>
                     <div class="ticket-comment-text <?= ($row['body_format'] ?? 'TEXT') === 'HTML' ? 'is-rich' : '' ?>"><?= render_comment($row, $mentionNames) ?></div>
-                    <?= view('admin/tickets/_attachments', ['attachments' => $row['attachments'], 'cards' => false, 'routePrefix' => $routePrefix, 'previewable' => $isAgent]) ?>
+                    <?= view('admin/tickets/_attachments', ['attachments' => $row['attachments'], 'cards' => false, 'routePrefix' => $routePrefix]) ?>
                 </div>
             </article>
         <?php else: ?>
