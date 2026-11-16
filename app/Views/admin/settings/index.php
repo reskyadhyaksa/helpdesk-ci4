@@ -57,6 +57,8 @@ $groupIcons = ['attachment' => 'fa-paperclip', 'notification' => 'fa-bell', 'sla
                         </p>
                     <?php endif ?>
 
+                    <?php // Dua kolom parameter di layar lebar (admin-settings.css); judul subbagian dan isian teks panjang selebar kartu ?>
+                    <div class="settings-grid">
                     <?php $lastSection = null ?>
                     <?php foreach ($items as $item): ?>
                         <?php
@@ -120,6 +122,7 @@ $groupIcons = ['attachment' => 'fa-paperclip', 'notification' => 'fa-bell', 'sla
                             </div>
                         </div>
                     <?php endforeach ?>
+                    </div>
                 </section>
             <?php endforeach ?>
 
