@@ -162,9 +162,8 @@ if ($hasActions) {
                                 data-confirm="<?= esc(lang('Admin.requestCategory.confirmDelete'), 'attr') ?>">
                                 <?= csrf_field() ?>
                                 <button type="submit" class="button is-small is-danger is-light"
-                                    aria-label="Hapus <?= esc($name, 'attr') ?>">
+                                    aria-label="Hapus <?= esc($name, 'attr') ?>" title="Hapus <?= esc($name, 'attr') ?>">
                                     <span class="icon"><i class="fa-solid fa-trash" aria-hidden="true"></i></span>
-                                    <span>Hapus</span>
                                 </button>
                             </form>
                         <?php endif ?>

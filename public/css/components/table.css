@@ -751,17 +751,27 @@
 }
 
 .admin-table-card .table td .button.is-small {
-  height: 1.7rem;
+  height: 2.15rem;
   min-height: 0;
-  padding: 0 0.6rem;
-  border-radius: 0.5rem;
-  font-size: 0.72rem;
+  padding: 0 0.85rem;
+  border-radius: 0.6rem;
+  font-size: 0.82rem;
 }
 
 .admin-table-card .table td .button.is-small .icon {
   width: 1em;
   height: 1em;
-  font-size: 0.72rem;
+  font-size: 0.85rem;
+}
+
+/* Tombol hanya berikon (tempat sampah): persegi, ikon sedikit lebih besar */
+.admin-table-card .table td .button.is-small:not(:has(span:not(.icon))) {
+  width: 2.15rem;
+  padding: 0;
+}
+
+.admin-table-card .table td .button.is-small:not(:has(span:not(.icon))) .icon {
+  font-size: 0.95rem;
 }
 
 .admin-table-card .table td .buttons {

@@ -275,9 +275,8 @@ $isFiltered = $keyword !== '' || $selectedMonths !== [] || $selectedYears !== [(
                             <?php if ($canDelete): ?>
                                 <form action="<?= url_to('admin.holidays.delete', $holiday['id']) ?>" method="post" data-confirm="<?= esc(lang('Admin.holiday.confirmDelete'), 'attr') ?>">
                                     <?= csrf_field() ?>
-                                    <button type="submit" class="button is-small is-danger is-light" aria-label="Hapus <?= esc($holiday['name'], 'attr') ?>">
+                                    <button type="submit" class="button is-small is-danger is-light" aria-label="Hapus <?= esc($holiday['name'], 'attr') ?>" title="Hapus <?= esc($holiday['name'], 'attr') ?>">
                                         <span class="icon"><i class="fa-solid fa-trash" aria-hidden="true"></i></span>
-                                        <span>Hapus</span>
                                     </button>
                                 </form>
                             <?php endif ?>

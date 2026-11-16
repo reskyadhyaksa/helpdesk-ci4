@@ -85,7 +85,6 @@ if ($hasActions) {
                                         title="<?= esc($deleteHint, 'attr') ?>"
                                         aria-label="Hapus <?= esc($role['name'], 'attr') ?>">
                                         <span class="icon"><i class="fa-solid fa-trash" aria-hidden="true"></i></span>
-                                        <span>Hapus</span>
                                     </button>
                                 </form>
                             <?php endif ?>

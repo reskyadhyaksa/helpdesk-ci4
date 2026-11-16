@@ -106,9 +106,8 @@ $effectOptions = [
                     <div class="buttons is-right is-flex-wrap-nowrap">
                         <form action="<?= url_to('admin.users.category-access.delete', $user->id, $exception['request_category_id']) ?>" method="post">
                             <?= csrf_field() ?>
-                            <button type="submit" class="button is-small is-danger is-light" aria-label="Hapus pengecualian <?= esc($categoryName, 'attr') ?>">
+                            <button type="submit" class="button is-small is-danger is-light" aria-label="Hapus pengecualian <?= esc($categoryName, 'attr') ?>" title="Hapus pengecualian <?= esc($categoryName, 'attr') ?>">
                                 <span class="icon"><i class="fa-solid fa-trash" aria-hidden="true"></i></span>
-                                <span>Hapus</span>
                             </button>
                         </form>
                     </div>
