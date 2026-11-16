@@ -74,7 +74,30 @@ class RequestCategoryModel extends Model
      */
     public function selectableForTicket(): array
     {
-        $this->orderedUnderParent()
+        return $this->selectable()->orderByParentName()->findAll();
+    }
+
+    /**
+     * Kartu "Kategori Layanan Populer" di beranda: tujuan tiket yang sama dengan selectableForTicket(), dengan
+     * ticket_count; yang paling banyak dipakai tiket lebih dulu (sama banyak: urut nama).
+     *
+     * @return list<array> kolom selectableForTicket() plus ticket_count
+     */
+    public function popularForHome(int $limit): array
+    {
+        return $this->selectable()
+            ->select('(SELECT COUNT(*) FROM tickets t WHERE t.request_category_id = request_categories.id) AS ticket_count', false)
+            ->orderBy('ticket_count', 'DESC')
+            ->orderByParentName()
+            ->findAll($limit);
+    }
+
+    /**
+     * Kategori aktif yang tidak punya sub kategori, dengan SLA yang berlaku (belum diurutkan).
+     */
+    private function selectable(): static
+    {
+        return $this->join('request_categories parent', 'parent.id = request_categories.parent_id', 'left')
             ->join('sla_policies', 'sla_policies.id = COALESCE(request_categories.sla_policy_id, parent.sla_policy_id) AND sla_policies.is_active = 1', 'left', false)
             ->select('request_categories.id, request_categories.parent_id, request_categories.name, request_categories.description, parent.name AS parent_name, '
                 . 'sla_policies.priority AS sla_priority, sla_policies.response_minutes AS sla_response_minutes, '
@@ -82,8 +105,6 @@ class RequestCategoryModel extends Model
             ->where('request_categories.is_active', 1)
             ->groupStart()->where('parent.id IS NULL', null, false)->orWhere('parent.is_active', 1)->groupEnd()
             ->where('NOT EXISTS (SELECT 1 FROM request_categories child WHERE child.parent_id = request_categories.id)', null, false);
-
-        return $this->findAll();
     }
 
     public function hasTickets(string $id): bool
@@ -141,8 +162,12 @@ class RequestCategoryModel extends Model
 
     private function orderedUnderParent(): static
     {
-        return $this->join('request_categories parent', 'parent.id = request_categories.parent_id', 'left')
-            ->orderBy('COALESCE(parent.name, request_categories.name)', 'ASC', false)
+        return $this->join('request_categories parent', 'parent.id = request_categories.parent_id', 'left')->orderByParentName();
+    }
+
+    private function orderByParentName(): static
+    {
+        return $this->orderBy('COALESCE(parent.name, request_categories.name)', 'ASC', false)
             ->orderBy('request_categories.parent_id IS NOT NULL', 'ASC', false)
             ->orderBy('request_categories.name', 'ASC');
     }

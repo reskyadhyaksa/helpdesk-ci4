@@ -91,6 +91,17 @@
   margin-top: 1rem;
 }
 
+/* Dua kolom berdampingan (>=1216px): margin bawah dibuang agar kartu lacak (tinggi 100% kolom) rata dengan kartu aksi cepat */
+@media (min-width: 1216px) {
+  .home-page > .columns.is-desktop > .column > .quick-actions {
+    margin-bottom: 0;
+  }
+
+  .track-card {
+    margin-bottom: 0;
+  }
+}
+
 /*
  * iPad landscape (1024-1215px): kolom kiri hanya ~500px, terlalu sempit untuk 3 kartu aksi cepat berdampingan
  * dengan kolom lacak tiket 440px. Susunannya sama dengan tablet portrait: banner, aksi cepat, lalu lacak tiket di bawah.

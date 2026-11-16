@@ -71,6 +71,16 @@ class RequestCategoryService
     /**
      * @return list<array> kategori utama untuk dropdown induk
      */
+    /**
+     * Kategori layanan untuk kartu di beranda, yang paling banyak dipakai tiket lebih dulu.
+     *
+     * @return list<array> id, name, description, parent_name, sla_resolution_minutes, ticket_count, ...
+     */
+    public function popularServices(int $limit): array
+    {
+        return $this->categories->popularForHome($limit);
+    }
+
     public function topLevel(): array
     {
         return array_values(array_filter($this->all(), static fn (array $category) => $category['parent_id'] === null));
